@@ -5,4 +5,4 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4.5.20", features = ["derive"] }
-libryzenadj = "0.13.0"
+libryzenadj = { git = "https://gitlab.com/chironjit/libryzenadj-rs.git" }
