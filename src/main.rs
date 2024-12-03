@@ -79,6 +79,46 @@ impl SystemMonitor {
     fn get_state(&self) -> SystemState {
         self.state.lock().unwrap().clone()
     }
+
+    fn set_fast_limit(&self, value: u32) -> RyzenAdjResult<()> {
+        self.adj.set_fast_limit(value * 1000)
+    }
+
+    fn set_slow_limit(&self, value: u32) -> RyzenAdjResult<()> {
+        self.adj.set_slow_limit(value * 1000)
+    }
+
+    fn set_stapm_limit(&self, value: u32) -> RyzenAdjResult<()> {
+        self.adj.set_stapm_limit(value * 1000)
+    }
+
+    fn set_tctl_temp(&self, value: u32) -> RyzenAdjResult<()> {
+        self.adj.set_tctl_temp(value)
+    }
+}
+
+fn show_error_dialog(parent: &impl IsA<gtk::Window>, message: &str) {
+    let dialog = gtk::MessageDialog::new(
+        Some(parent),
+        gtk::DialogFlags::MODAL,
+        gtk::MessageType::Error,
+        gtk::ButtonsType::Ok,
+        message
+    );
+    dialog.connect_response(|dialog, _| dialog.close());
+    dialog.show();
+}
+
+fn show_success_dialog(parent: &impl IsA<gtk::Window>, message: &str) {
+    let dialog = gtk::MessageDialog::new(
+        Some(parent),
+        gtk::DialogFlags::MODAL,
+        gtk::MessageType::Info,
+        gtk::ButtonsType::Ok,
+        message
+    );
+    dialog.connect_response(|dialog, _| dialog.close());
+    dialog.show();
 }
 
 // Function to create param box
@@ -269,11 +309,40 @@ fn build_ui(app: &Application) {
         temp: Entry::new(),
     }));
 
-    // Set up entries
-    entries.borrow().fast_limit.set_width_chars(10);
-    entries.borrow().slow_limit.set_width_chars(10);
-    entries.borrow().stapm_limit.set_width_chars(10);
-    entries.borrow().temp.set_width_chars(10);
+    // Set up initial values
+    let monitor_for_init = Arc::clone(&monitor);
+    if let Ok(()) = monitor_for_init.update_state() {
+        let state = monitor_for_init.get_state();
+        entries.borrow().fast_limit.set_text(&format!("{:.1}", state.fast_limit));
+        entries.borrow().slow_limit.set_text(&format!("{:.1}", state.slow_limit));
+        entries.borrow().stapm_limit.set_text(&format!("{:.1}", state.stapm_limit));
+        entries.borrow().temp.set_text(&format!("{:.1}", state.tctl_limit));
+    }
+
+    // Set up entries to only accept numbers
+    for entry in [&entries.borrow().fast_limit, &entries.borrow().slow_limit, 
+    &entries.borrow().stapm_limit, &entries.borrow().temp] {
+    entry.set_width_chars(10);
+
+    // Clear on focus
+    let entry_clone = entry.clone();
+    entry.connect_activate(move |_| {
+    entry_clone.set_text("");
+    });
+
+    // Only allow numbers and decimal point
+    entry.connect_changed(move |entry| {
+    let text = entry.text();
+    let is_valid = text.chars().all(|c| c.is_digit(10) || c == '.')
+    && text.matches('.').count() <= 1;
+
+    if !is_valid && !text.is_empty() {
+    // Remove the last character if it made the input invalid
+    let new_text = text.chars().take(text.len() - 1).collect::<String>();
+    entry.set_text(&new_text);
+    }
+    });
+    }
 
     // Create the input fields
     for (i, param_name) in parameters.iter().enumerate() {
@@ -367,11 +436,98 @@ fn build_ui(app: &Application) {
         }
     });
 
-    // Apply button
+    // Apply UI section
+
     let apply_button = Button::with_label("Apply Changes");
     apply_button.set_halign(gtk::Align::End);
     apply_button.add_css_class("suggested-action");
-    
+
+    let window_clone = window.clone();
+    let entries_for_apply = Rc::clone(&entries);
+    let monitor_for_apply = Arc::clone(&monitor);
+
+    apply_button.connect_clicked(move |_| {
+        let entries = entries_for_apply.borrow();
+        
+        // Helper function to parse and validate value
+        let parse_value = |text: String, min: f64, max: f64| -> Result<u32, String> {
+            text.parse::<f64>()
+                .map_err(|_| "Invalid number format".to_string())
+                .and_then(|v| {
+                    if v >= min && v <= max {
+                        Ok(v as u32)
+                    } else {
+                        Err(format!("Value must be between {} and {}", min, max))
+                    }
+                })
+        };
+
+       // Process each entry
+        type SetterFn = std::boxed::Box<dyn Fn(u32) -> RyzenAdjResult<()>>;
+
+        // Clone monitor outside the array definition for each closure
+        let monitor_for_fast = Arc::clone(&monitor_for_apply);
+        let monitor_for_slow = Arc::clone(&monitor_for_apply);
+        let monitor_for_stapm = Arc::clone(&monitor_for_apply);
+        let monitor_for_temp = Arc::clone(&monitor_for_apply);
+
+        let results: [(String, SetterFn, &str, f64, f64); 4] = [
+            (entries.fast_limit.text().to_string(), 
+            std::boxed::Box::new(move |v| monitor_for_fast.set_fast_limit(v)), 
+            "Fast Limit", 4.0, 50.0),
+            (entries.slow_limit.text().to_string(),
+            std::boxed::Box::new(move |v| monitor_for_slow.set_slow_limit(v)), 
+            "Slow Limit", 4.0, 50.0),
+            (entries.stapm_limit.text().to_string(),
+            std::boxed::Box::new(move |v| monitor_for_stapm.set_stapm_limit(v)), 
+            "STAPM Limit", 4.0, 50.0),
+            (entries.temp.text().to_string(),
+            std::boxed::Box::new(move |v| monitor_for_temp.set_tctl_temp(v)), 
+            "Temperature", 50.0, 100.0),
+        ];
+
+        for (value, setter, name, min, max) in results {
+            if !value.is_empty() {
+                match parse_value(value, min, max) {
+                    Ok(parsed_value) => {
+                        // Add interdependent validations
+                        if name == "Slow Limit" {
+                            let fast_limit = entries.fast_limit.text()
+                                .parse::<f64>()
+                                .unwrap_or(50.0); // default to max if invalid
+                            if parsed_value as f64 > fast_limit {
+                                show_error_dialog(&window_clone,
+                                    "Slow Limit cannot be greater than Fast Limit");
+                                continue;
+                            }
+                        } else if name == "STAPM Limit" {
+                            let slow_limit = entries.slow_limit.text()
+                                .parse::<f64>()
+                                .unwrap_or(50.0);
+                            if parsed_value as f64 > slow_limit {
+                                show_error_dialog(&window_clone,
+                                    "STAPM Limit cannot be greater than Slow Limit");
+                                continue;
+                            }
+                        }
+                
+                        if let Err(e) = setter(parsed_value) {
+                            show_error_dialog(&window_clone, 
+                                &format!("Failed to set {}: {}", name, e));
+                        } else {
+                            show_success_dialog(&window_clone,
+                                &format!("{} successfully set to {}", name, parsed_value));
+                        }
+                    },
+                    Err(e) => {
+                        show_error_dialog(&window_clone, 
+                            &format!("Invalid {} value: {}", name, e));
+                    }
+                }
+            }
+        }
+    });
+
     let button_box = Box::new(Orientation::Horizontal, 0);
     button_box.set_halign(gtk::Align::End);
     button_box.append(&apply_button);
@@ -413,6 +569,7 @@ fn build_ui(app: &Application) {
     window.set_child(Some(&main_box));
     setup_monitor_updates(Arc::clone(&monitor), value_labels);
     window.show();
+
 }
 
 fn main() {
