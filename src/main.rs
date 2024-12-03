@@ -1,10 +1,40 @@
 use gtk::prelude::*;
 use gtk::{
     Application, ApplicationWindow, Box, Button, Entry, Grid, Label,
-    Orientation, gdk,
+    Orientation, gdk, glib,
 };
 use std::rc::Rc;
 use std::cell::RefCell;
+use std::sync::{Arc, Mutex};
+use libryzenadj::{RyzenAdj, RyzenAdjResult};
+
+// Structure to hold system state
+#[derive(Debug, Clone)]
+struct SystemState {
+    tctl_limit: f32,
+    tctl_value: f32,
+    fast_limit: f32,
+    fast_value: f32,
+    slow_limit: f32,
+    slow_value: f32,
+    stapm_limit: f32,
+    stapm_value: f32,
+}
+
+impl Default for SystemState {
+    fn default() -> Self {
+        Self {
+            tctl_limit: 0.0,
+            tctl_value: 0.0,
+            fast_limit: 0.0,
+            fast_value: 0.0,
+            slow_limit: 0.0,
+            slow_value: 0.0,
+            stapm_limit: 0.0,
+            stapm_value: 0.0,
+        }
+    }
+}
 
 // Structure to hold our parameter entries for validation
 struct ParameterEntries {
@@ -14,6 +44,85 @@ struct ParameterEntries {
     temp: Entry,
 }
 
+// Structure to hold UI elements that need updating
+struct SystemMonitor {
+    state: Arc<Mutex<SystemState>>,
+    adj: RyzenAdj,
+}
+
+impl SystemMonitor {
+    fn new() -> RyzenAdjResult<Self> {
+        Ok(Self {
+            state: Arc::new(Mutex::new(SystemState::default())),
+            adj: RyzenAdj::new()?,
+        })
+    }
+
+    fn update_state(&self) -> RyzenAdjResult<()> {
+        let mut state = self.state.lock().unwrap();
+        
+        // Update temperature values
+        state.tctl_limit = self.adj.get_tctl_temp()?;
+        state.tctl_value = self.adj.get_tctl_temp_value()?;
+        
+        // Update power limits
+        state.fast_limit = self.adj.get_fast_limit()? ;
+        state.fast_value = self.adj.get_fast_value()? ;
+        state.slow_limit = self.adj.get_slow_limit()? ;
+        state.slow_value = self.adj.get_slow_value()? ;
+        state.stapm_limit = self.adj.get_stapm_limit()?;
+        state.stapm_value = self.adj.get_stapm_value()?;
+
+        Ok(())
+    }
+
+    fn get_state(&self) -> SystemState {
+        self.state.lock().unwrap().clone()
+    }
+}
+
+// Function to create param box
+fn create_param_box(name: &str, value: &str) -> (Box, Label) {
+    let param_box = Box::new(Orientation::Vertical, 5);
+    let param_name = Label::new(Some(name));
+    let param_value = Label::new(Some(value));
+    
+    param_box.append(&param_name);
+    param_box.append(&param_value);
+    
+    param_box.set_widget_name("param-box");
+    param_box.add_css_class("param-container");
+    param_box.set_hexpand(true);
+    param_box.set_vexpand(true);
+    
+    (param_box, param_value)
+}
+
+fn setup_monitor_updates(monitor: Arc<SystemMonitor>, value_labels: Vec<(String, Label)>) {
+    glib::timeout_add_local(std::time::Duration::from_millis(1000), move || {
+        if let Ok(()) = monitor.update_state() {
+            let state = monitor.get_state();
+            
+            for (id, label) in value_labels.iter() {
+                let value = match id.as_str() {
+                    "tctl_limit" => format!("{:.1}°C", state.tctl_limit),
+                    "tctl_value" => format!("{:.1}°C", state.tctl_value),
+                    "fast_limit" => format!("{:.1}W", state.fast_limit),
+                    "fast_value" => format!("{:.1}W", state.fast_value),
+                    "slow_limit" => format!("{:.1}W", state.slow_limit),
+                    "slow_value" => format!("{:.1}W", state.slow_value),
+                    "stapm_limit" => format!("{:.1}W", state.stapm_limit),
+                    "stapm_value" => format!("{:.1}W", state.stapm_value),
+                    _ => String::from("N/A"),
+                };
+                label.set_text(&value);
+            }
+        }
+        
+        glib::ControlFlow::Continue
+    });
+}
+
 fn build_ui(app: &Application) {
     let window = ApplicationWindow::builder()
         .application(app)
@@ -21,6 +130,17 @@ fn build_ui(app: &Application) {
         .default_width(800)
         .default_height(600)
         .build();
+
+    // Initialize the monitor:
+    let monitor = match SystemMonitor::new() {
+        Ok(monitor) => Arc::new(monitor),
+        Err(e) => {
+            eprintln!("Failed to initialize system monitor: {}", e);
+            return;
+        }
+    };
+
+    let mut value_labels = Vec::new();
 
     // Main container
     let main_box = Box::new(Orientation::Vertical, 10);
@@ -35,39 +155,89 @@ fn build_ui(app: &Application) {
     title.set_markup("<span size='x-large'><b>System Parameters Dashboard</b></span>");
     main_box.append(&title);
 
-    // Parameters Display Section
+    // Parameters display section wit:
     let params_frame = gtk::Frame::new(Some("Current Parameters"));
     params_frame.set_vexpand(true);
-    
+
     let params_grid = Grid::new();
     params_grid.set_row_spacing(10);
     params_grid.set_column_spacing(20);
     params_grid.set_vexpand(true);
-    
     params_grid.set_margin_top(10);
     params_grid.set_margin_bottom(10);
     params_grid.set_margin_start(10);
     params_grid.set_margin_end(10);
+    
+    // Row 1: Temperature
+    let temp_label = Label::new(Some("Temperature"));
+    temp_label.set_markup("<b>Temperature</b>");
+    params_grid.attach(&temp_label, 0, 0, 1, 1);
 
-    // Create parameter display boxes
-    for i in 0..15 {
-        let param_box = Box::new(Orientation::Vertical, 5);
-        let param_name = Label::new(Some(&format!("Parameter {}", i + 1)));
-        let param_value = Label::new(Some("0.0"));
-        
-        param_box.append(&param_name);
-        param_box.append(&param_value);
-        
-        param_box.set_widget_name("param-box");
-        param_box.add_css_class("param-container");
-        param_box.set_hexpand(true);
-        param_box.set_vexpand(true);
-        
-        params_grid.attach(&param_box, (i % 3) as i32, (i / 3) as i32, 1, 1);
+    let temp_grid = Grid::new();
+    temp_grid.set_column_spacing(10);
+
+    // Create temperature boxes with stored labels
+    let (tctl_limit_box, tctl_limit_label) = create_param_box("TCtl Limit", "0.0");
+    let (tctl_value_box, tctl_value_label) = create_param_box("TCtl Value", "0.0");
+    let (gpu_temp1_box, _gpu_temp1_label) = create_param_box("GPU Temp", "0.0");
+    let (gpu_temp2_box, _gpu_temp2_label) = create_param_box("GPU Temp", "0.0");
+
+    // Store labels for updating
+    value_labels.push(("tctl_limit".to_string(), tctl_limit_label));
+    value_labels.push(("tctl_value".to_string(), tctl_value_label));
+
+    // Attach boxes to grid
+    temp_grid.attach(&tctl_limit_box, 0, 0, 1, 1);
+    temp_grid.attach(&tctl_value_box, 1, 0, 1, 1);
+    temp_grid.attach(&gpu_temp1_box, 2, 0, 1, 1);
+    temp_grid.attach(&gpu_temp2_box, 3, 0, 1, 1);
+
+    params_grid.attach(&temp_grid, 1, 0, 1, 1);
+
+    // Row 2-4: Limits
+    let limits = [
+        ("Fast Limit", ["Limit", "Current Value"]),
+        ("Slow Limit", ["Limit", "Current Value"]),
+        ("STAPM Limit", ["Limit", "Current Value"]),
+    ];
+
+    for (row, (title, params)) in limits.iter().enumerate() {
+        let label = Label::new(Some(title));
+        label.set_markup(&format!("<b>{}</b>", title));
+        params_grid.attach(&label, 0, (row + 1) as i32, 1, 1);
+
+        let limit_grid = Grid::new();
+        limit_grid.set_column_spacing(10);
+
+        // Create parameter boxes with stored labels
+        let (limit_box, limit_label) = create_param_box(params[0], "0.0");
+        let (value_box, value_label) = create_param_box(params[1], "0.0");
+
+        // Store labels for updating based on the row
+        match row {
+            0 => {
+                value_labels.push(("fast_limit".to_string(), limit_label));
+                value_labels.push(("fast_value".to_string(), value_label));
+            },
+            1 => {
+                value_labels.push(("slow_limit".to_string(), limit_label));
+                value_labels.push(("slow_value".to_string(), value_label));
+            },
+            2 => {
+                value_labels.push(("stapm_limit".to_string(), limit_label));
+                value_labels.push(("stapm_value".to_string(), value_label));
+            },
+            _ => {}
+        }
+
+        limit_grid.attach(&limit_box, 0, 0, 1, 1);
+        limit_grid.attach(&value_box, 1, 0, 1, 1);
+        params_grid.attach(&limit_grid, 1, (row + 1) as i32, 1, 1);
     }
 
     params_frame.set_child(Some(&params_grid));
     main_box.append(&params_frame);
+
 
     // Controls Section
     let controls_frame = gtk::Frame::new(Some("Parameter Controls"));
@@ -126,6 +296,8 @@ fn build_ui(app: &Application) {
 
     controls_box.append(&controls_grid);
 
+    
+
     // Add parameter descriptions
     let descriptions_box = Box::new(Orientation::Vertical, 10);
     descriptions_box.set_margin_top(20);
@@ -149,7 +321,6 @@ fn build_ui(app: &Application) {
     controls_box.append(&descriptions_box);
 
     // Set up validation
-    let entries_for_fast = Rc::clone(&entries);
     entries.borrow().fast_limit.connect_changed(move |entry| {
         if let Ok(value) = entry.text().parse::<f64>() {
             if value < 4.0 || value > 50.0 {
@@ -186,7 +357,6 @@ fn build_ui(app: &Application) {
         }
     });
 
-    let entries_for_temp = Rc::clone(&entries);
     entries.borrow().temp.connect_changed(move |entry| {
         if let Ok(value) = entry.text().parse::<f64>() {
             if value < 40.0 || value > 100.0 {
@@ -241,6 +411,7 @@ fn build_ui(app: &Application) {
     );
 
     window.set_child(Some(&main_box));
+    setup_monitor_updates(Arc::clone(&monitor), value_labels);
     window.show();
 }
 
