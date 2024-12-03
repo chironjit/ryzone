@@ -1,152 +1,254 @@
-use clap::{Parser, Subcommand};
-use libryzenadj::RyzenAdj;
+use gtk::prelude::*;
+use gtk::{
+    Application, ApplicationWindow, Box, Button, Entry, Grid, Label,
+    Orientation, gdk,
+};
+use std::rc::Rc;
+use std::cell::RefCell;
 
-#[derive(Parser)]
-#[command(author, version, about, long_about = None)]
-struct Cli {
-    #[command(subcommand)]
-    command: Commands,
+// Structure to hold our parameter entries for validation
+struct ParameterEntries {
+    fast_limit: Entry,
+    slow_limit: Entry,
+    stapm_limit: Entry,
+    temp: Entry,
 }
 
-#[derive(Subcommand)]
-enum Commands {
-    /// Get current CPU family
-    Family,
-    /// Get current CPU temperature
-    Temp,
-    /// Set stapm limit (sustained power limit)
-    SetStapm {
-        /// Value in mW (milliwatts)
-        #[arg(value_parser = clap::value_parser!(u32).range(1000..100000))]
-        value: u32,
-    },
-    /// Get all available system information
-    Info,
-}
+fn build_ui(app: &Application) {
+    let window = ApplicationWindow::builder()
+        .application(app)
+        .title("System Parameters Dashboard")
+        .default_width(800)
+        .default_height(600)
+        .build();
 
-// Helper function to format optional float values
-fn format_value<T: std::fmt::Display>(value: Result<T, Box<dyn std::error::Error>>, unit: &str) -> String {
-    match value {
-        Ok(val) => format!("{}{}", val, unit),
-        Err(_) => "N/A".to_string(),
-    }
-}
+    // Main container
+    let main_box = Box::new(Orientation::Vertical, 10);
+    main_box.set_margin_top(20);
+    main_box.set_margin_bottom(20);
+    main_box.set_margin_start(20);
+    main_box.set_margin_end(20);
+    main_box.set_vexpand(true);
 
-fn print_info(adj: &RyzenAdj) -> Result<(), Box<dyn std::error::Error>> {
-    println!("=== RyzenAdj System Information ===\n");
+    // Title
+    let title = Label::new(Some("System Parameters Dashboard"));
+    title.set_markup("<span size='x-large'><b>System Parameters Dashboard</b></span>");
+    main_box.append(&title);
+
+    // Parameters Display Section
+    let params_frame = gtk::Frame::new(Some("Current Parameters"));
+    params_frame.set_vexpand(true);
     
-    // System Information
-    println!("System Information:");
-    if let Ok(family) = adj.get_cpu_family() {
-        println!("CPU Family: {:?}", family);
-    }
-    if let Ok(bios) = adj.get_bios_if_ver() {
-        println!("BIOS Interface Version: {}", bios);
-    }
+    let params_grid = Grid::new();
+    params_grid.set_row_spacing(10);
+    params_grid.set_column_spacing(20);
+    params_grid.set_vexpand(true);
     
-    // Temperature Information
-    println!("\nTemperature Information:");
-    println!("Tctl Temperature: {}", format_value(adj.get_tctl_temp().map_err(Box::from), "°C"));
-    println!("Tctl Temperature Value: {}", format_value(adj.get_tctl_temp_value().map_err(Box::from), "°C"));
-    println!("Graphics Temperature: {}", format_value(adj.get_gfx_temp().map_err(Box::from), "°C"));
-    
-    // Power Limits
-    println!("\nPower Limits:");
-    println!("STAPM Limit: {}", format_value(adj.get_stapm_limit().map_err(Box::from), " mW"));
-    println!("STAPM Value: {}", format_value(adj.get_stapm_value().map_err(Box::from), " mW"));
-    println!("STAPM Time: {}", format_value(adj.get_stapm_time().map_err(Box::from), " s"));
-    println!("Fast Limit: {}", format_value(adj.get_fast_limit().map_err(Box::from), " mW"));
-    println!("Fast Value: {}", format_value(adj.get_fast_value().map_err(Box::from), " mW"));
-    println!("Slow Limit: {}", format_value(adj.get_slow_limit().map_err(Box::from), " mW"));
-    println!("Slow Value: {}", format_value(adj.get_slow_value().map_err(Box::from), " mW"));
-    println!("Slow Time: {}", format_value(adj.get_slow_time().map_err(Box::from), " s"));
-    
-    // Power Measurements
-    println!("\nPower Measurements:");
-    println!("Socket Power: {}", format_value(adj.get_socket_power().map_err(Box::from), " mW"));
-    println!("SoC Power: {}", format_value(adj.get_soc_power().map_err(Box::from), " mW"));
-    
-    // Clock Speeds
-    println!("\nClock Speeds:");
-    println!("Graphics Clock: {}", format_value(adj.get_gfx_clk().map_err(Box::from), " MHz"));
-    println!("Memory Clock: {}", format_value(adj.get_mem_clk().map_err(Box::from), " MHz"));
-    println!("FCLK: {}", format_value(adj.get_fclk().map_err(Box::from), " MHz"));
-    println!("L3 Cache Clock: {}", format_value(adj.get_l3_clk().map_err(Box::from), " MHz"));
-    
-    // Core Information
-    println!("\nPer-Core Information:");
-    for core in 0..8 {
-        let clock = adj.get_core_clk(core).map_err(Box::from);
-        let temp = adj.get_core_temp(core).map_err(Box::from);
-        let volt = adj.get_core_volt(core).map_err(Box::from);
-        let power = adj.get_core_power(core).map_err(Box::from);
+    params_grid.set_margin_top(10);
+    params_grid.set_margin_bottom(10);
+    params_grid.set_margin_start(10);
+    params_grid.set_margin_end(10);
+
+    // Create parameter display boxes
+    for i in 0..15 {
+        let param_box = Box::new(Orientation::Vertical, 5);
+        let param_name = Label::new(Some(&format!("Parameter {}", i + 1)));
+        let param_value = Label::new(Some("0.0"));
         
-        // Only print core info if at least one value is available
-        if clock.is_ok() || temp.is_ok() || volt.is_ok() || power.is_ok() {
-            println!("\nCore {}:", core);
-            println!("  Clock: {}", format_value(clock, " MHz"));
-            println!("  Temperature: {}", format_value(temp, "°C"));
-            println!("  Voltage: {}", format_value(volt, " V"));
-            println!("  Power: {}", format_value(power, " mW"));
-        }
+        param_box.append(&param_name);
+        param_box.append(&param_value);
+        
+        param_box.set_widget_name("param-box");
+        param_box.add_css_class("param-container");
+        param_box.set_hexpand(true);
+        param_box.set_vexpand(true);
+        
+        params_grid.attach(&param_box, (i % 3) as i32, (i / 3) as i32, 1, 1);
     }
+
+    params_frame.set_child(Some(&params_grid));
+    main_box.append(&params_frame);
+
+    // Controls Section
+    let controls_frame = gtk::Frame::new(Some("Parameter Controls"));
+    let controls_box = Box::new(Orientation::Vertical, 10);
     
-    // Voltage Information
-    println!("\nVoltage Information:");
-    println!("Graphics Voltage: {}", format_value(adj.get_gfx_volt().map_err(Box::from), " V"));
-    println!("SoC Voltage: {}", format_value(adj.get_soc_volt().map_err(Box::from), " V"));
-    println!("L3 Logic Voltage: {}", format_value(adj.get_l3_logic().map_err(Box::from), " V"));
-    println!("L3 VDDM: {}", format_value(adj.get_l3_vddm().map_err(Box::from), " V"));
+    controls_box.set_margin_top(10);
+    controls_box.set_margin_bottom(10);
+    controls_box.set_margin_start(10);
+    controls_box.set_margin_end(10);
+
+    // Create control inputs
+    let controls_grid = Grid::new();
+    controls_grid.set_row_spacing(10);
+    controls_grid.set_column_spacing(20);
+
+    // Define the parameters we want to control
+    let parameters = [
+        "Fast Limit",
+        "Slow limit",
+        "STAPM Limit",
+        "Processor Temp"
+    ];
+
+    // Create entries struct to store our entries for validation
+    let entries = Rc::new(RefCell::new(ParameterEntries {
+        fast_limit: Entry::new(),
+        slow_limit: Entry::new(),
+        stapm_limit: Entry::new(),
+        temp: Entry::new(),
+    }));
+
+    // Set up entries
+    entries.borrow().fast_limit.set_width_chars(10);
+    entries.borrow().slow_limit.set_width_chars(10);
+    entries.borrow().stapm_limit.set_width_chars(10);
+    entries.borrow().temp.set_width_chars(10);
+
+    // Create the input fields
+    for (i, param_name) in parameters.iter().enumerate() {
+        let control_box = Box::new(Orientation::Horizontal, 5);
+        let label = Label::new(Some(param_name));
+        
+        let entry = match i {
+            0 => &entries.borrow().fast_limit,
+            1 => &entries.borrow().slow_limit,
+            2 => &entries.borrow().stapm_limit,
+            3 => &entries.borrow().temp,
+            _ => unreachable!(),
+        };
+        
+        control_box.append(&label);
+        control_box.append(entry);
+        
+        controls_grid.attach(&control_box, i as i32, 0, 1, 1);
+    }
+
+    controls_box.append(&controls_grid);
+
+    // Add parameter descriptions
+    let descriptions_box = Box::new(Orientation::Vertical, 10);
+    descriptions_box.set_margin_top(20);
+    descriptions_box.add_css_class("descriptions");
+
+    let descriptions = [
+        "<b>Fast Limit:</b> Power limit for short-term boost (valid range: 4W - 50W)\n",
+        "<b>Slow Limit:</b> Sustained power limit (must be ≤ Fast Limit)\n",
+        "<b>STAPM Limit:</b> Average power limit (must be ≤ Slow Limit)\n",
+        "<b>Processor Temp:</b> Maximum processor temperature (valid range: 40°C - 100°C)",
+    ];
+
+    for desc in descriptions.iter() {
+        let desc_label = Label::new(None);
+        desc_label.set_markup(desc);
+        desc_label.set_halign(gtk::Align::Start);
+        desc_label.set_wrap(true);
+        descriptions_box.append(&desc_label);
+    }
+
+    controls_box.append(&descriptions_box);
+
+    // Set up validation
+    let entries_for_fast = Rc::clone(&entries);
+    entries.borrow().fast_limit.connect_changed(move |entry| {
+        if let Ok(value) = entry.text().parse::<f64>() {
+            if value < 4.0 || value > 50.0 {
+                entry.add_css_class("error");
+            } else {
+                entry.remove_css_class("error");
+            }
+        }
+    });
+
+    let entries_for_slow = Rc::clone(&entries);
+    entries.borrow().slow_limit.connect_changed(move |entry| {
+        let fast_limit: f64 = entries_for_slow.borrow().fast_limit.text()
+            .parse().unwrap_or(0.0);
+        if let Ok(value) = entry.text().parse::<f64>() {
+            if value > fast_limit {
+                entry.add_css_class("error");
+            } else {
+                entry.remove_css_class("error");
+            }
+        }
+    });
+
+    let entries_for_stapm = Rc::clone(&entries);
+    entries.borrow().stapm_limit.connect_changed(move |entry| {
+        let slow_limit: f64 = entries_for_stapm.borrow().slow_limit.text()
+            .parse().unwrap_or(0.0);
+        if let Ok(value) = entry.text().parse::<f64>() {
+            if value > slow_limit {
+                entry.add_css_class("error");
+            } else {
+                entry.remove_css_class("error");
+            }
+        }
+    });
+
+    let entries_for_temp = Rc::clone(&entries);
+    entries.borrow().temp.connect_changed(move |entry| {
+        if let Ok(value) = entry.text().parse::<f64>() {
+            if value < 40.0 || value > 100.0 {
+                entry.add_css_class("error");
+            } else {
+                entry.remove_css_class("error");
+            }
+        }
+    });
+
+    // Apply button
+    let apply_button = Button::with_label("Apply Changes");
+    apply_button.set_halign(gtk::Align::End);
+    apply_button.add_css_class("suggested-action");
     
-    // Current Information
-    println!("\nCurrent Information:");
-    println!("VRM Current: {}", format_value(adj.get_vrm_current().map_err(Box::from), " A"));
-    println!("VRM Current Value: {}", format_value(adj.get_vrm_current_value().map_err(Box::from), " A"));
-    println!("VRM Maximum Current: {}", format_value(adj.get_vrmmax_current().map_err(Box::from), " A"));
-    println!("VRM Maximum Current Value: {}", format_value(adj.get_vrmmax_current_value().map_err(Box::from), " A"));
-    println!("VRM SoC Current: {}", format_value(adj.get_vrmsoc_current().map_err(Box::from), " A"));
-    println!("VRM SoC Current Value: {}", format_value(adj.get_vrmsoc_current_value().map_err(Box::from), " A"));
-    println!("VRM SoC Maximum Current: {}", format_value(adj.get_vrmsocmax_current().map_err(Box::from), " A"));
-    println!("VRM SoC Maximum Current Value: {}", format_value(adj.get_vrmsocmax_current_value().map_err(Box::from), " A"));
-    println!("PSI0 Current: {}", format_value(adj.get_psi0_current().map_err(Box::from), " A"));
-    println!("PSI0 SoC Current: {}", format_value(adj.get_psi0soc_current().map_err(Box::from), " A"));
-    
-    // Additional Metrics
-    println!("\nAdditional Metrics:");
-    println!("CCLK Busy Value: {}", format_value(adj.get_cclk_busy_value().map_err(Box::from), "%"));
-    println!("CCLK Setpoint: {}", format_value(adj.get_cclk_setpoint().map_err(Box::from), ""));
-    
-    // Skin Temperature Metrics
-    println!("\nSkin Temperature Information:");
-    println!("APU Skin Temperature Limit: {}", format_value(adj.get_apu_skin_temp_limit().map_err(Box::from), "°C"));
-    println!("APU Skin Temperature Value: {}", format_value(adj.get_apu_skin_temp_value().map_err(Box::from), "°C"));
-    println!("dGPU Skin Temperature Limit: {}", format_value(adj.get_dgpu_skin_temp_limit().map_err(Box::from), "°C"));
-    println!("dGPU Skin Temperature Value: {}", format_value(adj.get_dgpu_skin_temp_value().map_err(Box::from), "°C"));
-    
-    Ok(())
+    let button_box = Box::new(Orientation::Horizontal, 0);
+    button_box.set_halign(gtk::Align::End);
+    button_box.append(&apply_button);
+    controls_box.append(&button_box);
+
+    controls_frame.set_child(Some(&controls_box));
+    main_box.append(&controls_frame);
+
+    // Add CSS styling
+    let provider = gtk::CssProvider::new();
+    provider.load_from_data(
+        "
+        .param-container {
+            background-color: #f8f8f8;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .descriptions {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .error entry {
+            background-color: #ffe6e6;
+            border-color: #ff0000;
+        }
+        "
+    );
+
+    // Apply CSS to the window
+    let display = gdk::Display::default().expect("Could not get default display");
+    gtk::style_context_add_provider_for_display(
+        &display,
+        &provider,
+        gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
+    );
+
+    window.set_child(Some(&main_box));
+    window.show();
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let cli = Cli::parse();
-    let adj = RyzenAdj::new()?;
-    
-    match cli.command {
-        Commands::Family => {
-            let family = adj.get_cpu_family()?;
-            println!("CPU Family: {:?}", family);
-        }
-        Commands::Temp => {
-            let temp = adj.get_tctl_temp()?;
-            println!("CPU Temperature: {:.1}°C", temp);
-        }
-        Commands::SetStapm { value } => {
-            adj.set_stapm_limit(value)?;
-            println!("Set STAPM limit to {} mW", value);
-        }
-        Commands::Info => {
-            print_info(&adj)?;
-        }
-    }
-    
-    Ok(())
+fn main() {
+    let app = Application::builder()
+        .application_id("com.example.system.dashboard")
+        .build();
+
+    app.connect_activate(build_ui);
+    app.run();
 }

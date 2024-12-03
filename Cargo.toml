@@ -1,8 +1,8 @@
 [package]
-name = "ryzen_controller"
+name = "ryzone"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-clap = { version = "4.5.20", features = ["derive"] }
+gtk = { version = "0.9.4", package = "gtk4", features = ["v4_6"] }
 libryzenadj = "0.15.0"
