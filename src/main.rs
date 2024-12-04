@@ -61,15 +61,12 @@ impl SystemMonitor {
     fn update_state(&self) -> RyzenAdjResult<()> {
         let mut state = self.state.lock().unwrap();
         
-        // Update temperature values
         state.tctl_limit = self.adj.get_tctl_temp()?;
         state.tctl_value = self.adj.get_tctl_temp_value()?;
-        
-        // Update power limits
-        state.fast_limit = self.adj.get_fast_limit()? ;
-        state.fast_value = self.adj.get_fast_value()? ;
-        state.slow_limit = self.adj.get_slow_limit()? ;
-        state.slow_value = self.adj.get_slow_value()? ;
+        state.fast_limit = self.adj.get_fast_limit()?;
+        state.fast_value = self.adj.get_fast_value()?;
+        state.slow_limit = self.adj.get_slow_limit()?;
+        state.slow_value = self.adj.get_slow_value()?;
         state.stapm_limit = self.adj.get_stapm_limit()?;
         state.stapm_value = self.adj.get_stapm_value()?;
 
@@ -97,6 +94,12 @@ impl SystemMonitor {
     }
 }
 
+// Helper struct to store application state
+struct AppState {
+    monitor: Arc<SystemMonitor>,
+    window: ApplicationWindow,
+}
+
 fn show_error_dialog(parent: &impl IsA<gtk::Window>, message: &str) {
     let dialog = gtk::MessageDialog::new(
         Some(parent),
@@ -121,7 +124,6 @@ fn show_success_dialog(parent: &impl IsA<gtk::Window>, message: &str) {
     dialog.show();
 }
 
-// Function to create param box
 fn create_param_box(name: &str, value: &str) -> (Box, Label) {
     let param_box = Box::new(Orientation::Vertical, 5);
     let param_name = Label::new(Some(name));
@@ -138,10 +140,10 @@ fn create_param_box(name: &str, value: &str) -> (Box, Label) {
     (param_box, param_value)
 }
 
-fn setup_monitor_updates(monitor: Arc<SystemMonitor>, value_labels: Vec<(String, Label)>) {
+fn setup_monitor_updates(app_state: Arc<AppState>, value_labels: Vec<(String, Label)>) {
     glib::timeout_add_local(std::time::Duration::from_millis(1000), move || {
-        if let Ok(()) = monitor.update_state() {
-            let state = monitor.get_state();
+        if let Ok(()) = app_state.monitor.update_state() {
+            let state = app_state.monitor.get_state();
             
             for (id, label) in value_labels.iter() {
                 let value = match id.as_str() {
@@ -163,6 +165,86 @@ fn setup_monitor_updates(monitor: Arc<SystemMonitor>, value_labels: Vec<(String,
     });
 }
 
+fn setup_apply_button(
+    button: &Button,  // Changed from Button to &Button
+    app_state: Arc<AppState>,
+    entries: Rc<RefCell<ParameterEntries>>,
+) {
+    button.connect_clicked(move |_| {
+        let entries = entries.borrow();
+        let monitor = &app_state.monitor;
+        let window = &app_state.window;
+        
+        // Helper function to parse and validate value
+        let parse_value = |text: String, min: f64, max: f64| -> Result<u32, String> {
+            text.parse::<f64>()
+                .map_err(|_| "Invalid number format".to_string())
+                .and_then(|v| {
+                    if v >= min && v <= max {
+                        Ok(v as u32)
+                    } else {
+                        Err(format!("Value must be between {} and {}", min, max))
+                    }
+                })
+        };
+
+        // Process values
+        let values = [
+            (entries.fast_limit.text().to_string(), "Fast Limit", 4.0, 50.0),
+            (entries.slow_limit.text().to_string(), "Slow Limit", 4.0, 50.0),
+            (entries.stapm_limit.text().to_string(), "STAPM Limit", 4.0, 50.0),
+            (entries.temp.text().to_string(), "Temperature", 50.0, 100.0),
+        ];
+
+        for (value, name, min, max) in values {
+            if !value.is_empty() {
+                match parse_value(value, min, max) {
+                    Ok(parsed_value) => {
+                        let result = match name {
+                            "Fast Limit" => monitor.set_fast_limit(parsed_value),
+                            "Slow Limit" => {
+                                let fast_limit = entries.fast_limit.text()
+                                    .parse::<f64>()
+                                    .unwrap_or(50.0);
+                                if parsed_value as f64 > fast_limit {
+                                    show_error_dialog(window, 
+                                        "Slow Limit cannot be greater than Fast Limit");
+                                    continue;
+                                }
+                                monitor.set_slow_limit(parsed_value)
+                            },
+                            "STAPM Limit" => {
+                                let slow_limit = entries.slow_limit.text()
+                                    .parse::<f64>()
+                                    .unwrap_or(50.0);
+                                if parsed_value as f64 > slow_limit {
+                                    show_error_dialog(window,
+                                        "STAPM Limit cannot be greater than Slow Limit");
+                                    continue;
+                                }
+                                monitor.set_stapm_limit(parsed_value)
+                            },
+                            "Temperature" => monitor.set_tctl_temp(parsed_value),
+                            _ => Ok(()),
+                        };
+
+                        match result {
+                            Ok(_) => show_success_dialog(window,
+                                &format!("{} successfully set to {}", name, parsed_value)),
+                            Err(e) => show_error_dialog(window,
+                                &format!("Failed to set {}: {}", name, e)),
+                        }
+                    },
+                    Err(e) => {
+                        show_error_dialog(window,
+                            &format!("Invalid {} value: {}", name, e));
+                    }
+                }
+            }
+        }
+    });
+}
+
 fn build_ui(app: &Application) {
     let window = ApplicationWindow::builder()
         .application(app)
@@ -171,7 +253,7 @@ fn build_ui(app: &Application) {
         .default_height(600)
         .build();
 
-    // Initialize the monitor:
+    // Initialize the monitor
     let monitor = match SystemMonitor::new() {
         Ok(monitor) => Arc::new(monitor),
         Err(e) => {
@@ -179,6 +261,12 @@ fn build_ui(app: &Application) {
             return;
         }
     };
+
+    // Create app state
+    let app_state = Arc::new(AppState {
+        monitor: monitor.clone(),
+        window: window.clone(),
+    });
 
     let mut value_labels = Vec::new();
 
@@ -442,91 +530,10 @@ fn build_ui(app: &Application) {
     apply_button.set_halign(gtk::Align::End);
     apply_button.add_css_class("suggested-action");
 
-    let window_clone = window.clone();
     let entries_for_apply = Rc::clone(&entries);
-    let monitor_for_apply = Arc::clone(&monitor);
+    let app_state_for_apply = Arc::clone(&app_state);
 
-    apply_button.connect_clicked(move |_| {
-        let entries = entries_for_apply.borrow();
-        
-        // Helper function to parse and validate value
-        let parse_value = |text: String, min: f64, max: f64| -> Result<u32, String> {
-            text.parse::<f64>()
-                .map_err(|_| "Invalid number format".to_string())
-                .and_then(|v| {
-                    if v >= min && v <= max {
-                        Ok(v as u32)
-                    } else {
-                        Err(format!("Value must be between {} and {}", min, max))
-                    }
-                })
-        };
-
-       // Process each entry
-        type SetterFn = std::boxed::Box<dyn Fn(u32) -> RyzenAdjResult<()>>;
-
-        // Clone monitor outside the array definition for each closure
-        let monitor_for_fast = Arc::clone(&monitor_for_apply);
-        let monitor_for_slow = Arc::clone(&monitor_for_apply);
-        let monitor_for_stapm = Arc::clone(&monitor_for_apply);
-        let monitor_for_temp = Arc::clone(&monitor_for_apply);
-
-        let results: [(String, SetterFn, &str, f64, f64); 4] = [
-            (entries.fast_limit.text().to_string(), 
-            std::boxed::Box::new(move |v| monitor_for_fast.set_fast_limit(v)), 
-            "Fast Limit", 4.0, 50.0),
-            (entries.slow_limit.text().to_string(),
-            std::boxed::Box::new(move |v| monitor_for_slow.set_slow_limit(v)), 
-            "Slow Limit", 4.0, 50.0),
-            (entries.stapm_limit.text().to_string(),
-            std::boxed::Box::new(move |v| monitor_for_stapm.set_stapm_limit(v)), 
-            "STAPM Limit", 4.0, 50.0),
-            (entries.temp.text().to_string(),
-            std::boxed::Box::new(move |v| monitor_for_temp.set_tctl_temp(v)), 
-            "Temperature", 50.0, 100.0),
-        ];
-
-        for (value, setter, name, min, max) in results {
-            if !value.is_empty() {
-                match parse_value(value, min, max) {
-                    Ok(parsed_value) => {
-                        // Add interdependent validations
-                        if name == "Slow Limit" {
-                            let fast_limit = entries.fast_limit.text()
-                                .parse::<f64>()
-                                .unwrap_or(50.0); // default to max if invalid
-                            if parsed_value as f64 > fast_limit {
-                                show_error_dialog(&window_clone,
-                                    "Slow Limit cannot be greater than Fast Limit");
-                                continue;
-                            }
-                        } else if name == "STAPM Limit" {
-                            let slow_limit = entries.slow_limit.text()
-                                .parse::<f64>()
-                                .unwrap_or(50.0);
-                            if parsed_value as f64 > slow_limit {
-                                show_error_dialog(&window_clone,
-                                    "STAPM Limit cannot be greater than Slow Limit");
-                                continue;
-                            }
-                        }
-                
-                        if let Err(e) = setter(parsed_value) {
-                            show_error_dialog(&window_clone, 
-                                &format!("Failed to set {}: {}", name, e));
-                        } else {
-                            show_success_dialog(&window_clone,
-                                &format!("{} successfully set to {}", name, parsed_value));
-                        }
-                    },
-                    Err(e) => {
-                        show_error_dialog(&window_clone, 
-                            &format!("Invalid {} value: {}", name, e));
-                    }
-                }
-            }
-        }
-    });
+    setup_apply_button(&apply_button, app_state_for_apply, entries_for_apply);
 
     let button_box = Box::new(Orientation::Horizontal, 0);
     button_box.set_halign(gtk::Align::End);
@@ -567,7 +574,7 @@ fn build_ui(app: &Application) {
     );
 
     window.set_child(Some(&main_box));
-    setup_monitor_updates(Arc::clone(&monitor), value_labels);
+    setup_monitor_updates(Arc::clone(&app_state), value_labels);
     window.show();
 
 }
