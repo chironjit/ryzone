@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-gtk = { version = "0.9.4", package = "gtk4", features = ["v4_6"] }
+iced = "0.13.1"
 libryzenadj = "0.15.0"
