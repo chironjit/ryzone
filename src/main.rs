@@ -25,8 +25,8 @@ pub enum Message {
 }
 
 // All the states managed by the app
-#[derive(Default)]
-struct Ryzone {
+#[derive(Default, Debug, Clone)]
+struct RyzoneState {
     fast_value: u16,
     slow_value: u16,
     stapm_value: u16,
@@ -41,164 +41,146 @@ struct Ryzone {
     tctl_limit: u16,
 }
 
-
-impl Ryzone {
-    pub fn update(&mut self, message: Message) {
-        match message {
-            Message::SetFastLimit(value) => {
-                if value >= FAST_LIMIT_MIN && value <= FAST_LIMIT_MAX {
-                    self.fast_limit = value;
-                }
+// Standalone update function
+fn update(
+    state: &mut RyzoneState,
+    message: Message
+) {
+    match message {
+        Message::SetFastLimit(value) => {
+            if value >= FAST_LIMIT_MIN && value <= FAST_LIMIT_MAX {
+                state.fast_limit = value;
             }
-            Message::SetSlowLimit(value) => {
-                if value >= SLOW_LIMIT_MIN && value <= SLOW_LIMIT_MAX {
-                    self.slow_limit = value;
-                }
+        }
+        Message::SetSlowLimit(value) => {
+            if value >= SLOW_LIMIT_MIN && value <= SLOW_LIMIT_MAX {
+                state.slow_limit = value;
             }
-            Message::SetStapmLimit(value) => {
-                if value >= STAPM_LIMIT_MIN && value <= STAPM_LIMIT_MAX {
-                    self.stapm_limit = value;
-                }
+        }
+        Message::SetStapmLimit(value) => {
+            if value >= STAPM_LIMIT_MIN && value <= STAPM_LIMIT_MAX {
+                state.stapm_limit = value;
             }
-            Message::SetTctlLimit(value) => {
-                if value >= TCTL_LIMIT_MIN && value <= TCTL_LIMIT_MAX {
-                    self.tctl_limit = value;
-                }
+        }
+        Message::SetTctlLimit(value) => {
+            if value >= TCTL_LIMIT_MIN && value <= TCTL_LIMIT_MAX {
+                state.tctl_limit = value;
             }
-            Message::FastLimitInputChanged(value) => {
-                if value.chars().all(|c| c.is_digit(10)) {
-                    if let Ok(num) = value.parse::<u16>() {
-                        if num <= FAST_LIMIT_MAX {
-                            self.fast_input = value;
-                        }
+        }
+        Message::FastLimitInputChanged(value) => {
+            if value.chars().all(|c| c.is_digit(10)) {
+                if let Ok(num) = value.parse::<u16>() {
+                    if num <= FAST_LIMIT_MAX {
+                        state.fast_input = value;
                     }
                 }
             }
-            Message::SlowLimitInputChanged(value) => {
-                if value.chars().all(|c| c.is_digit(10)) {
-                    if let Ok(num) = value.parse::<u16>() {
-                        if num <= SLOW_LIMIT_MAX {
-                            self.slow_input = value;
-                        }
+        }
+        Message::SlowLimitInputChanged(value) => {
+            if value.chars().all(|c| c.is_digit(10)) {
+                if let Ok(num) = value.parse::<u16>() {
+                    if num <= SLOW_LIMIT_MAX {
+                        state.slow_input = value;
                     }
                 }
             }
-            Message::StapmLimitInputChanged(value) => {
-                if value.chars().all(|c| c.is_digit(10)) {
-                    if let Ok(num) = value.parse::<u16>() {
-                        if num <= STAPM_LIMIT_MAX {
-                            self.stapm_input = value;
-                        }
+        }
+        Message::StapmLimitInputChanged(value) => {
+            if value.chars().all(|c| c.is_digit(10)) {
+                if let Ok(num) = value.parse::<u16>() {
+                    if num <= STAPM_LIMIT_MAX {
+                        state.stapm_input = value;
                     }
                 }
             }
-            Message::TctlLimitInputChanged(value) => {
-                if value.chars().all(|c| c.is_digit(10)) {
-                    if let Ok(num) = value.parse::<u16>() {
-                        if num <= TCTL_LIMIT_MAX {
-                            self.tctl_input = value;
-                        }
+        }
+        Message::TctlLimitInputChanged(value) => {
+            if value.chars().all(|c| c.is_digit(10)) {
+                if let Ok(num) = value.parse::<u16>() {
+                    if num <= TCTL_LIMIT_MAX {
+                        state.tctl_input = value;
                     }
                 }
             }
         }
     }
+}
 
-    // Separate getter methods
-    pub fn get_fast_limit(&self) -> u16 {
-        self.fast_limit
-    }
+// Standalone view function
+fn view(state: &RyzoneState) -> Row<Message> {
+    row![ 
+        // Set Fast Limit
+        column![
+            text(format!("Current Fast Limit: {} mW", state.fast_limit)).size(30),
+            text(format!("Range: {}-{}", FAST_LIMIT_MIN, FAST_LIMIT_MAX)).size(20),
+            text_input(
+                "Enter new value...",
+                &state.fast_input
+            )
+            .on_input(Message::FastLimitInputChanged)
+            .padding(10),
+            button("Update").on_press(Message::SetFastLimit(
+                state.fast_input.parse().unwrap_or(0)
+            )),
+        ],
 
-    pub fn get_slow_limit(&self) -> u16 {
-        self.slow_limit
-    }
+        // Set Slow Limit
+        column![
+            text(format!("Current Slow Limit: {} mW", state.slow_limit)).size(30),
+            text(format!("Range: {}-{}", SLOW_LIMIT_MIN, SLOW_LIMIT_MAX)).size(20),
+            text_input(
+                "Enter new value...",
+                &state.slow_input
+            )
+            .on_input(Message::SlowLimitInputChanged)
+            .padding(10),
+            button("Update").on_press(Message::SetSlowLimit(
+                state.slow_input.parse().unwrap_or(0)
+            )),
+        ],
 
-    pub fn get_stapm_limit(&self) -> u16 {
-        self.stapm_limit
-    }
+        // Set STAPM Limit
+        column![
+            text(format!("Current STAPM Limit: {} mW", state.stapm_limit)).size(30),
+            text(format!("Range: {}-{}", STAPM_LIMIT_MIN, STAPM_LIMIT_MAX)).size(20),
+            text_input(
+                "Enter new value...",
+                &state.stapm_input
+            )
+            .on_input(Message::StapmLimitInputChanged)
+            .padding(10),
+            button("Update").on_press(Message::SetStapmLimit(
+                state.stapm_input.parse().unwrap_or(0)
+            )),
+        ],
 
-    pub fn get_tctl_limit(&self) -> u16 {
-        self.tctl_limit
-    }
-
-    pub fn view(&self) -> Row<Message> {
-        row![ 
-            // Set Fast Limit
-            column![
-                text(format!("Current Fast Limit: {} mW", self.fast_limit)).size(30),
-                text(format!("Range: {}-{}", FAST_LIMIT_MIN, FAST_LIMIT_MAX)).size(20),
-                text_input(
-                    "Enter new value...",
-                    &self.fast_input
-                )
-                .on_input(Message::FastLimitInputChanged)
-                .padding(10),
-                button("Update").on_press(Message::SetFastLimit(
-                    self.fast_input.parse().unwrap_or(0)
-                )),
-            ],
-
-            // Set Slow Limit
-            column![
-                text(format!("Current Slow Limit: {} mW", self.slow_limit)).size(30),
-                text(format!("Range: {}-{}", SLOW_LIMIT_MIN, SLOW_LIMIT_MAX)).size(20),
-                text_input(
-                    "Enter new value...",
-                    &self.slow_input
-                )
-                .on_input(Message::SlowLimitInputChanged)
-                .padding(10),
-                button("Update").on_press(Message::SetSlowLimit(
-                    self.slow_input.parse().unwrap_or(0)
-                )),
-            ],
-
-            // Set STAPM Limit
-            column![
-                text(format!("Current STAPM Limit: {} mW", self.stapm_limit)).size(30),
-                text(format!("Range: {}-{}", STAPM_LIMIT_MIN, STAPM_LIMIT_MAX)).size(20),
-                text_input(
-                    "Enter new value...",
-                    &self.stapm_input
-                )
-                .on_input(Message::StapmLimitInputChanged)
-                .padding(10),
-                button("Update").on_press(Message::SetStapmLimit(
-                    self.stapm_input.parse().unwrap_or(0)
-                )),
-            ],
-
-            // Set TCTL Limit
-            column![
-                text(format!("Current TCTL Limit: {}°C", self.tctl_limit)).size(30),
-                text(format!("Range: {}-{}", TCTL_LIMIT_MIN, TCTL_LIMIT_MAX)).size(20),
-                text_input(
-                    "Enter new value...",
-                    &self.tctl_input
-                )
-                .on_input(Message::TctlLimitInputChanged)
-                .padding(10),
-                button("Update").on_press(Message::SetTctlLimit(
-                    self.tctl_input.parse().unwrap_or(0)
-                )),
-            ],
-        ]
-        .spacing(20)  
-        .padding(20)  
-    }
-
-    
-    
+        // Set TCTL Limit
+        column![
+            text(format!("Current TCTL Limit: {}°C", state.tctl_limit)).size(30),
+            text(format!("Range: {}-{}", TCTL_LIMIT_MIN, TCTL_LIMIT_MAX)).size(20),
+            text_input(
+                "Enter new value...",
+                &state.tctl_input
+            )
+            .on_input(Message::TctlLimitInputChanged)
+            .padding(10),
+            button("Update").on_press(Message::SetTctlLimit(
+                state.tctl_input.parse().unwrap_or(0)
+            )),
+        ],
+    ]
+    .spacing(20)  
+    .padding(20)  
 }
 
 
 fn main() -> iced::Result {
-    iced::application("Ryzone", Ryzone::update, Ryzone::view)
+    iced::application("Ryzone", update, view)
         .theme(theme)
         .run()
 }
 
-fn theme(state: &Ryzone) -> Theme {
+fn theme(_state: &RyzoneState) -> Theme {
     Theme::TokyoNightStorm
 }
 
