@@ -1,4 +1,5 @@
 use iced::widget::{button, column, row, text, text_input, Column, Row}; 
+use iced::Theme;
 
 
 // Constants to limit input values
@@ -192,7 +193,13 @@ impl Ryzone {
 
 
 fn main() -> iced::Result {
-    iced::run("Ryzone - Adjust Mobile Ryzen Power Profiles", Ryzone::update, Ryzone::view)
+    iced::application("Ryzone", Ryzone::update, Ryzone::view)
+        .theme(theme)
+        .run()
+}
+
+fn theme(state: &Ryzone) -> Theme {
+    Theme::TokyoNightStorm
 }
 
 
