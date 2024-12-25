@@ -1,6 +1,6 @@
-use iced::widget::{button, column, row, text, text_input, Column, Row}; 
+use iced::widget::{button, column, row, text, text_input, Row}; 
 use iced::{Theme, Subscription};
-use iced::time::{self, Duration, Instant};
+use iced::time::{self, Duration};
 use libryzenadj::RyzenAdj;
 
 
@@ -30,22 +30,22 @@ pub enum Message {
 // All the states managed by the app
 #[derive(Default, Debug, Clone)]
 struct RyzoneState {
-    curr_fast_value: u16,
-    curr_slow_value: u16,
-    curr_stapm_value: u16,
-    curr_tctl_value: u16,
-    curr_fast_limit: u16,
-    curr_slow_limit: u16,
-    curr_stapm_limit: u16,
-    curr_tctl_limit: u16,
+    curr_fast_value: f32,
+    curr_slow_value: f32,
+    curr_stapm_value: f32,
+    curr_tctl_value: f32,
+    curr_fast_limit: f32,
+    curr_slow_limit: f32,
+    curr_stapm_limit: f32,
+    curr_tctl_limit: f32,
     fast_input: String,
     slow_input: String,
     stapm_input: String,
     tctl_input: String,
-    manual_fast_limit: u16,
-    manual_slow_limit: u16,
-    manual_stapm_limit: u16,
-    manual_tctl_limit: u16,
+    manual_fast_limit: f32,
+    manual_slow_limit: f32,
+    manual_stapm_limit: f32,
+    manual_tctl_limit: f32,
 }
 
 // Standalone update function
@@ -56,22 +56,22 @@ fn update(
     match message {
         Message::SetFastLimit(value) => {
             if value >= FAST_LIMIT_MIN && value <= FAST_LIMIT_MAX {
-                state.manual_fast_limit = value;
+                state.manual_fast_limit = value.into();
             }
         }
         Message::SetSlowLimit(value) => {
             if value >= SLOW_LIMIT_MIN && value <= SLOW_LIMIT_MAX {
-                state.manual_slow_limit = value;
+                state.manual_slow_limit = value.into();
             }
         }
         Message::SetStapmLimit(value) => {
             if value >= STAPM_LIMIT_MIN && value <= STAPM_LIMIT_MAX {
-                state.manual_stapm_limit = value;
+                state.manual_stapm_limit = value.into();
             }
         }
         Message::SetTctlLimit(value) => {
             if value >= TCTL_LIMIT_MIN && value <= TCTL_LIMIT_MAX {
-                state.manual_tctl_limit = value;
+                state.manual_tctl_limit = value.into();
             }
         }
         Message::FastLimitInputChanged(value) => {
@@ -117,13 +117,17 @@ fn update(
             // try to apply the override value
             // Then check the latest figures and then update the state
 
-            // fast_value: u16,
-            // slow_value: u16,
-            // stapm_value: u16,
-            // tctl_value: u16,
+            let ryzen = RyzenAdj::new().unwrap();
 
-            // let fast_value = 
 
+            state.curr_fast_limit = ryzen.get_fast_limit().unwrap_or_default();
+            state.curr_fast_value = ryzen.get_fast_value().unwrap_or_default();
+            state.curr_slow_limit = ryzen.get_slow_limit().unwrap_or_default();
+            state.curr_slow_value = ryzen.get_slow_value().unwrap_or_default();
+            state.curr_stapm_limit = ryzen.get_stapm_limit().unwrap_or_default();
+            state.curr_stapm_value = ryzen.get_stapm_value().unwrap_or_default();
+            state.curr_tctl_limit = ryzen.get_tctl_temp().unwrap_or_default();
+            state.curr_tctl_value = ryzen.get_tctl_temp_value().unwrap_or_default();
         }
     }
 }
@@ -133,7 +137,8 @@ fn view(state: &RyzoneState) -> Row<Message> {
     row![ 
         // Set Fast Limit
         column![
-            text(format!("Current Fast Limit: {} mW", state.manual_fast_limit)).size(30),
+            text(format!("Current Fast Value: {} W", state.curr_fast_value)).size(30),
+            text(format!("Current Fast Limit: {} W", state.curr_fast_limit)).size(30),
             text(format!("Range: {}-{}", FAST_LIMIT_MIN, FAST_LIMIT_MAX)).size(20),
             text_input(
                 "Enter new value...",
@@ -148,7 +153,8 @@ fn view(state: &RyzoneState) -> Row<Message> {
 
         // Set Slow Limit
         column![
-            text(format!("Current Slow Limit: {} mW", state.manual_slow_limit)).size(30),
+            text(format!("Current Slow Value: {} W", state.curr_slow_value)).size(30),
+            text(format!("Current Slow Limit: {} W", state.curr_slow_limit)).size(30),
             text(format!("Range: {}-{}", SLOW_LIMIT_MIN, SLOW_LIMIT_MAX)).size(20),
             text_input(
                 "Enter new value...",
@@ -163,7 +169,8 @@ fn view(state: &RyzoneState) -> Row<Message> {
 
         // Set STAPM Limit
         column![
-            text(format!("Current STAPM Limit: {} mW", state.manual_stapm_limit)).size(30),
+            text(format!("Current STAPM Value: {} W", state.curr_stapm_value)).size(30),
+            text(format!("Current STAPM Limit: {} W", state.curr_stapm_limit)).size(30),
             text(format!("Range: {}-{}", STAPM_LIMIT_MIN, STAPM_LIMIT_MAX)).size(20),
             text_input(
                 "Enter new value...",
@@ -178,7 +185,8 @@ fn view(state: &RyzoneState) -> Row<Message> {
 
         // Set TCTL Limit
         column![
-            text(format!("Current TCTL Limit: {}°C", state.manual_tctl_limit)).size(30),
+            text(format!("Current TCTL Value: {}°C", state.curr_tctl_value)).size(30),
+            text(format!("Current TCTL Limit: {}°C", state.curr_tctl_limit)).size(30),
             text(format!("Range: {}-{}", TCTL_LIMIT_MIN, TCTL_LIMIT_MAX)).size(20),
             text_input(
                 "Enter new value...",
