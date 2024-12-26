@@ -137,8 +137,8 @@ fn view(state: &RyzoneState) -> Row<Message> {
     row![ 
         // Set Fast Limit
         column![
-            text(format!("Current Fast Value: {} W", state.curr_fast_value)).size(30),
-            text(format!("Current Fast Limit: {} W", state.curr_fast_limit)).size(30),
+            text(format!("Current Fast Value: {:.1} W", state.curr_fast_value)).size(30),
+            text(format!("Current Fast Limit: {:.1} W", state.curr_fast_limit)).size(30),
             text(format!("Range: {}-{}", FAST_LIMIT_MIN, FAST_LIMIT_MAX)).size(20),
             text_input(
                 "Enter new value...",
@@ -153,8 +153,8 @@ fn view(state: &RyzoneState) -> Row<Message> {
 
         // Set Slow Limit
         column![
-            text(format!("Current Slow Value: {} W", state.curr_slow_value)).size(30),
-            text(format!("Current Slow Limit: {} W", state.curr_slow_limit)).size(30),
+            text(format!("Current Slow Value: {:.1} W", state.curr_slow_value)).size(30),
+            text(format!("Current Slow Limit: {:.1} W", state.curr_slow_limit)).size(30),
             text(format!("Range: {}-{}", SLOW_LIMIT_MIN, SLOW_LIMIT_MAX)).size(20),
             text_input(
                 "Enter new value...",
@@ -169,8 +169,8 @@ fn view(state: &RyzoneState) -> Row<Message> {
 
         // Set STAPM Limit
         column![
-            text(format!("Current STAPM Value: {} W", state.curr_stapm_value)).size(30),
-            text(format!("Current STAPM Limit: {} W", state.curr_stapm_limit)).size(30),
+            text(format!("Current STAPM Value: {:.1} W", state.curr_stapm_value)).size(30),
+            text(format!("Current STAPM Limit: {:.1} W", state.curr_stapm_limit)).size(30),
             text(format!("Range: {}-{}", STAPM_LIMIT_MIN, STAPM_LIMIT_MAX)).size(20),
             text_input(
                 "Enter new value...",
@@ -185,8 +185,8 @@ fn view(state: &RyzoneState) -> Row<Message> {
 
         // Set TCTL Limit
         column![
-            text(format!("Current TCTL Value: {}°C", state.curr_tctl_value)).size(30),
-            text(format!("Current TCTL Limit: {}°C", state.curr_tctl_limit)).size(30),
+            text(format!("Current TCTL Value: {:.1}°C", state.curr_tctl_value)).size(30),
+            text(format!("Current TCTL Limit: {:.0}°C", state.curr_tctl_limit)).size(30),
             text(format!("Range: {}-{}", TCTL_LIMIT_MIN, TCTL_LIMIT_MAX)).size(20),
             text_input(
                 "Enter new value...",
