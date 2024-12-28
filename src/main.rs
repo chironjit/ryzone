@@ -7,11 +7,11 @@ use iced::alignment::{self, Horizontal, Vertical};
 
 // Constants to limit input values
 const FAST_LIMIT_MIN: u32 = 4000;
-const FAST_LIMIT_MAX: u32 = 50000;
+const FAST_LIMIT_MAX: u32 = 65000;
 const SLOW_LIMIT_MIN: u32 = 4000;
-const SLOW_LIMIT_MAX: u32 = 50000;
+const SLOW_LIMIT_MAX: u32 = 65000;
 const STAPM_LIMIT_MIN: u32 = 4000;
-const STAPM_LIMIT_MAX: u32 = 50000;
+const STAPM_LIMIT_MAX: u32 = 65000;
 const TCTL_LIMIT_MIN: u32 = 40;
 const TCTL_LIMIT_MAX: u32 = 100;
 
@@ -241,7 +241,7 @@ fn view(state: &State) -> Element<Message> {
                 .width(Length::FillPortion(4)),
                 
                 container(
-                    container(text("30").size(16))
+                    container(text(format!("{:.1} W", state.curr_fast_value as f32 / 1000.0)).size(16))
                         .align_x(Horizontal::Center)
                         .align_y(Vertical::Center)
                         .width(Length::Fill)
@@ -250,7 +250,7 @@ fn view(state: &State) -> Element<Message> {
                 .width(Length::FillPortion(2)),
                 
                 container(
-                    container(text("40").size(16))
+                    container(text(format!("{:.1} W", state.curr_fast_limit as f32 / 1000.0)).size(16))
                         .align_x(Horizontal::Center)
                         .align_y(Vertical::Center)
                         .width(Length::Fill)
@@ -261,7 +261,7 @@ fn view(state: &State) -> Element<Message> {
                 container(
                     container(
                         text_input(
-                            "Enter value...",
+                            "New limit(mW)",
                             &state.fast_input
                         )
                             .on_input(Message::FastLimitInputChanged)
@@ -291,7 +291,7 @@ fn view(state: &State) -> Element<Message> {
                         tooltip(
                             text("?").size(12),
                             container(
-                                text("This is your helpful \ntooltip text that explains \nthe feature").size(12)
+                                text("Enter value in miliWatts.\nAccepted value range\nbetween 4000 & 65000.").size(12)
                             )
                             .style(container::bordered_box)
                             .padding(10),
@@ -325,7 +325,7 @@ fn view(state: &State) -> Element<Message> {
                 .width(Length::FillPortion(4)),
                 
                 container(
-                    container(text("30").size(16))
+                    container(text(format!("{:.1} W", state.curr_slow_value as f32 / 1000.0)).size(16))
                         .align_x(Horizontal::Center)
                         .align_y(Vertical::Center)
                         .width(Length::Fill)
@@ -334,7 +334,7 @@ fn view(state: &State) -> Element<Message> {
                 .width(Length::FillPortion(2)),
                 
                 container(
-                    container(text("40").size(16))
+                    container(text(format!("{:.1} W", state.curr_slow_limit as f32 / 1000.0)).size(16))
                         .align_x(Horizontal::Center)
                         .align_y(Vertical::Center)
                         .width(Length::Fill)
@@ -345,7 +345,7 @@ fn view(state: &State) -> Element<Message> {
                 container(
                     container(
                         text_input(
-                            "Enter value...",
+                            "New limit(mW)",
                             &state.slow_input
                         )
                             .on_input(Message::SlowLimitInputChanged)
@@ -375,7 +375,7 @@ fn view(state: &State) -> Element<Message> {
                         tooltip(
                             text("?").size(12),
                             container(
-                                text("This is your helpful \ntooltip text that explains \nthe feature").size(12)
+                                text("Enter value in miliWatts.\nAccepted value range\nbetween 4000 & 65000.\nSlow limit must be less\nthan or equal to fast limit.").size(12)
                             )
                             .style(container::bordered_box)
                             .padding(10),
@@ -409,7 +409,7 @@ fn view(state: &State) -> Element<Message> {
                 .width(Length::FillPortion(4)),
                 
                 container(
-                    container(text("30").size(16))
+                    container(text(format!("{:.1} W", state.curr_stapm_limit as f32 / 1000.0)).size(16))
                         .align_x(Horizontal::Center)
                         .align_y(Vertical::Center)
                         .width(Length::Fill)
@@ -418,7 +418,7 @@ fn view(state: &State) -> Element<Message> {
                 .width(Length::FillPortion(2)),
                 
                 container(
-                    container(text("40").size(16))
+                    container(text(format!("{:.1} W", state.curr_stapm_limit as f32 / 1000.0)).size(16))
                         .align_x(Horizontal::Center)
                         .align_y(Vertical::Center)
                         .width(Length::Fill)
@@ -429,7 +429,7 @@ fn view(state: &State) -> Element<Message> {
                 container(
                     container(
                         text_input(
-                            "Enter value...",
+                            "New limit(mW)",
                             &state.stapm_input
                         )
                             .on_input(Message::StapmLimitInputChanged)
@@ -459,7 +459,7 @@ fn view(state: &State) -> Element<Message> {
                         tooltip(
                             text("?").size(12),
                             container(
-                                text("This is your helpful \ntooltip text that explains \nthe feature").size(12)
+                                text("Enter value in miliWatts.\nAccepted value range\nbetween 4000 & 65000.\nStapm limit must be less\nthan or equal to slow limit.").size(12)
                             )
                             .style(container::bordered_box)
                             .padding(10),
@@ -493,7 +493,7 @@ fn view(state: &State) -> Element<Message> {
                 .width(Length::FillPortion(4)),
                 
                 container(
-                    container(text("30").size(16))
+                    container(text(format!("{}°C", state.curr_tctl_value)).size(16))
                         .align_x(Horizontal::Center)
                         .align_y(Vertical::Center)
                         .width(Length::Fill)
@@ -502,7 +502,7 @@ fn view(state: &State) -> Element<Message> {
                 .width(Length::FillPortion(2)),
                 
                 container(
-                    container(text("40").size(16))
+                    container(text(format!("{}°C", state.curr_tctl_limit)).size(16))
                         .align_x(Horizontal::Center)
                         .align_y(Vertical::Center)
                         .width(Length::Fill)
@@ -513,7 +513,7 @@ fn view(state: &State) -> Element<Message> {
                 container(
                     container(
                         text_input(
-                            "Enter value...",
+                            "New limit(°C)",
                             &state.tctl_input
                         )
                             .on_input(Message::TctlLimitInputChanged)
@@ -543,7 +543,7 @@ fn view(state: &State) -> Element<Message> {
                         tooltip(
                             text("?").size(12),
                             container(
-                                text("This is your helpful \ntooltip text that explains \nthe feature").size(12)
+                                text("Enter value in °C.\nAccepted value range\nbetween 40 and 100.").size(12)
                             )
                             .style(container::bordered_box)
                             .padding(10),
