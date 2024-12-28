@@ -1,8 +1,9 @@
-use iced::widget::{button, column, row, text, text_input, Row}; 
+use iced::widget::{button, column, row, text, text_input, Row, container, Space, tooltip}; 
 use iced::{Theme, Subscription};
 use iced::time::{self, Duration};
 use libryzenadj::RyzenAdj;
-
+use iced::{Length, Fill, Element, window};
+use iced::alignment::{self, Horizontal, Vertical};
 
 // Constants to limit input values
 const FAST_LIMIT_MIN: u32 = 4000;
@@ -29,7 +30,7 @@ pub enum Message {
 
 // All the states managed by the app
 #[derive(Default, Debug, Clone)]
-struct RyzoneState {
+struct State {
     curr_fast_value: u32,
     curr_slow_value: u32,
     curr_stapm_value: u32,
@@ -50,7 +51,7 @@ struct RyzoneState {
 
 // Standalone update function
 fn update(
-    state: &mut RyzoneState,
+    state: &mut State,
     message: Message
 ) {
     match message {
@@ -149,77 +150,499 @@ fn update(
 }
 
 // Standalone view function
-fn view(state: &RyzoneState) -> Row<Message> {
-    row![ 
-        // Set Fast Limit
-        column![
-            text(format!("Current Fast Value: {} mW", state.curr_fast_value)).size(30),
-            text(format!("Current Fast Limit: {} mW", state.curr_fast_limit)).size(30),
-            text(format!("Range: {}-{}", FAST_LIMIT_MIN, FAST_LIMIT_MAX)).size(20),
-            text_input(
-                "Enter new value...",
-                &state.fast_input
-            )
-            .on_input(Message::FastLimitInputChanged)
-            .padding(10),
-            button("Update").on_press(Message::SetFastLimit(
-                state.fast_input.parse().unwrap_or(0)
-            )),
-        ],
+fn view(state: &State) -> Element<Message> {
+    column![
+        // Top full-width container
+        container("Top Container")
+            .style(container::bordered_box)
+            .padding(10)
+            .width(Length::Fill)
+            .height(Length::Fixed(50.0)),
 
-        // Set Slow Limit
-        column![
-            text(format!("Current Slow Value: {} mW", state.curr_slow_value)).size(30),
-            text(format!("Current Slow Limit: {} mW", state.curr_slow_limit)).size(30),
-            text(format!("Range: {}-{}", SLOW_LIMIT_MIN, SLOW_LIMIT_MAX)).size(20),
-            text_input(
-                "Enter new value...",
-                &state.slow_input
-            )
-            .on_input(Message::SlowLimitInputChanged)
-            .padding(10),
-            button("Update").on_press(Message::SetSlowLimit(
-                state.slow_input.parse().unwrap_or(0)
-            )),
-        ],
+        // Row of three equal containers
+        row![
+            container("Left Box")
+                .style(container::bordered_box)
+                .padding(10)
+                .width(Length::Fill)
+                .height(Length::Fixed(100.0)),
+            
+            container("Middle Box")
+                .style(container::bordered_box)
+                .padding(10)
+                .width(Length::Fill)
+                .height(Length::Fixed(100.0)),
+            
+            container("Right Box")
+                .style(container::bordered_box)
+                .padding(10)
+                .width(Length::Fill)
+                .height(Length::Fixed(100.0)),
+        ]
+        .spacing(20)
+        .width(Length::Fill),
 
-        // Set STAPM Limit
-        column![
-            text(format!("Current STAPM Value: {} mW", state.curr_stapm_value)).size(30),
-            text(format!("Current STAPM Limit: {} mW", state.curr_stapm_limit)).size(30),
-            text(format!("Range: {}-{}", STAPM_LIMIT_MIN, STAPM_LIMIT_MAX)).size(20),
-            text_input(
-                "Enter new value...",
-                &state.stapm_input
-            )
-            .on_input(Message::StapmLimitInputChanged)
-            .padding(10),
-            button("Update").on_press(Message::SetStapmLimit(
-                state.stapm_input.parse().unwrap_or(0)
-            )),
-        ],
+        // Column titles row
+        container(
+            row![
+                container(
+                    container(text("").size(16))
+                        .align_x(alignment::Horizontal::Center)
+                        .width(Length::Fill)
+                )
+                .width(Length::FillPortion(4)),
+                container(
+                    container(text("Current").size(16))
+                        .align_x(alignment::Horizontal::Center)
+                        .width(Length::Fill)
+                )
+                .width(Length::FillPortion(2)),
+                container(
+                    container(text("Limit").size(16))
+                        .align_x(alignment::Horizontal::Center)
+                        .width(Length::Fill)
+                )
+                .width(Length::FillPortion(2)),
+                container(
+                    container(text("Set New Limit").size(16))
+                        .align_x(alignment::Horizontal::Center)
+                        .width(Length::Fill)
+                )
+                .width(Length::FillPortion(2)),
+                container(
+                    container(text("").size(16))
+                        .align_x(alignment::Horizontal::Center)
+                        .width(Length::Fill)
+                )
+                .width(Length::FillPortion(2)),
+                container(
+                    container(text("").size(12))
+                        .align_x(alignment::Horizontal::Center)
+                        .width(Length::Fill)
+                )
+                .width(Length::FillPortion(1)),
+            ]
+            .spacing(20)
+        )
+        .style(container::transparent)
+        .padding(10)
+        .width(Length::Fill),
 
-        // Set TCTL Limit
-        column![
-            text(format!("Current TCTL Value: {}°C", state.curr_tctl_value)).size(30),
-            text(format!("Current TCTL Limit: {}°C", state.curr_tctl_limit)).size(30),
-            text(format!("Range: {}-{}", TCTL_LIMIT_MIN, TCTL_LIMIT_MAX)).size(20),
-            text_input(
-                "Enter new value...",
-                &state.tctl_input
-            )
-            .on_input(Message::TctlLimitInputChanged)
-            .padding(10),
-            button("Update").on_press(Message::SetTctlLimit(
-                state.tctl_input.parse().unwrap_or(0)
-            )),
-        ],
+        // Fast Limit
+        container(
+            row![
+                container(
+                    container(text("Fast Limit").size(16))
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::Fill)
+                        .height(Length::Fill)  
+                )
+                .width(Length::FillPortion(4)),
+                
+                container(
+                    container(text("30").size(16))
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::Fill)
+                        .height(Length::Fill)  
+                )
+                .width(Length::FillPortion(2)),
+                
+                container(
+                    container(text("40").size(16))
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::Fill)
+                        .height(Length::Fill)  
+                )
+                .width(Length::FillPortion(2)),
+        
+                container(
+                    container(
+                        text_input(
+                            "Enter value...",
+                            &state.fast_input
+                        )
+                            .on_input(Message::FastLimitInputChanged)
+                            .align_x(Horizontal::Center)
+                    )
+                        .align_x(Horizontal::Center)
+                        .width(Length::Fill)
+                        .height(Length::Fill)  
+                )
+                .width(Length::FillPortion(2)),
+        
+                container(
+                    container(
+                        button("Set").on_press(Message::SetFastLimit(
+                            state.fast_input.parse().unwrap_or(0)
+                        ))
+                    )
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::Fill)
+                        .height(Length::Fill)  
+                )
+                .width(Length::FillPortion(2)),
+
+                container(
+                    container(
+                        tooltip(
+                            text("?").size(12),
+                            container(
+                                text("This is your helpful \ntooltip text that explains \nthe feature").size(12)
+                            )
+                            .style(container::bordered_box)
+                            .padding(10),
+                            tooltip::Position::Top
+                        )
+                    )
+                    .align_x(Horizontal::Center)
+                    .align_y(Vertical::Center)
+                    .width(Length::Fill)
+                    .height(Length::Fill)
+                )
+                .width(Length::FillPortion(1))
+            ]
+            .spacing(20)
+        )
+        .style(container::bordered_box)
+        .padding(10)
+        .width(Length::Fill)
+        .height(Length::Fixed(50.0)),
+
+        // Slow Limit
+        container(
+            row![
+                container(
+                    container(text("Slow Limit").size(16))
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::Fill)
+                        .height(Length::Fill)  
+                )
+                .width(Length::FillPortion(4)),
+                
+                container(
+                    container(text("30").size(16))
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::Fill)
+                        .height(Length::Fill)  
+                )
+                .width(Length::FillPortion(2)),
+                
+                container(
+                    container(text("40").size(16))
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::Fill)
+                        .height(Length::Fill)  
+                )
+                .width(Length::FillPortion(2)),
+        
+                container(
+                    container(
+                        text_input(
+                            "Enter value...",
+                            &state.slow_input
+                        )
+                            .on_input(Message::SlowLimitInputChanged)
+                            .align_x(Horizontal::Center)
+                    )
+                        .align_x(Horizontal::Center)
+                        .width(Length::Fill)
+                        .height(Length::Fill)  
+                )
+                .width(Length::FillPortion(2)),
+        
+                container(
+                    container(
+                        button("Set").on_press(Message::SetSlowLimit(
+                            state.slow_input.parse().unwrap_or(0)
+                        ))
+                    )
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::Fill)
+                        .height(Length::Fill)  
+                )
+                .width(Length::FillPortion(2)),
+
+                container(
+                    container(
+                        tooltip(
+                            text("?").size(12),
+                            container(
+                                text("This is your helpful \ntooltip text that explains \nthe feature").size(12)
+                            )
+                            .style(container::bordered_box)
+                            .padding(10),
+                            tooltip::Position::Top
+                        )
+                    )
+                    .align_x(Horizontal::Center)
+                    .align_y(Vertical::Center)
+                    .width(Length::Fill)
+                    .height(Length::Fill)
+                )
+                .width(Length::FillPortion(1))
+            ]
+            .spacing(20)
+        )
+        .style(container::bordered_box)
+        .padding(10)
+        .width(Length::Fill)
+        .height(Length::Fixed(50.0)),
+
+        // STAPM Limit
+        container(
+            row![
+                container(
+                    container(text("STAPM Limit").size(16))
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::Fill)
+                        .height(Length::Fill) 
+                )
+                .width(Length::FillPortion(4)),
+                
+                container(
+                    container(text("30").size(16))
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::Fill)
+                        .height(Length::Fill) 
+                )
+                .width(Length::FillPortion(2)),
+                
+                container(
+                    container(text("40").size(16))
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::Fill)
+                        .height(Length::Fill) 
+                )
+                .width(Length::FillPortion(2)),
+        
+                container(
+                    container(
+                        text_input(
+                            "Enter value...",
+                            &state.stapm_input
+                        )
+                            .on_input(Message::StapmLimitInputChanged)
+                            .align_x(Horizontal::Center)
+                    )
+                        .align_x(Horizontal::Center)
+                        .width(Length::Fill)
+                        .height(Length::Fill)  
+                )
+                .width(Length::FillPortion(2)),
+        
+                container(
+                    container(
+                        button("Set").on_press(Message::SetStapmLimit(
+                            state.stapm_input.parse().unwrap_or(0)
+                        ))
+                    )
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::Fill)
+                        .height(Length::Fill) 
+                )
+                .width(Length::FillPortion(2)),
+
+                container(
+                    container(
+                        tooltip(
+                            text("?").size(12),
+                            container(
+                                text("This is your helpful \ntooltip text that explains \nthe feature").size(12)
+                            )
+                            .style(container::bordered_box)
+                            .padding(10),
+                            tooltip::Position::Top
+                        )
+                    )
+                    .align_x(Horizontal::Center)
+                    .align_y(Vertical::Center)
+                    .width(Length::Fill)
+                    .height(Length::Fill)
+                )
+                .width(Length::FillPortion(1))
+            ]
+            .spacing(20)
+        )
+        .style(container::bordered_box)
+        .padding(10)
+        .width(Length::Fill)
+        .height(Length::Fixed(50.0)),
+
+        // TCtl Limit
+        container(
+            row![
+                container(
+                    container(text("TCTL Limit").size(16))
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::Fill)
+                        .height(Length::Fill) 
+                )
+                .width(Length::FillPortion(4)),
+                
+                container(
+                    container(text("30").size(16))
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::Fill)
+                        .height(Length::Fill) 
+                )
+                .width(Length::FillPortion(2)),
+                
+                container(
+                    container(text("40").size(16))
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::Fill)
+                        .height(Length::Fill) 
+                )
+                .width(Length::FillPortion(2)),
+        
+                container(
+                    container(
+                        text_input(
+                            "Enter value...",
+                            &state.tctl_input
+                        )
+                            .on_input(Message::TctlLimitInputChanged)
+                            .align_x(Horizontal::Center)
+                    )
+                        .align_x(Horizontal::Center)
+                        .width(Length::Fill)
+                        .height(Length::Fill) 
+                )
+                .width(Length::FillPortion(2)),
+        
+                container(
+                    container(
+                        button("Set").on_press(Message::SetTctlLimit(
+                            state.tctl_input.parse().unwrap_or(0)
+                        ))
+                    )
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::Fill)
+                        .height(Length::Fill) 
+                )
+                .width(Length::FillPortion(2)),
+
+                container(
+                    container(
+                        tooltip(
+                            text("?").size(12),
+                            container(
+                                text("This is your helpful \ntooltip text that explains \nthe feature").size(12)
+                            )
+                            .style(container::bordered_box)
+                            .padding(10),
+                            tooltip::Position::Top
+                        )
+                    )
+                    .align_x(Horizontal::Center)
+                    .align_y(Vertical::Center)
+                    .width(Length::Fill)
+                    .height(Length::Fill)
+                )
+                .width(Length::FillPortion(1))
+            ]
+            .spacing(20)
+        )
+        .style(container::bordered_box)
+        .padding(10)
+        .width(Length::Fill)
+        .height(Length::Fixed(50.0)),
+
     ]
-    .spacing(20)  
-    .padding(20)  
+    .spacing(10)
+    .padding(20)
+    .width(Length::Fill)
+    .height(Length::Fill)
+    .into()
 }
 
-fn update_state_values(_: &RyzoneState) -> Subscription<Message> {
+// fn view(state: &RyzoneState) -> Row<Message> {
+//     row![ 
+//         // Set Fast Limit
+//         column![
+//             text(format!("Current Fast Value: {} mW", state.curr_fast_value)).size(30),
+//             text(format!("Current Fast Limit: {} mW", state.curr_fast_limit)).size(30),
+//             text(format!("Range: {}-{}", FAST_LIMIT_MIN, FAST_LIMIT_MAX)).size(20),
+//             text_input(
+//                 "Enter new value...",
+//                 &state.fast_input
+//             )
+//             .on_input(Message::FastLimitInputChanged)
+//             .padding(10),
+//             button("Update").on_press(Message::SetFastLimit(
+//                 state.fast_input.parse().unwrap_or(0)
+//             )),
+//         ],
+
+//         // Set Slow Limit
+//         column![
+//             text(format!("Current Slow Value: {} mW", state.curr_slow_value)).size(30),
+//             text(format!("Current Slow Limit: {} mW", state.curr_slow_limit)).size(30),
+//             text(format!("Range: {}-{}", SLOW_LIMIT_MIN, SLOW_LIMIT_MAX)).size(20),
+//             text_input(
+//                 "Enter new value...",
+//                 &state.slow_input
+//             )
+//             .on_input(Message::SlowLimitInputChanged)
+//             .padding(10),
+//             button("Update").on_press(Message::SetSlowLimit(
+//                 state.slow_input.parse().unwrap_or(0)
+//             )),
+//         ],
+
+//         // Set STAPM Limit
+//         column![
+//             text(format!("Current STAPM Value: {} mW", state.curr_stapm_value)).size(30),
+//             text(format!("Current STAPM Limit: {} mW", state.curr_stapm_limit)).size(30),
+//             text(format!("Range: {}-{}", STAPM_LIMIT_MIN, STAPM_LIMIT_MAX)).size(20),
+//             text_input(
+//                 "Enter new value...",
+//                 &state.stapm_input
+//             )
+//             .on_input(Message::StapmLimitInputChanged)
+//             .padding(10),
+//             button("Update").on_press(Message::SetStapmLimit(
+//                 state.stapm_input.parse().unwrap_or(0)
+//             )),
+//         ],
+
+//         // Set TCTL Limit
+//         column![
+//             text(format!("Current TCTL Value: {}°C", state.curr_tctl_value)).size(30),
+//             text(format!("Current TCTL Limit: {}°C", state.curr_tctl_limit)).size(30),
+//             text(format!("Range: {}-{}", TCTL_LIMIT_MIN, TCTL_LIMIT_MAX)).size(20),
+//             text_input(
+//                 "Enter new value...",
+//                 &state.tctl_input
+//             )
+//             .on_input(Message::TctlLimitInputChanged)
+//             .padding(10),
+//             button("Update").on_press(Message::SetTctlLimit(
+//                 state.tctl_input.parse().unwrap_or(0)
+//             )),
+//         ],
+//     ]
+//     .spacing(20)  
+//     .padding(20)  
+// }
+
+fn update_state_values(_: &State) -> Subscription<Message> {
     time::every(Duration::from_secs(1))
         .map(|_| Message::UpdateStateValues)
 }
@@ -232,7 +655,7 @@ fn main() -> iced::Result {
         .run()
 }
 
-fn theme(_state: &RyzoneState) -> Theme {
+fn theme(_state: &State) -> Theme {
     Theme::TokyoNightStorm
 }
 
