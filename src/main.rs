@@ -4,6 +4,7 @@ use iced::time::{self, Duration};
 use libryzenadj::RyzenAdj;
 use iced::{Length, Fill, Element, window};
 use iced::alignment::{self, Horizontal, Vertical};
+use iced::{Size}; 
 
 // Constants to limit input values
 const FAST_LIMIT_MIN: u32 = 4000;
@@ -153,27 +154,28 @@ fn update(
 fn view(state: &State) -> Element<Message> {
     column![
         // Top full-width container
-        container("Top Container")
-            .style(container::bordered_box)
+        container("Ryzone - Adjust mobile Ryzen APU power limits")
+            .align_x(alignment::Horizontal::Center)
+            // .style(container::bordered_box)
             .padding(10)
             .width(Length::Fill)
             .height(Length::Fixed(50.0)),
 
         // Row of three equal containers
         row![
-            container("Left Box")
+            container("Processor")
                 .style(container::bordered_box)
                 .padding(10)
                 .width(Length::Fill)
                 .height(Length::Fixed(100.0)),
             
-            container("Middle Box")
+            container("GPU")
                 .style(container::bordered_box)
                 .padding(10)
                 .width(Length::Fill)
                 .height(Length::Fixed(100.0)),
             
-            container("Right Box")
+            container("Power")
                 .style(container::bordered_box)
                 .padding(10)
                 .width(Length::Fill)
@@ -564,6 +566,14 @@ fn view(state: &State) -> Element<Message> {
         .width(Length::Fill)
         .height(Length::Fixed(50.0)),
 
+        // Bottom full-width container
+        container("Notes and settings")
+            .align_x(alignment::Horizontal::Center)
+            .style(container::bordered_box)
+            .padding(10)
+            .width(Length::Fill)
+            .height(Length::Fixed(150.0)),
+
     ]
     .spacing(10)
     .padding(20)
@@ -571,76 +581,6 @@ fn view(state: &State) -> Element<Message> {
     .height(Length::Fill)
     .into()
 }
-
-// fn view(state: &RyzoneState) -> Row<Message> {
-//     row![ 
-//         // Set Fast Limit
-//         column![
-//             text(format!("Current Fast Value: {} mW", state.curr_fast_value)).size(30),
-//             text(format!("Current Fast Limit: {} mW", state.curr_fast_limit)).size(30),
-//             text(format!("Range: {}-{}", FAST_LIMIT_MIN, FAST_LIMIT_MAX)).size(20),
-//             text_input(
-//                 "Enter new value...",
-//                 &state.fast_input
-//             )
-//             .on_input(Message::FastLimitInputChanged)
-//             .padding(10),
-//             button("Update").on_press(Message::SetFastLimit(
-//                 state.fast_input.parse().unwrap_or(0)
-//             )),
-//         ],
-
-//         // Set Slow Limit
-//         column![
-//             text(format!("Current Slow Value: {} mW", state.curr_slow_value)).size(30),
-//             text(format!("Current Slow Limit: {} mW", state.curr_slow_limit)).size(30),
-//             text(format!("Range: {}-{}", SLOW_LIMIT_MIN, SLOW_LIMIT_MAX)).size(20),
-//             text_input(
-//                 "Enter new value...",
-//                 &state.slow_input
-//             )
-//             .on_input(Message::SlowLimitInputChanged)
-//             .padding(10),
-//             button("Update").on_press(Message::SetSlowLimit(
-//                 state.slow_input.parse().unwrap_or(0)
-//             )),
-//         ],
-
-//         // Set STAPM Limit
-//         column![
-//             text(format!("Current STAPM Value: {} mW", state.curr_stapm_value)).size(30),
-//             text(format!("Current STAPM Limit: {} mW", state.curr_stapm_limit)).size(30),
-//             text(format!("Range: {}-{}", STAPM_LIMIT_MIN, STAPM_LIMIT_MAX)).size(20),
-//             text_input(
-//                 "Enter new value...",
-//                 &state.stapm_input
-//             )
-//             .on_input(Message::StapmLimitInputChanged)
-//             .padding(10),
-//             button("Update").on_press(Message::SetStapmLimit(
-//                 state.stapm_input.parse().unwrap_or(0)
-//             )),
-//         ],
-
-//         // Set TCTL Limit
-//         column![
-//             text(format!("Current TCTL Value: {}°C", state.curr_tctl_value)).size(30),
-//             text(format!("Current TCTL Limit: {}°C", state.curr_tctl_limit)).size(30),
-//             text(format!("Range: {}-{}", TCTL_LIMIT_MIN, TCTL_LIMIT_MAX)).size(20),
-//             text_input(
-//                 "Enter new value...",
-//                 &state.tctl_input
-//             )
-//             .on_input(Message::TctlLimitInputChanged)
-//             .padding(10),
-//             button("Update").on_press(Message::SetTctlLimit(
-//                 state.tctl_input.parse().unwrap_or(0)
-//             )),
-//         ],
-//     ]
-//     .spacing(20)  
-//     .padding(20)  
-// }
 
 fn update_state_values(_: &State) -> Subscription<Message> {
     time::every(Duration::from_secs(1))
@@ -650,6 +590,18 @@ fn update_state_values(_: &State) -> Subscription<Message> {
 
 fn main() -> iced::Result {
     iced::application("Ryzone", update, view)
+        .window(window::Settings{
+            min_size: Some(Size::new(600.0, 450.0)),
+            size: Size::new(800.0, 600.0),
+            icon: Some(
+                window::icon::from_file_data(
+                    include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/icon.ico")),
+                    None,
+                )
+                .expect("icon file should be reachable and in ICO file format"),
+            ),
+            ..Default::default()
+        })
         .theme(theme)
         .subscription(update_state_values)
         .run()
