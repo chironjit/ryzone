@@ -1,10 +1,12 @@
 use iced::widget::{button, column, row, text, text_input, Row, container, Space, tooltip}; 
-use iced::{Theme, Subscription};
+use iced::{theme, Subscription, Theme};
 use iced::time::{self, Duration};
 use libryzenadj::RyzenAdj;
 use iced::{Length, Fill, Element, window};
 use iced::alignment::{self, Horizontal, Vertical};
 use iced::{Size}; 
+use iced::widget::container::{Style};
+use iced::{Border, Color, Shadow, Background, border, Vector, color};
 
 // Constants to limit input values
 const FAST_LIMIT_MIN: u32 = 4000;
@@ -150,75 +152,180 @@ fn update(
     }
 }
 
+
+
+fn card_style() -> impl Fn(&Theme) -> Style {
+    |theme| Style {
+        text_color: None,
+        background: Some(Background::Color(theme.extended_palette().background.weak.color)),
+        border: Border {
+            radius: border::Radius::new(16.0),
+            width: 0.0, 
+            color: Color::TRANSPARENT,
+        },
+        shadow: Shadow {
+            color: Color::from_rgba(0.0, 0.0, 0.0, 0.08),
+            offset: Vector::new(0.0, 2.0),
+            blur_radius: 12.0,
+        },
+    }
+}
+
+fn hint_text_style() -> impl Fn(&Theme) -> text::Style {
+    |theme| text::Style {
+        color: Some(theme.extended_palette().primary.strong.color),
+        ..text::Style::default()
+    }
+}
+
+fn text_input_style() -> impl Fn(&Theme, text_input::Status) -> text_input::Style {
+    |theme, status| text_input::Style {
+        background: Background::Color(theme.extended_palette().background.base.color),
+        border: Border {
+            radius: border::Radius::new(8.0),
+            width: 1.0,
+            color: match status {
+                text_input::Status::Focused => theme.extended_palette().primary.base.color,
+                _ => theme.extended_palette().secondary.weak.color,
+            },
+        },
+        icon: theme.extended_palette().background.strong.color,
+        placeholder: theme.extended_palette().background.strong.color,
+        value: theme.extended_palette().primary.base.color,
+        selection: theme.extended_palette().primary.weak.color,
+    }
+}
+
 // Standalone view function
 fn view(state: &State) -> Element<Message> {
     column![
         // Top full-width container
         container("Ryzone - Adjust mobile Ryzen APU power limits")
             .align_x(alignment::Horizontal::Center)
-            // .style(container::bordered_box)
             .padding(10)
             .width(Length::Fill)
             .height(Length::Fixed(50.0)),
 
         // Row of three equal containers
         row![
-            container("Processor")
-                .style(container::bordered_box)
-                .padding(10)
-                .width(Length::Fill)
-                .height(Length::Fixed(100.0)),
-            
-            container("GPU")
-                .style(container::bordered_box)
-                .padding(10)
-                .width(Length::Fill)
-                .height(Length::Fixed(100.0)),
-            
-            container("Power")
-                .style(container::bordered_box)
-                .padding(10)
-                .width(Length::Fill)
-                .height(Length::Fixed(100.0)),
-        ]
-        .spacing(20)
-        .width(Length::Fill),
+            // Processor container
+            container(
+                column![
+                    text("Processor").size(20),
+                    row![
+                        column![
+                            text("Current Speed").size(14),
+                            text("3.8 GHz").size(16),
+                        ],
+                        Space::with_width(Length::Fill),
+                        column![
+                            text("Peak Speed").size(14),
+                            text("4.2 GHz").size(16),
+                        ],
+                    ],
+                ]
+                .spacing(10)
+            )
+            .style(card_style())
+            .padding(20)
+            .width(Length::Fill)
+            .height(Length::Fixed(120.0)),
+
+            // GPU container
+            container(
+                column![
+                    text("GPU").size(20),
+                    row![
+                        column![
+                            text("Current Speed").size(14),
+                            text("1.8 GHz").size(16),
+                        ],
+                        Space::with_width(Length::Fill),
+                        column![
+                            text("Peak Speed").size(14),
+                            text("2.2 GHz").size(16),
+                        ],
+                    ],
+                ]
+                .spacing(10)
+            )
+            .style(card_style())
+            .padding(20)
+            .width(Length::Fill)
+            .height(Length::Fixed(120.0)),
+
+            // Power container
+            container(
+                column![
+                    text("Power").size(20),
+                    row![
+                        column![
+                            text("APU").size(14),
+                            text("15W").size(16),
+                            text("System").size(14),
+                            text("25W").size(16),
+                        ],
+                        Space::with_width(Length::Fill),
+                        column![
+                            text("APU").size(14),
+                            text("15W").size(16),
+                            text("System").size(14),
+                            text("25W").size(16),
+                        ],
+                        Space::with_width(Length::Fill),
+                        column![
+                            text("Battery").size(14),
+                            text("8W").size(16),
+                            text("Socket").size(14),
+                            text("32W").size(16),
+                        ],
+                    ],
+                ]
+                .spacing(10)
+            )
+            .style(card_style())
+            .padding(20)
+            .width(Length::Fill)
+            .height(Length::Fixed(150.0)),
+            ]
+            .spacing(20)
+            .width(Length::Fill),
 
         // Column titles row
         container(
             row![
                 container(
-                    container(text("").size(16))
+                    container(text("").size(14))
                         .align_x(alignment::Horizontal::Center)
                         .width(Length::Fill)
                 )
                 .width(Length::FillPortion(4)),
                 container(
-                    container(text("Current").size(16))
+                    container(text("Current").size(14))
                         .align_x(alignment::Horizontal::Center)
                         .width(Length::Fill)
                 )
                 .width(Length::FillPortion(2)),
                 container(
-                    container(text("Limit").size(16))
+                    container(text("Limit").size(14))
                         .align_x(alignment::Horizontal::Center)
                         .width(Length::Fill)
                 )
                 .width(Length::FillPortion(2)),
                 container(
-                    container(text("Set New Limit").size(16))
+                    container(text("Set New Limit").size(14))
                         .align_x(alignment::Horizontal::Center)
                         .width(Length::Fill)
                 )
                 .width(Length::FillPortion(2)),
                 container(
-                    container(text("").size(16))
+                    container(text("").size(14))
                         .align_x(alignment::Horizontal::Center)
                         .width(Length::Fill)
                 )
                 .width(Length::FillPortion(2)),
                 container(
-                    container(text("").size(12))
+                    container(text("").size(14))
                         .align_x(alignment::Horizontal::Center)
                         .width(Length::Fill)
                 )
@@ -263,9 +370,10 @@ fn view(state: &State) -> Element<Message> {
                 container(
                     container(
                         text_input(
-                            "New limit(mW)",
+                            "",
                             &state.fast_input
                         )
+                            .style(text_input_style())
                             .on_input(Message::FastLimitInputChanged)
                             .align_x(Horizontal::Center)
                     )
@@ -291,7 +399,7 @@ fn view(state: &State) -> Element<Message> {
                 container(
                     container(
                         tooltip(
-                            text("?").size(12),
+                            text("ⓘ").size(16).style(hint_text_style()).shaping(text::Shaping::Advanced),
                             container(
                                 text("Enter value in miliWatts.\nAccepted value range\nbetween 4000 & 65000.").size(12)
                             )
@@ -309,7 +417,7 @@ fn view(state: &State) -> Element<Message> {
             ]
             .spacing(20)
         )
-        .style(container::bordered_box)
+        .style(card_style())
         .padding(10)
         .width(Length::Fill)
         .height(Length::Fixed(50.0)),
@@ -347,9 +455,10 @@ fn view(state: &State) -> Element<Message> {
                 container(
                     container(
                         text_input(
-                            "New limit(mW)",
+                            "",
                             &state.slow_input
                         )
+                            .style(text_input_style())
                             .on_input(Message::SlowLimitInputChanged)
                             .align_x(Horizontal::Center)
                     )
@@ -375,11 +484,11 @@ fn view(state: &State) -> Element<Message> {
                 container(
                     container(
                         tooltip(
-                            text("?").size(12),
+                            text("ⓘ").size(16).style(hint_text_style()).shaping(text::Shaping::Advanced),
                             container(
                                 text("Enter value in miliWatts.\nAccepted value range\nbetween 4000 & 65000.\nSlow limit must be less\nthan or equal to fast limit.").size(12)
                             )
-                            .style(container::bordered_box)
+                            .style(card_style())
                             .padding(10),
                             tooltip::Position::Top
                         )
@@ -393,7 +502,7 @@ fn view(state: &State) -> Element<Message> {
             ]
             .spacing(20)
         )
-        .style(container::bordered_box)
+        .style(card_style())
         .padding(10)
         .width(Length::Fill)
         .height(Length::Fixed(50.0)),
@@ -431,9 +540,10 @@ fn view(state: &State) -> Element<Message> {
                 container(
                     container(
                         text_input(
-                            "New limit(mW)",
+                            "",
                             &state.stapm_input
                         )
+                            .style(text_input_style())
                             .on_input(Message::StapmLimitInputChanged)
                             .align_x(Horizontal::Center)
                     )
@@ -459,11 +569,11 @@ fn view(state: &State) -> Element<Message> {
                 container(
                     container(
                         tooltip(
-                            text("?").size(12),
+                            text("ⓘ").size(16).style(hint_text_style()).shaping(text::Shaping::Advanced),
                             container(
                                 text("Enter value in miliWatts.\nAccepted value range\nbetween 4000 & 65000.\nStapm limit must be less\nthan or equal to slow limit.").size(12)
                             )
-                            .style(container::bordered_box)
+                            .style(card_style())
                             .padding(10),
                             tooltip::Position::Top
                         )
@@ -477,7 +587,7 @@ fn view(state: &State) -> Element<Message> {
             ]
             .spacing(20)
         )
-        .style(container::bordered_box)
+        .style(card_style())
         .padding(10)
         .width(Length::Fill)
         .height(Length::Fixed(50.0)),
@@ -515,9 +625,10 @@ fn view(state: &State) -> Element<Message> {
                 container(
                     container(
                         text_input(
-                            "New limit(°C)",
+                            "",
                             &state.tctl_input
                         )
+                            .style(text_input_style())
                             .on_input(Message::TctlLimitInputChanged)
                             .align_x(Horizontal::Center)
                     )
@@ -543,11 +654,11 @@ fn view(state: &State) -> Element<Message> {
                 container(
                     container(
                         tooltip(
-                            text("?").size(12),
+                            text("ⓘ").size(16).style(hint_text_style()).shaping(text::Shaping::Advanced),
                             container(
                                 text("Enter value in °C.\nAccepted value range\nbetween 40 and 100.").size(12)
                             )
-                            .style(container::bordered_box)
+                            .style(card_style())
                             .padding(10),
                             tooltip::Position::Top
                         )
@@ -561,7 +672,7 @@ fn view(state: &State) -> Element<Message> {
             ]
             .spacing(20)
         )
-        .style(container::bordered_box)
+        .style(card_style())
         .padding(10)
         .width(Length::Fill)
         .height(Length::Fixed(50.0)),
@@ -569,7 +680,7 @@ fn view(state: &State) -> Element<Message> {
         // Bottom full-width container
         container("Notes and settings")
             .align_x(alignment::Horizontal::Center)
-            .style(container::bordered_box)
+            .style(card_style())
             .padding(10)
             .width(Length::Fill)
             .height(Length::Fixed(150.0)),
