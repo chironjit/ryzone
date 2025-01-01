@@ -211,82 +211,127 @@ fn view(state: &State) -> Element<Message> {
             // Processor container
             container(
                 column![
-                    text("Processor").size(20),
+                    // Top section with title and main speed reading
                     row![
                         column![
-                            text("Current Speed").size(14),
-                            text("3.8 GHz").size(16),
-                        ],
+                            text("CPU").size(20),
+                            text("Current").size(10),
+                        ]
+                        .spacing(2),
                         Space::with_width(Length::Fill),
                         column![
-                            text("Peak Speed").size(14),
-                            text("4.2 GHz").size(16),
-                        ],
-                    ],
+                            text("2.4 GHz").size(28),
+                        ]
+                    ]
+                    .align_y(alignment::Vertical::Center)
+                    .spacing(2),
+            
+                    Space::with_height(8),
+            
+                    // Bottom section with minor details
+                    row![
+                        column![
+                            text("Min (last 5 mins)").size(12),
+                            text("Max (last 5 mins)").size(12),
+                        ]
+                        .spacing(2),
+                        Space::with_width(Length::Fill),
+                        column![
+                            text("500 MHz").size(12),
+                            text("4.43 GHz").size(12),
+                        ]
+                        .spacing(2)
+                    ]
                 ]
-                .spacing(10)
             )
             .style(card_style())
             .padding(20)
             .width(Length::Fill)
-            .height(Length::Fixed(120.0)),
+            .height(Length::Fixed(140.0)),
 
             // GPU container
             container(
                 column![
-                    text("GPU").size(20),
+                    // Top section with title and main speed reading
                     row![
                         column![
-                            text("Current Speed").size(14),
-                            text("1.8 GHz").size(16),
-                        ],
+                            text("GPU").size(20),
+                            text("Current").size(10),
+                        ]
+                        .spacing(2),
                         Space::with_width(Length::Fill),
                         column![
-                            text("Peak Speed").size(14),
-                            text("2.2 GHz").size(16),
-                        ],
-                    ],
+                            text("800 MHz").size(28),
+                        ]
+                    ]
+                    .align_y(alignment::Vertical::Center)
+                    .spacing(2),
+            
+                    Space::with_height(8),
+            
+                    // Bottom section with minor details
+                    row![
+                        column![
+                            text("Min (last 5 mins)").size(12),
+                            text("Max (last 5 mins)").size(12),
+                        ]
+                        .spacing(2),
+                        Space::with_width(Length::Fill),
+                        column![
+                            text("400 MHz").size(12),
+                            text("2.0 GHz").size(12),
+                        ]
+                        .spacing(2)
+                    ]
                 ]
-                .spacing(10)
             )
             .style(card_style())
             .padding(20)
             .width(Length::Fill)
-            .height(Length::Fixed(120.0)),
+            .height(Length::Fixed(140.0)),
 
             // Power container
             container(
                 column![
-                    text("Power").size(20),
+                    // Top section with title and main power reading
                     row![
                         column![
-                            text("APU").size(14),
-                            text("15W").size(16),
-                            text("System").size(14),
-                            text("25W").size(16),
-                        ],
+                            text("Power").size(20),
+                            text("APU Total").size(10),
+                        ]
+                        .spacing(2),
                         Space::with_width(Length::Fill),
                         column![
-                            text("APU").size(14),
-                            text("15W").size(16),
-                            text("System").size(14),
-                            text("25W").size(16),
-                        ],
+                            text("15.1 W").size(28),
+                        ]
+                    ]
+                    .align_y(alignment::Vertical::Center)
+                    .spacing(2),
+            
+                    Space::with_height(8),
+            
+                    // Bottom section with power details
+                    row![
+                        column![
+                            text("System total").size(12),
+                            text("Source (battery)").size(12),
+                            text("Source (external)").size(12),
+                        ]
+                        .spacing(2),
                         Space::with_width(Length::Fill),
                         column![
-                            text("Battery").size(14),
-                            text("8W").size(16),
-                            text("Socket").size(14),
-                            text("32W").size(16),
-                        ],
-                    ],
+                            text("20.0 W").size(12),
+                            text("20.0 W").size(12),
+                            text("00.0 W").size(12),
+                        ]
+                        .spacing(2)
+                    ]
                 ]
-                .spacing(10)
             )
             .style(card_style())
             .padding(20)
             .width(Length::Fill)
-            .height(Length::Fixed(150.0)),
+            .height(Length::Fixed(140.0))
             ]
             .spacing(20)
             .width(Length::Fill),
