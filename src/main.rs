@@ -42,6 +42,16 @@ struct State {
     curr_slow_limit: u32,
     curr_stapm_limit: u32,
     curr_tctl_limit: u32,
+    curr_cpu_speed: u32,
+    min_cpu_speed: u32,
+    max_cpu_speed: u32,
+    curr_gpu_speed: u32,
+    min_gpu_speed: u32,
+    max_gpu_speed: u32,
+    curr_apu_power: u32,
+    total_sys_power: u32,
+    batt_source_power: u32,
+    ext_source_power: u32,
     fast_input: String,
     slow_input: String,
     stapm_input: String,
@@ -237,7 +247,7 @@ fn view(state: &State) -> Element<Message> {
                         .spacing(2),
                         Space::with_width(Length::Fill),
                         column![
-                            text("500 MHz").size(12),
+                            text(" 500 MHz").size(12),
                             text("4.43 GHz").size(12),
                         ]
                         .spacing(2)
@@ -278,8 +288,8 @@ fn view(state: &State) -> Element<Message> {
                         .spacing(2),
                         Space::with_width(Length::Fill),
                         column![
-                            text("400 MHz").size(12),
-                            text("2.0 GHz").size(12),
+                            text(" 400 MHz").size(12),
+                            text("2.00 GHz").size(12),
                         ]
                         .spacing(2)
                     ]
@@ -565,7 +575,7 @@ fn view(state: &State) -> Element<Message> {
                 .width(Length::FillPortion(4)),
                 
                 container(
-                    container(text(format!("{:.1} W", state.curr_stapm_limit as f32 / 1000.0)).size(16))
+                    container(text(format!("{:.1} W", state.curr_stapm_value as f32 / 1000.0)).size(16))
                         .align_x(Horizontal::Center)
                         .align_y(Vertical::Center)
                         .width(Length::Fill)
