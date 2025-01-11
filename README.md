@@ -12,11 +12,12 @@ Ryzone is a linux graphical interface for manually controlling mobile Ryzen proc
 ## Work in progress
 This app is a work in progress. Some key pending items:
 
-1.  Power consumption tracking on external power
-2.  Background daemon
-3.  Pkexec (instead of sudo -E) 
-4.  Packaging and release of appimage 
-5.  Tray icon
+1.  Background daemon
+2.  Pkexec (instead of sudo -E) 
+3.  Packaging and release of appimage 
+4.  Tray icon
+5.  Power profiles
+6.  Install / deploy script
    
 ## Building & Running the app
 To build and run the release version, run 
