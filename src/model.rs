@@ -31,6 +31,21 @@ impl Default for HistoricalGpuFreq {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct HistoricalBattStat {
+    pub timestamp: SystemTime,
+    pub power_usage: u32,  // Watts
+}
+
+impl Default for HistoricalBattStat {
+    fn default() -> Self {
+        Self {
+            timestamp: SystemTime::now(),
+            power_usage: 0,
+        }
+    }
+}
+
 // Constants to limit input values
 pub const FAST_LIMIT_MIN: u32 = 4000;
 pub const FAST_LIMIT_MAX: u32 = 65000;
@@ -69,10 +84,10 @@ pub struct State {
     pub gpu_history: VecDeque<HistoricalGpuFreq>,
 
     // System power status
-    pub curr_apu_power: u32,
-    pub total_sys_power: u32,
-    pub batt_source_power: u32,
-    pub ext_source_power: u32,
+    pub batt_power: u32,
+    pub batt_time: u32,
+    pub charge_state: String,
+    pub batt_history: VecDeque<HistoricalBattStat>,
 
     // Custom values input tracking
     pub fast_input: String,

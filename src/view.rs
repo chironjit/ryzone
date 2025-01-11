@@ -5,6 +5,7 @@ use iced::widget::container::Style;
 
 use crate::model::State;
 use crate::update::Message;
+use crate::utils::battery::format_time_remaining;
 
 fn format_frequency(freq: u32) -> String {
     if freq < 1000 {  // Less than 1000 MHz (1 GHz)
@@ -13,8 +14,6 @@ fn format_frequency(freq: u32) -> String {
         format!("{:.2} GHz", freq as f32 / 1000.0)
     }
 }
-
-
 
 fn card_style() -> impl Fn(&Theme) -> Style {
     |theme| Style {
@@ -164,7 +163,7 @@ pub fn view(state: &State) -> Element<Message> {
                         .spacing(2),
                         Space::with_width(Length::Fill),
                         column![
-                            text("15.1 W").size(28),
+                            text(format!("{:.1} W", state.curr_stapm_value as f32 / 1000.0)).size(28),
                         ]
                     ]
                     .align_y(alignment::Vertical::Center)
@@ -175,16 +174,14 @@ pub fn view(state: &State) -> Element<Message> {
                     // Bottom section with power details
                     row![
                         column![
-                            text("System total").size(12),
-                            text("Source (battery)").size(12),
-                            text("Source (external)").size(12),
+                            text("Battery usage").size(12),
+                            text("Est Running time").size(12),
                         ]
                         .spacing(2),
                         Space::with_width(Length::Fill),
                         column![
-                            text("20.0 W").size(12),
-                            text("20.0 W").size(12),
-                            text("00.0 W").size(12),
+                            text(format!("{:.1} W", state.batt_power as f64 / 10.0)).size(12),
+                            text(format_time_remaining(state.batt_time)).size(12),
                         ]
                         .spacing(2)
                     ]

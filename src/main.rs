@@ -5,6 +5,7 @@ use iced::Size;
 mod model;
 mod update;
 mod view;
+mod utils;
 
 use model::State;
 

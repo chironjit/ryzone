@@ -5,6 +5,7 @@ use std::collections::VecDeque;
 use std::time::SystemTime;
 use iced::time::Duration;
 
+use crate::utils;
 use crate::model::{
     State,
     HistoricalFreq,
@@ -128,12 +129,13 @@ pub fn update(
             state.max_gpu_freq_5min = max_5min;
 
 
-            // state.curr_apu_power = todo!() ;
-            // state.total_sys_power = todo!() ;
-            // state.batt_source_power = todo!() ;
-            // state.ext_source_power = todo!() ;
+            // Power stats updates
+            let (power, time) = utils::battery::get_battery_metrics(&mut state.batt_history);
+            
+            state.batt_power = power;
+            state.batt_time = time;
 
-
+            println!("Power:{}, Time:{}", state.batt_power, state.batt_time);
 
             if state.manual_fast_limit != 0 && state.curr_fast_limit != state.manual_fast_limit {
                 let _ = ryzen.set_fast_limit(state.manual_fast_limit);
