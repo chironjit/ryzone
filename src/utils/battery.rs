@@ -114,9 +114,10 @@ fn read_battery_info(path: &str) -> io::Result<BatteryInfo> {
 }
 
 pub fn get_battery_metrics(history: &mut VecDeque<HistoricalBattStat>) -> (u32, u32) {
-    
     let now = SystemTime::now();
     let five_mins_ago = now - Duration::from_secs(300);
+    let one_min_ago = now - Duration::from_secs(60);
+    let ten_secs_ago = now - Duration::from_secs(10);
     
     let mut current_power = 0;
     let mut time_remaining = 0;
@@ -131,14 +132,13 @@ pub fn get_battery_metrics(history: &mut VecDeque<HistoricalBattStat>) -> (u32, 
                     is_charging = true;
                     break;
                 } else if info.status == "Discharging" {
-                    // Convert to watts with one decimal point precision (multiply by 10 for rounding)
-                    current_power = (info.power_now as f64 / 100_000.0).round() as u32;
-                    total_energy = info.energy_now / 1_000_000; // Convert to watt-hours
+                    current_power = ((info.power_now as f64 / 100_000.0).round() as u32);
+                    total_energy = info.energy_now / 1_000_000;
                 }
             }
         }
     }
-    
+
     if !is_charging {
         // Add current reading to history
         history.push_back(HistoricalBattStat {
@@ -146,20 +146,40 @@ pub fn get_battery_metrics(history: &mut VecDeque<HistoricalBattStat>) -> (u32, 
             power_usage: current_power,
         });
 
-        // Remove old entries
+        // Calculate average based on available data
+        if !history.is_empty() {
+            // Get relevant history window based on data availability
+            let relevant_history: Vec<_> = if history.iter().any(|h| h.timestamp <= five_mins_ago) {
+                // We have 5+ minutes of data
+                history.iter()
+                    .filter(|h| h.timestamp > five_mins_ago)
+                    .collect()
+            } else if history.iter().any(|h| h.timestamp <= one_min_ago) {
+                // We have 1+ minute of data
+                history.iter()
+                    .filter(|h| h.timestamp > one_min_ago)
+                    .collect()
+            } else {
+                // Use last 10 seconds or whatever we have
+                history.iter()
+                    .filter(|h| h.timestamp > ten_secs_ago)
+                    .collect()
+            };
+
+            if !relevant_history.is_empty() {
+                let avg_power: u32 = relevant_history.iter()
+                    .map(|h| h.power_usage)
+                    .sum::<u32>() / relevant_history.len() as u32;
+
+                if avg_power > 0 {
+                    time_remaining = ((total_energy as f64 * 60.0) / avg_power as f64) as u32;
+                }
+            }
+        }
+
+        // Clean up old history entries
         while history.front().map_or(false, |h| h.timestamp < five_mins_ago) {
             history.pop_front();
-        }
-        
-        // Calculate average power consumption over the last 5 minutes
-        if !history.is_empty() {
-            let avg_power: u32 = history.iter()
-                .map(|h| h.power_usage)
-                .sum::<u32>() / history.len() as u32;
-            
-            if avg_power > 0 {
-                time_remaining = ((total_energy as f64 * 60.0) / avg_power as f64) as u32;
-            }
         }
     }
 
