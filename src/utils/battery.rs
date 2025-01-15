@@ -9,13 +9,15 @@ use std::path::PathBuf;
 use crate::model::HistoricalBattStat;
 
 
-struct BatteryInfo {
-    charge_now: u32,
-    voltage_now: u32,
-    current_now: u32,
-    capacity: u32,
-    status: String,
-}
+// pub struct HistoricalBattStat {
+//     pub timestamp: SystemTime,
+//     pub power_usage: u32,  // Watts
+//     pub charge_now: u32, // expected in Ah or µAh
+//     pub voltage_now: u32, // volts
+//     pub current_now: u32, // Amp
+//     pub capacity: u32, // percentage number (0 - 100)
+//     pub status: String, // Charging / Discharging (Other states stored for debugging and / or status update)
+// }
 
 fn find_battery_paths() -> Vec<String> {
     let mut battery_paths = Vec::new();
@@ -45,7 +47,7 @@ fn find_battery_paths() -> Vec<String> {
     battery_paths
 }
 
-fn get_batt_stat(path: PathBuf) -> BatteryInfo {
+fn get_batt_stat(path: PathBuf) -> HistoricalBattStat {
     let charge_now = fs::read_to_string(&path.join("charge_now"))
                                 .ok()  
                                 .and_then(|s| s.trim().parse().ok())  
@@ -65,7 +67,11 @@ fn get_batt_stat(path: PathBuf) -> BatteryInfo {
     let status = fs::read_to_string(&path.join("status"))
                                 .map_or(String::from(""), |s| s.trim().to_string());
 
-    BatteryInfo{
+    let power_usage = (voltage_now/1_000_000) * (current_now/100_000);
+
+    HistoricalBattStat{
+        timestamp: SystemTime::now(),
+        power_usage,
         charge_now,
         voltage_now,
         current_now,
@@ -74,29 +80,34 @@ fn get_batt_stat(path: PathBuf) -> BatteryInfo {
     }
 }
 
-fn calc_batt_time() {
-
-}
-
-
 
 
 
 pub fn get_battery_metrics(batt_stat: &mut VecDeque<HistoricalBattStat>) -> (u32, u32, String) {
     let battery_paths = find_battery_paths();
+    let now = SystemTime::now();
+    let five_mins_ago = now - Duration::from_secs(300);
     
     match battery_paths.len() {
         0 => (0, 0, "No batt detected".to_string()),
         1 => {
-            // Get batt stat()
-            let batt_stat = get_batt_stat(PathBuf::from(&battery_paths[0]));
+            // Get batt stat() and add history
+            let latest_batt_stat = get_batt_stat(PathBuf::from(&battery_paths[0]));
 
-            // Calculate batt time from historical data 
+            // Add to history
+            batt_stat.push_back(latest_batt_stat.clone());
 
-            
-            // Update state 
+            // Remove old entries
+            while batt_stat.front().map_or(false, |h| h.timestamp < five_mins_ago) {
+                batt_stat.pop_front();
+            }
 
-            (0, 0, "WIP".to_string())
+            // Calculate est running time (based on status)
+            let mut batt_time: u32 = 0;
+
+
+            // Return results 
+            (latest_batt_stat.power_usage, batt_time, latest_batt_stat.status)
 
         },
         _ => (0, 0, "Multiple batteries detected".to_string()),
