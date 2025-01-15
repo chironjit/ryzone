@@ -35,6 +35,9 @@ impl Default for HistoricalGpuFreq {
 pub struct HistoricalBattStat {
     pub timestamp: SystemTime,
     pub power_usage: u32,  // Watts
+    pub charge_now: u32, // expected in Ah or µAh
+    pub capacity: u32, // percentage number (0 - 100)
+    pub status: String, // Charging / Discharging (Other states stored for debugging and / or status update)
 }
 
 impl Default for HistoricalBattStat {
@@ -42,6 +45,9 @@ impl Default for HistoricalBattStat {
         Self {
             timestamp: SystemTime::now(),
             power_usage: 0,
+            charge_now: 0,
+            capacity: 0,
+            status: "".to_string(),
         }
     }
 }
@@ -86,7 +92,7 @@ pub struct State {
     // System power status
     pub batt_power: u32,
     pub batt_time: u32,
-    pub charge_state: String,
+    pub batt_status: String,
     pub batt_history: VecDeque<HistoricalBattStat>,
 
     // Custom values input tracking

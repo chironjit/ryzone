@@ -130,12 +130,14 @@ pub fn update(
 
 
             // Power stats updates
-            let (power, time) = utils::battery::get_battery_metrics(&mut state.batt_history);
+            let (power, time, status) = utils::battery::get_battery_metrics(&mut state.batt_history);
             
             state.batt_power = power;
             state.batt_time = time;
+            state.batt_status = status;
 
             println!("Power:{}, Time:{}", state.batt_power, state.batt_time);
+
 
             if state.manual_fast_limit != 0 && state.curr_fast_limit != state.manual_fast_limit {
                 let _ = ryzen.set_fast_limit(state.manual_fast_limit);
