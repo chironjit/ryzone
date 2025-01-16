@@ -47,6 +47,7 @@ fn find_battery_paths() -> Vec<String> {
     battery_paths
 }
 
+
 fn get_batt_stat(path: PathBuf) -> HistoricalBattStat {
     let charge_now = fs::read_to_string(&path.join("charge_now"))
                                 .ok()  
@@ -105,6 +106,29 @@ pub fn get_battery_metrics(batt_stat: &mut VecDeque<HistoricalBattStat>) -> (u32
             // Calculate est running time (based on status)
             let mut batt_time: u32 = 0;
 
+            // Find last non-discharging state index
+            let discharge_start_idx = batt_stat.iter()
+                .rposition(|stat| stat.status != "Discharging")
+                .unwrap_or(0);
+
+            let recent_discharge_count = batt_stat.iter()
+                .skip(discharge_start_idx)
+                .count();
+
+            if recent_discharge_count > 20 {
+                let prev_stat = &batt_stat[batt_stat.len() -5];
+
+                let charge_diff = prev_stat.charge_now - latest_batt_stat.charge_now;
+                let time_diff = latest_batt_stat.timestamp.duration_since(prev_stat.timestamp)
+                    .unwrap_or_default()
+                    .as_secs();
+
+                // Return 0 if no discharge or no time passed
+                if charge_diff > 0 && time_diff != 0 {
+                    let discharge_rate = (charge_diff as f64) / (time_diff as f64);
+                    batt_time = (latest_batt_stat.charge_now as f64 / discharge_rate / 60.) as u32 
+                }
+            }
 
             // Return results 
             (latest_batt_stat.power_usage, batt_time, latest_batt_stat.status)
