@@ -34,13 +34,9 @@ impl Default for HistoricalGpuFreq {
 #[derive(Debug, Clone)]
 pub struct HistoricalBattStat {
     pub timestamp: SystemTime,
-    pub power_usage: u32,  // Watts
-    pub charge_now: u32, // expected in Ah or µAh
-    pub voltage_now: u32, // µV
-    pub current_now: u32, // µA
-    pub capacity: u32, // percentage number (0 - 100)
-    pub discharge_rate: u32, // 
-    pub discharge_metric: String,
+    pub charge_value: u32, // generic charge value (either charge or capacity)
+    pub charge_metric: String, // charge_now / capacity
+    pub discharge_rate: f64, // Rate of discharge per minute
     pub status: String, // Charging / Discharging (Other states stored for debugging and / or status update)
 }
 
@@ -48,13 +44,9 @@ impl Default for HistoricalBattStat {
     fn default() -> Self {
         Self {
             timestamp: SystemTime::now(),
-            power_usage: 0,
-            charge_now: 0,
-            voltage_now: 0,
-            current_now: 0,
-            capacity: 0,
-            discharge_rate: 0,
-            discharge_metric: "".to_string(),
+            charge_value: 0,
+            charge_metric:  "".to_string(),
+            discharge_rate: 0.,
             status: "".to_string(),
         }
     }

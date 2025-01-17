@@ -1,23 +1,13 @@
 use std::fs;
 use std::io;
 use std::path::Path;
+use std::str::FromStr;
 use std::time::SystemTime;
 use iced::time::Duration;
 use std::collections::VecDeque;
 use std::path::PathBuf;
 
 use crate::model::HistoricalBattStat;
-
-
-// pub struct HistoricalBattStat {
-//     pub timestamp: SystemTime,
-//     pub power_usage: u32,  // Watts
-//     pub charge_now: u32, // expected in Ah or µAh
-//     pub voltage_now: u32, // volts
-//     pub current_now: u32, // Amp
-//     pub capacity: u32, // percentage number (0 - 100)
-//     pub status: String, // Charging / Discharging (Other states stored for debugging and / or status update)
-// }
 
 fn find_battery_paths() -> Vec<String> {
     let mut battery_paths = Vec::new();
@@ -48,100 +38,139 @@ fn find_battery_paths() -> Vec<String> {
 }
 
 // Generic function to call and read called stat and return it as a string 
-fn get_batt_stat(path: PathBuf, stat: &str) -> String {
-    fs::read_to_string(path.join(stat))
+fn get_batt_stat(path: &str, stat: &str) -> String {
+    let path_buf:PathBuf = PathBuf::from(path);
+    fs::read_to_string(path_buf.join(stat))
         .unwrap_or_default()  // Return an empty string "" if error
         .trim()
         .to_string()
 }
 
 
-// fn get_batt_stat(path: PathBuf, history: HistoricalBattStat) -> HistoricalBattStat {
-//     let charge_now = fs::read_to_string(&path.join("charge_now"))
-//                                 .ok()  
-//                                 .and_then(|s| s.trim().parse().ok())  
-//                                 .unwrap_or(0);
-//     let voltage_now = fs::read_to_string(&path.join("voltage_now"))
-//                                 .ok()  
-//                                 .and_then(|s| s.trim().parse().ok())  
-//                                 .unwrap_or(0);
-//     let current_now = fs::read_to_string(&path.join("current_now"))
-//                             .ok()  
-//                             .and_then(|s| s.trim().parse().ok())  
-//                             .unwrap_or(0);
-//     let capacity = fs::read_to_string(&path.join("capacity"))
-//                                 .ok()  
-//                                 .and_then(|s| s.trim().parse().ok())  
-//                                 .unwrap_or(0);
-//     let status = fs::read_to_string(&path.join("status"))
-//                                 .map_or(String::from(""), |s| s.trim().to_string());
-
-//     let power_usage = (voltage_now/1_000_000) * (current_now/100_000);
-
-//     HistoricalBattStat{
-//         timestamp: SystemTime::now(),
-//         power_usage,
-//         charge_now,
-//         voltage_now,
-//         current_now,
-//         capacity,
-//         discharge_rate,
-//         discharge_metric,
-//         status
-//     }
-// }
+fn calc_discharge_rate_per_min(curr_charge: u32, prev_charge: u32, curr_time: SystemTime, prev_time: SystemTime) -> f64 {
+    let charge_diff = prev_charge - curr_charge;
+    let time_diff = curr_time.duration_since(prev_time)
+                    .unwrap_or_default()
+                    .as_secs();
+    let discharge_rate_per_sec = (charge_diff as f64) / (time_diff as f64);
+    discharge_rate_per_sec * 60.
+}
 
 pub fn get_battery_metrics(batt_stat: &mut VecDeque<HistoricalBattStat>) -> (u32, u32, String) {
     let battery_paths = find_battery_paths();
     let now = SystemTime::now();
-    let five_mins_ago = now - Duration::from_secs(300);
+    // let five_mins_ago = now - Duration::from_secs(300);
     
     match battery_paths.len() {
         0 => (0, 0, "No batt detected".to_string()),
         1 => {
-            // Get history fom 60 readings ago
+            // Get status
+            let status = get_batt_stat(&battery_paths[0], "status");
 
+            // Get voltage and amperage, 
+            // ( and if available ) calculate power 
+            // & store data 
+            let mut power_now: u32 = 0;
+            let voltage_now = (get_batt_stat(&battery_paths[0], "voltage_now")).parse::<u32>().unwrap_or(0);
+            let current_now = (get_batt_stat(&battery_paths[0], "current_now")).parse::<u32>().unwrap_or(0);
 
-            // Get batt stat() and add history
-            let latest_batt_stat = get_batt_stat(PathBuf::from(&battery_paths[0]));
-
-            // Add to history
-            batt_stat.push_back(latest_batt_stat.clone());
-
-            // Remove old entries
-            while batt_stat.front().map_or(false, |h| h.timestamp < five_mins_ago) {
-                batt_stat.pop_front();
+            if voltage_now !=0 && current_now !=0 {
+                power_now = (voltage_now / 1_000_000) * (current_now / 100_000);
             }
 
-            // Calculate est running time (based on status)
+            let batt_stat_list_length = batt_stat.len();
+
+            // If status is "Discharging"
+            // Calculate the discharge rate
+            let timestamp = SystemTime::now();
+            let mut charge_value: u32 = 0;
+            let mut discharge_rate:f64 = 0.;
+            let mut charge_metric: String = "".to_string();
             let mut batt_time: u32 = 0;
+            if &status == "Discharging" {
+                // Find last non-discharging state index
+                let discharge_start_idx = batt_stat.iter()
+                    .rposition(|stat| stat.status != "Discharging")
+                    .unwrap_or(0);
 
-            // Find last non-discharging state index
-            let discharge_start_idx = batt_stat.iter()
-                .rposition(|stat| stat.status != "Discharging")
-                .unwrap_or(0);
+                    
 
-            let recent_discharge_count = batt_stat.iter()
-                .skip(discharge_start_idx)
-                .count();
+                    let recent_discharge_count = &batt_stat_list_length - discharge_start_idx;
 
-            if recent_discharge_count > 40 {
-                let prev_stat = &batt_stat[batt_stat.len() - 30];
+                    match recent_discharge_count {
+                        0       => {
+                            // check which method to use based on available metric
+                            // don't calculate anything
+                            // just store charge value and metric
+                            let charge_now = get_batt_stat(&battery_paths[0], "charge_now").parse::<u32>().unwrap_or_default();
 
-                let charge_diff = prev_stat.charge_now - latest_batt_stat.charge_now;
-                let time_diff = latest_batt_stat.timestamp.duration_since(prev_stat.timestamp)
-                    .unwrap_or_default()
-                    .as_secs();
+                            if charge_now != 0 {
+                                charge_value = charge_now;
+                                charge_metric = "charge_now".to_string();
+                            } else {
+                                let capacity = get_batt_stat(&battery_paths[0], "capacity").parse::<u32>().unwrap_or_default();
+                                if capacity != 0 {
+                                    charge_value = capacity;
+                                    charge_metric = "capacity".to_string();
+                                }
+                            }
+                            
+                        },
+                        1..=60  => {
+                            // get method from stored historical stat
+                            // use oldest available data for reading calculating current discharge
+                            // average out discharge rate
+                            // calculate time remaining
 
-                // Return 0 if no discharge or no time passed
-                if charge_diff > 0 && time_diff != 0 {
-                    let discharge_rate = (charge_diff as f64) / (time_diff as f64);
-                    batt_time = (latest_batt_stat.charge_now as f64 / discharge_rate / 60.) as u32 
-                }
+                            let last_batt_stat = &batt_stat[batt_stat_list_length-1];
+                            let oldest_discharging_batt_stat = &batt_stat[discharge_start_idx + 1];
+
+                            charge_metric = last_batt_stat.charge_metric.clone();
+
+                            charge_value = get_batt_stat(&battery_paths[0], &charge_metric).parse::<u32>().unwrap_or_default();
+                            
+                            discharge_rate = calc_discharge_rate_per_min(charge_value, oldest_discharging_batt_stat.charge_value, timestamp, oldest_discharging_batt_stat.timestamp);
+
+                            batt_time = (charge_value as f64 / discharge_rate) as u32; 
+
+                            
+
+                            
+
+                            
+
+
+
+                        },
+                        _       =>  {
+                            // get method from stored historical stat
+                            // use data from 60 readings ago reading calculating current discharge
+                            // average out discharge rate
+                            // calculate time remaining
+
+                        }
+                    }
+
             }
 
-            // Return results 
-            (latest_batt_stat.power_usage, batt_time, latest_batt_stat.status)
+            // Add new readings to batt_stat
+            let new_batt_statt = HistoricalBattStat {
+                timestamp,
+                charge_value,
+                charge_metric,
+                discharge_rate,
+                status: status.clone()
+            };
+
+            batt_stat.push_back(new_batt_statt);
+
+            // Clear old readings oldes than 310
+            if batt_stat_list_length > 310 {
+                
+            }
+
+            // // Return results 
+            (power_now, batt_time, status)
 
         },
         _ => (0, 0, "Multiple batteries detected".to_string()),
