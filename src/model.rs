@@ -38,6 +38,7 @@ pub struct HistoricalBattStat {
     pub charge_metric: String, // charge_now / capacity
     pub discharge_rate: f64, // Rate of discharge per minute
     pub status: String, // Charging / Discharging (Other states stored for debugging and / or status update)
+    pub status_count: u32,
 }
 
 impl Default for HistoricalBattStat {
@@ -48,6 +49,7 @@ impl Default for HistoricalBattStat {
             charge_metric:  "".to_string(),
             discharge_rate: 0.,
             status: "".to_string(),
+            status_count: 0,
         }
     }
 }
