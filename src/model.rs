@@ -39,6 +39,8 @@ pub struct HistoricalBattStat {
     pub voltage_now: u32, // µV
     pub current_now: u32, // µA
     pub capacity: u32, // percentage number (0 - 100)
+    pub discharge_rate: u32, // 
+    pub discharge_metric: String,
     pub status: String, // Charging / Discharging (Other states stored for debugging and / or status update)
 }
 
@@ -51,6 +53,8 @@ impl Default for HistoricalBattStat {
             voltage_now: 0,
             current_now: 0,
             capacity: 0,
+            discharge_rate: 0,
+            discharge_metric: "".to_string(),
             status: "".to_string(),
         }
     }
