@@ -174,7 +174,11 @@ pub fn view(state: &State) -> Element<Message> {
                     // Bottom section with power details
                     row![
                         column![
-                            text("Battery usage").size(12),
+                            text(format!("Battery {}", match state.batt_status.as_str() {
+                                "Discharging" => "usage",
+                                "Charging" => "charging",
+                                _ => ""
+                            })).size(12),
                             text("Est Running time").size(12),
                         ]
                         .spacing(2),
