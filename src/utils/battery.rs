@@ -3,6 +3,7 @@ use std::io;
 use std::path::Path;
 use std::str::FromStr;
 use std::time::SystemTime;
+use std::usize;
 use iced::time::Duration;
 use std::collections::VecDeque;
 use std::path::PathBuf;
@@ -46,19 +47,11 @@ fn get_batt_stat(path: &str, stat: &str) -> String {
         .to_string()
 }
 
-fn determine_charge(battery_path: &String) -> (u32, String){
+fn determine_charge_and_capacity(battery_path: &String) -> (u32, u32){
     let charge_now = get_batt_stat(&battery_path, "charge_now").parse::<u32>().unwrap_or_default();
+    let capacity = get_batt_stat(&battery_path, "capacity").parse::<u32>().unwrap_or_default();
 
-    if charge_now != 0 {
-        (charge_now, "charge_now".to_string())
-    } else {
-        let capacity = get_batt_stat(&battery_path, "capacity").parse::<u32>().unwrap_or_default();
-        if capacity != 0 {
-            (capacity, "capacity".to_string())
-        } else {
-            (0, "".to_string())
-        }
-    }
+    return (charge_now, capacity);
 }
 
 
@@ -73,8 +66,6 @@ fn calc_discharge_rate_per_min(curr_charge: u32, prev_charge: u32, curr_time: Sy
 
 pub fn get_battery_metrics(batt_stat: &mut VecDeque<HistoricalBattStat>) -> (u32, u32, String) {
     let battery_paths = find_battery_paths();
-    let now = SystemTime::now();
-    // let five_mins_ago = now - Duration::from_secs(300);
     
     match battery_paths.len() {
         0 => (0, 0, "No batt detected".to_string()),
@@ -90,160 +81,64 @@ pub fn get_battery_metrics(batt_stat: &mut VecDeque<HistoricalBattStat>) -> (u32
             let current_now = (get_batt_stat(&battery_paths[0], "current_now")).parse::<u32>().unwrap_or(0);
 
             if voltage_now !=0 && current_now !=0 {
-                power_now = (voltage_now / 1_000_000) * (current_now / 100_000);
+                power_now = ((voltage_now as u64 * current_now as u64) / 1_000_000_000_00) as u32;
             }
 
             let batt_stat_list_length = batt_stat.len();
 
-            // If status is "Discharging"
-            // Calculate the discharge rate
             let timestamp = SystemTime::now();
-            let mut charge_value: u32 = 0;
+            let (charge, capacity) = determine_charge_and_capacity(&battery_paths[0]);
+            
             let mut discharge_rate:f64 = 0.;
-            let mut charge_metric: String = "".to_string();
             let mut batt_time: u32 = 0;
             let mut status_count: u32 = 0;
 
-            match batt_stat_list_length {
-                l if status != "Discharging" && l == 0 => {
-                    // handle empty list where it is not Discharging
-                }
-                l if status == "Discharging" && l == 0 => {
-                    // handle case where it is discharging and the first entry
-                    // Get charge and metric
-                    // don't calculate anything
-                    // just store charge value and metric
 
-                    (charge_value, charge_metric) = determine_charge(&battery_paths[0]);
-  
-                    status_count += 1;
+            if status == "Discharging" {
+                if batt_stat_list_length != 0 {
+                    let last_reading = &batt_stat[batt_stat_list_length - 1];
                     
-                }
-                l if status == "Discharging" => {
-                    // handle case where length is not 0 AND status is "Discharging"
-                    let last_batt_stat = &batt_stat[batt_stat_list_length-1];
+                    if last_reading.status != "Discharging" {
+                        batt_stat.clear();
 
-                    if last_batt_stat.status == "Discharging" {
-
-                        let stat_c = last_batt_stat.status_count;
-                        println!("Status count:c{}",stat_c);
-                        
-                        match stat_c {
-                            1       => {
-                                
-                                charge_metric = last_batt_stat.charge_metric.clone();
-
-                                charge_value = get_batt_stat(&battery_paths[0], &charge_metric).parse::<u32>().unwrap_or_default();
-                                
-                                discharge_rate = calc_discharge_rate_per_min(charge_value, last_batt_stat.charge_value, timestamp, last_batt_stat.timestamp);
-
-                                batt_time = (charge_value as f64 / discharge_rate) as u32;
-
-                                status_count = stat_c + 1;
-
-                            },
-                            2..=60 => {
-                                let oldest_record_to_use = stat_c as usize - 1;
-                                let oldest_discharging_batt_stat = &batt_stat[batt_stat_list_length - oldest_record_to_use];
-
-                                charge_metric = last_batt_stat.charge_metric.clone();
-
-                                charge_value = get_batt_stat(&battery_paths[0], &charge_metric).parse::<u32>().unwrap_or_default();
-                                
-                                discharge_rate = calc_discharge_rate_per_min(charge_value, oldest_discharging_batt_stat.charge_value, timestamp, oldest_discharging_batt_stat.timestamp);
-
-                                let sum_discharge_rate: f64 = batt_stat.iter()
-                                                .rev()
-                                                .take(oldest_record_to_use)
-                                                .map(|stat| stat.discharge_rate)
-                                                .sum();
-                                let avg_discharge_rate = (sum_discharge_rate + discharge_rate) / (stat_c as f64);
-
-                                batt_time = (charge_value as f64 / avg_discharge_rate) as u32;
-
-                                status_count = stat_c + 1;
-
-                            },
-                            61..=300 => {
-                                let oldest_record_to_use = 60;
-                                let oldest_discharging_batt_stat = &batt_stat[batt_stat_list_length - oldest_record_to_use];
-
-                                charge_metric = last_batt_stat.charge_metric.clone();
-
-                                charge_value = get_batt_stat(&battery_paths[0], &charge_metric).parse::<u32>().unwrap_or_default();
-                                
-                                discharge_rate = calc_discharge_rate_per_min(charge_value, oldest_discharging_batt_stat.charge_value, timestamp, oldest_discharging_batt_stat.timestamp);
-
-                                let sum_discharge_rate: f64 = batt_stat.iter()
-                                                .rev()
-                                                .take(60)
-                                                .map(|stat| stat.discharge_rate)
-                                                .sum();
-                                let avg_discharge_rate = (sum_discharge_rate + discharge_rate) / (stat_c as f64);
-
-                                batt_time = (charge_value as f64 / avg_discharge_rate) as u32;
-
-                                status_count = stat_c + 1;
-
-                            },
-                            _       => {
-                                let oldest_record_to_use = 300;
-                                let oldest_discharging_batt_stat = &batt_stat[batt_stat_list_length - oldest_record_to_use];
-
-                                charge_metric = last_batt_stat.charge_metric.clone();
-
-                                charge_value = get_batt_stat(&battery_paths[0], &charge_metric).parse::<u32>().unwrap_or_default();
-                                
-                                discharge_rate = calc_discharge_rate_per_min(charge_value, oldest_discharging_batt_stat.charge_value, timestamp, oldest_discharging_batt_stat.timestamp);
-
-                                let sum_discharge_rate: f64 = batt_stat.iter()
-                                                .rev()
-                                                .take(60)
-                                                .map(|stat| stat.discharge_rate)
-                                                .sum();
-                                let avg_discharge_rate = (sum_discharge_rate + discharge_rate) / (stat_c as f64);
-
-                                batt_time = (charge_value as f64 / avg_discharge_rate) as u32;
-
-                                status_count = stat_c + 1;
-
-                            }
-                            
-                        }
-
-                        
-
+                        status_count = 1;
                     } else {
-                        // handle case where it is discharging and the first entry
-                        // check which method to use based on available metric
-                        // don't calculate anything
-                        // just store charge value and metric
-                        (charge_value, charge_metric) = determine_charge(&battery_paths[0]);
-                        
-                        status_count += 1;
+                        let earliest_available_reading = &batt_stat[0];
 
+                        if charge != 0 {
+                            discharge_rate = calc_discharge_rate_per_min(charge, earliest_available_reading.charge, timestamp, earliest_available_reading.timestamp);
+                            batt_time = (charge as f64 / discharge_rate) as u32;
+                        } else {
+                            discharge_rate = calc_discharge_rate_per_min(capacity, earliest_available_reading.capacity, timestamp, earliest_available_reading.timestamp);
+                            batt_time = (capacity as f64 / discharge_rate) as u32;
+                        }
+    
+                        status_count = last_reading.status_count + 1;
                     }
-                   
-                },
-                _ => {
+
+                } else {
 
                 }
             }
 
+            
+
+            println!("Batt time:{}, Status: {}", batt_time, status);
+
             // Add new readings to batt_stat
-            let new_batt_statt = HistoricalBattStat {
+            let new_batt_stat = HistoricalBattStat {
                 timestamp,
-                charge_value,
-                charge_metric,
+                charge,
+                capacity,
                 discharge_rate,
                 status: status.clone(),
                 status_count
             };
 
-            batt_stat.push_back(new_batt_statt);
+            batt_stat.push_back(new_batt_stat);
 
-            // Clear old readings oldes than 310
-            if batt_stat_list_length > 310 {
+            // Clear old readings oldes than 300
+            if batt_stat_list_length > 300 {
                 batt_stat.pop_front();
             }
 
