@@ -157,7 +157,7 @@ pub fn update(
         }
 
         Message::TabSelected(tab) => {
-
+            state.active_tab = tab;
         }
     }
 }
