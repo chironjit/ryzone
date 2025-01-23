@@ -33,6 +33,7 @@ pub enum Message {
     StapmLimitInputChanged(String),
     TctlLimitInputChanged(String),
     UpdateStateValues,
+    TabSelected(Tab),
 }
 
 // Standalone update function

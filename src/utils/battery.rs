@@ -1,10 +1,7 @@
 use std::fs;
 use std::io;
 use std::path::Path;
-use std::str::FromStr;
 use std::time::SystemTime;
-use std::usize;
-use iced::time::Duration;
 use std::collections::VecDeque;
 use std::path::PathBuf;
 
@@ -150,12 +147,3 @@ pub fn get_battery_metrics(batt_stat: &mut VecDeque<HistoricalBattStat>) -> (u32
     }
 }
 
-pub fn format_time_remaining(minutes: u32) -> String {
-    if minutes == 0 {
-        String::from("N/A")
-    } else if minutes >= 60 {
-        format!("{}h:{:02}m", minutes / 60, minutes % 60)
-    } else {
-        format!("{} min", minutes)
-    }
-}

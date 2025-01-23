@@ -2,6 +2,7 @@ use iced::{window, Subscription, Theme};
 use iced::time::{self, Duration};
 use iced::Size; 
 
+mod views; 
 mod model;
 mod update;
 mod view;
