@@ -7,6 +7,7 @@ use iced::time::Duration;
 
 use crate::utils;
 use crate::model::{
+    Tab,
     State,
     HistoricalFreq,
     HistoricalGpuFreq,
@@ -153,6 +154,10 @@ pub fn update(
             if state.manual_tctl_limit != 0 && state.curr_tctl_limit != state.manual_tctl_limit {
                 let _ = ryzen.set_tctl_temp(state.manual_tctl_limit);
             }
+        }
+
+        Message::TabSelected(tab) => {
+
         }
     }
 }

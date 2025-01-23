@@ -54,8 +54,9 @@ impl Default for HistoricalBattStat {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Tab {
+   #[default]
    Profiles,
    Overrides,
    Settings
@@ -77,7 +78,7 @@ pub const TCTL_LIMIT_MAX: u32 = 100;
 #[derive(Default, Debug, Clone)]
 pub struct State {
     // App states
-    active_tab: Tab,
+    pub active_tab: Tab,
 
     // Current APU power status via libryzenadj
     pub curr_fast_value: u32,

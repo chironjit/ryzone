@@ -1,37 +1,53 @@
 use iced::widget::{container, row, column, text, Space};
-use iced::alignment;
+use iced::alignment::{self, Horizontal, Vertical};
 use iced::{Element, Length};
 
 use crate::model::State;
 use crate::update::Message;
-use crate::views::styles::{formatting::format_frequency, formatting::format_time_remaining, styles::card_style};
+use crate::views::styles::{formatting::format_frequency, formatting::format_time_remaining, styles::card_style, styles::header_style};
 
 pub fn view(state: &State) -> Element<Message> {
-    row![
-        // Processor container
-        container(create_processor_view(state))
-            .style(card_style())
-            .padding(20)
+    column! [
+        // Top bar
+        row![
+            container(
+                text("Ryzone - Control Mobile Ryzen Power States")
+            )
+            .align_x(Horizontal::Center)
+            .align_y(Vertical::Center)
+            .style(header_style())
             .width(Length::Fill)
-            .height(Length::Fixed(140.0)),
+            .height(Length::Fixed(33.3))
+        ],
 
-        // GPU container
-        container(create_gpu_view(state))
-            .style(card_style())
-            .padding(20)
-            .width(Length::Fill)
-            .height(Length::Fixed(140.0)),
-
-        // Power container
-        container(create_power_view(state))
-            .style(card_style())
-            .padding(20)
-            .width(Length::Fill)
-            .height(Length::Fixed(140.0))
+        row![
+            // Processor container
+            container(create_processor_view(state))
+                .style(card_style())
+                .padding(20)
+                .width(Length::Fill)
+                .height(Length::Fixed(140.0)),
+    
+            // GPU container
+            container(create_gpu_view(state))
+                .style(card_style())
+                .padding(20)
+                .width(Length::Fill)
+                .height(Length::Fixed(140.0)),
+    
+            // Power container
+            container(create_power_view(state))
+                .style(card_style())
+                .padding(20)
+                .width(Length::Fill)
+                .height(Length::Fixed(140.0))
+        ]
+        .spacing(20)
     ]
     .spacing(20)
     .width(Length::Fill)
     .into()
+    
 }
 
 fn create_processor_view(state: &State) -> Element<Message> {

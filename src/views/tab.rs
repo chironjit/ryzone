@@ -1,6 +1,10 @@
 use iced::widget::{container, row, column, text, Space, button};
 use iced::{Element, Length};
 
+use crate::model::{State, Tab};
+use crate::update::Message;
+use crate::views::styles::styles::button_style;
+
 pub fn view(state: &State) -> Element<Message> {
    row![
        button("Profiles")
@@ -24,11 +28,4 @@ pub fn view(state: &State) -> Element<Message> {
    .padding(10)
    .width(Length::Fill)
    .into()
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Tab {
-   Profiles,
-   Overrides,
-   Settings
 }
