@@ -4,7 +4,7 @@ use iced::alignment::{Horizontal, Vertical};
 
 use crate::model::{State, Tab};
 use crate::update::Message;
-use crate::views::styles::styles::tab_style;
+use crate::gui::styles::styles::tab_style;
 
 pub fn view(state: &State) -> Element<Message> {
     row![
@@ -21,6 +21,7 @@ pub fn view(state: &State) -> Element<Message> {
 
         button(
             text("Custom Overrides")
+                .size(16)
                 .align_x(Horizontal::Center)
                 .align_y(Vertical::Center)
         )

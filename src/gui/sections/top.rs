@@ -4,7 +4,7 @@ use iced::{Element, Length};
 
 use crate::model::State;
 use crate::update::Message;
-use crate::views::styles::{formatting::format_frequency, formatting::format_time_remaining, styles::card_style, styles::header_style};
+use crate::gui::styles::{formatting::format_frequency, formatting::format_time_remaining, styles::card_style, styles::header_style};
 
 pub fn view(state: &State) -> Element<Message> {
     column! [

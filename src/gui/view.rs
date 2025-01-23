@@ -3,7 +3,7 @@ use iced::{Element, Length};
 
 use crate::model::{State, Tab};
 use crate::update::Message;
-use crate::views::{top, tab, custom_overrides, profiles, settings};
+use crate::gui::sections::{top, tab, custom, profiles, settings};
 
 pub fn view(state: &State) -> Element<Message> {
     column![
@@ -11,7 +11,7 @@ pub fn view(state: &State) -> Element<Message> {
         tab::view(state),
         match state.active_tab {
             Tab::Profiles => profiles::view(state),
-            Tab::Overrides => custom_overrides::view(state),
+            Tab::Overrides => custom::view(state),
             Tab::Settings => settings::view(state)
         }
         

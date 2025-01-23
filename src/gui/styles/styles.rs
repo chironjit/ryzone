@@ -1,3 +1,4 @@
+use iced::border::color;
 use iced::widget::{text, text_input, button};
 use iced::widget::container::Style;
 use iced::{Theme, Border, Color, Shadow, Background, border, Vector};
@@ -64,24 +65,32 @@ pub fn text_input_style() -> impl Fn(&Theme, text_input::Status) -> text_input::
 pub fn tab_style(selected: bool) -> impl Fn(&Theme, button::Status) -> button::Style {
     move |theme, status| {
         let palette = theme.extended_palette();
-        
-        button::Style {
-            background: if selected {
-                Some(Background::Color(palette.primary.base.color))
-            } else {
-                Some(Background::Color(palette.background.weak.color))
-            },
-            border: Border {
-                radius: border::Radius::new(0.),
-                width: 1.0,
-                color: palette.primary.base.color,
-            },
-            text_color: if selected {
-                Color::WHITE
-            } else {
-                palette.primary.base.color
-            },
-            ..button::Style::default()
+
+        if selected {
+            button::Style {
+                background: Some(Background::Color(palette.background.strong.color)),
+                border: Border {
+                    radius: border::Radius::new(0.),
+                    width: 1.0,
+                    color: palette.background.strong.color,
+                },
+                text_color: Color::WHITE,
+                ..button::Style::default()
+            }
+
+        } else {
+            button::Style {
+                background: Some(Background::Color(palette.background.weak.color)),
+                border: Border {
+                    radius: border::Radius::new(0.),
+                    width: 1.0,
+                    color: palette.background.strong.color,
+                },
+                text_color: palette.primary.base.color,
+                ..button::Style::default()
+            }
+
         }
+        
     }
  }

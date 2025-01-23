@@ -2,12 +2,10 @@ use iced::{window, Subscription, Theme};
 use iced::time::{self, Duration};
 use iced::Size; 
 
-mod views; 
+mod gui;
 mod model;
 mod update;
-mod view;
 mod utils;
-
 use model::State;
 
 use update::{
@@ -15,7 +13,7 @@ use update::{
     update,
 };
 
-use view::view;
+use gui::view::view;
 
 fn update_state_values(_: &State) -> Subscription<Message> {
     time::every(Duration::from_secs(1))
