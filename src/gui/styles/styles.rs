@@ -1,5 +1,5 @@
 use iced::border::color;
-use iced::widget::{text, text_input, button};
+use iced::widget::{button, container, text, text_input};
 use iced::widget::container::Style;
 use iced::{Theme, Border, Color, Shadow, Background, border, Vector};
 
@@ -26,6 +26,23 @@ pub fn card_style() -> impl Fn(&Theme) -> Style {
         background: Some(Background::Color(theme.extended_palette().background.weak.color)),
         border: Border {
             radius: border::Radius::new(16.0),
+            width: 0.0, 
+            color: Color::TRANSPARENT,
+        },
+        shadow: Shadow {
+            color: Color::from_rgba(0.0, 0.0, 0.0, 0.08),
+            offset: Vector::new(0.0, 2.0),
+            blur_radius: 12.0,
+        },
+    }
+}
+
+pub fn stat_tip_style() -> impl Fn(&Theme) -> Style {
+    |theme| Style {
+        text_color: None,
+        background: Some(Background::Color(theme.extended_palette().background.weak.color)),
+        border: Border {
+            radius: border::Radius::new(12.0),
             width: 0.0, 
             color: Color::TRANSPARENT,
         },
@@ -94,3 +111,6 @@ pub fn tab_style(selected: bool) -> impl Fn(&Theme, button::Status) -> button::S
         
     }
  }
+
+
+
