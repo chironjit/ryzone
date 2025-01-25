@@ -1,21 +1,31 @@
-use iced::widget::{container, row, column, text, text_input, button, checkbox, tooltip};
+use iced::widget::{container, row, column, text, text_input, button, checkbox, tooltip, scrollable};
 use iced::alignment::{Horizontal, Vertical};
 use iced::{Element, Length};
 
 use crate::model::State;
 use crate::update::Message;
-use crate::gui::styles::styles::{card_style, text_input_style, hint_text_style, stat_tip_style};
-
+use crate::gui::styles::styles::{card_style, header_style, hint_text_style, stat_tip_style, text_input_style};
 
 pub fn view(state: &State) -> Element<Message> {
     column![
         create_current_profile(state),
-        create_battery_profile(state),
-        create_power_profile(state),
+        create_header(),
+        scrollable(
+            column![
+                create_battery_profile(state),
+                create_power_profile(state),
+            ]
+            .spacing(10)
+        )
+        .spacing(10)
+        .height(Length::Fill)
+        
     ]
     .spacing(10)
+    .padding(10)
     .into()
- }
+    
+}
 
 fn create_current_profile(state: &State) -> Element<Message> {
     container(
@@ -130,7 +140,7 @@ fn create_current_profile(state: &State) -> Element<Message> {
             // Current power profile
             container(
                 column![
-                    text("Low Batt") // Batt / Power / Custom / Low Batt
+                    text("Saver") // Batt / Power / Custom / Saver / Turbo
                         .size(20)
                         .align_x(Horizontal::Center)
                         .width(Length::Fill),
@@ -152,38 +162,48 @@ fn create_current_profile(state: &State) -> Element<Message> {
     ).into()
 }
 
-fn create_battery_profile(state: &State) -> Element<Message> {
+fn create_header<'a>() -> Element<'a, Message>  {
     container(
         column![
-            text("Battery Profile").size(20),
-            // Low Battery Section
+            // Header Section
             container(
                 column![
                     row![
-                        text("Current Profile")
-                    ],
-                    row![
-                        text("Current Profile"),
-                        text("Current Profile"),
-                        text("Current Profile"),
-                        text("Current Profile"),
-                        text("Current Profile")
-                    ],
-                    row![
-                        checkbox(
-                            "Enable Low Battery Profile",
-                            true),
-                        text_input(
-                            "Threshold %",
-                            "20"
-                        )
+                        text("Battery Profile")
+                        .align_x(Horizontal::Left)
+                        .align_y(Vertical::Center)
+                        .width(Length::FillPortion(2)),
+
+                        text_input("mW", "")
+                        .align_x(Horizontal::Left)
                         .style(text_input_style())
-                        .width(Length::Fixed(100.0))
-                    ].spacing(20),
+                        .width(Length::FillPortion(1)),
+
+                        text_input("mW", "")
+                        .align_x(Horizontal::Left)
+                        .style(text_input_style())
+                        .width(Length::FillPortion(1)),
+
+                        text_input("mW", "")
+                        .align_x(Horizontal::Left)
+                        .style(text_input_style())
+                        .width(Length::FillPortion(1)),
+
+                        text_input("°C", "")
+                        .align_x(Horizontal::Left)
+                        .style(text_input_style())
+                        .width(Length::FillPortion(1)),
+
+                        button(
+                            text("Set")
+                            .align_x(Horizontal::Center)
+                            .align_y(Vertical::Center)
+                        )
+                        .width(Length::FillPortion(1))
+                    ]
+                    .spacing(10),
                 ].spacing(10)
             )
-            // .style(section_style())
-            .padding(10)
         ]
     )
     .style(card_style())
@@ -193,88 +213,185 @@ fn create_battery_profile(state: &State) -> Element<Message> {
     
  }
 
- fn create_power_profile(state: &State) -> Element<Message> {
+fn create_battery_profile(state: &State) -> Element<Message> {
     container(
         column![
-            text("Battery Profile").size(20),
-            // Low Battery Section
+            // Battery Section
             container(
                 column![
                     row![
-           container(
-               container(text("Fast Limit").size(16))
-                   .align_x(Horizontal::Center)
-                   .align_y(Vertical::Center)
-                   .width(Length::Fill)
-                   .height(Length::Fill)  
-           )
-           .width(Length::FillPortion(4)),
-           
-           container(
-               container(text(format!("{:.1} W", state.curr_fast_value as f32 / 1000.0)).size(16))
-                   .align_x(Horizontal::Center)
-                   .align_y(Vertical::Center)
-                   .width(Length::Fill)
-                   .height(Length::Fill)  
-           )
-           .width(Length::FillPortion(2)),
-           
-           container(
-               container(text(format!("{:.1} W", state.curr_fast_limit as f32 / 1000.0)).size(16))
-                   .align_x(Horizontal::Center)
-                   .align_y(Vertical::Center)
-                   .width(Length::Fill)
-                   .height(Length::Fill)  
-           )
-           .width(Length::FillPortion(2)),
-   
-           container(
-               container(
-                   text_input(
-                       "",
-                       &state.fast_input
-                   )
-                       .style(text_input_style())
-                       .on_input(Message::FastLimitInputChanged)
-                       .align_x(Horizontal::Center)
-               )
-                   .align_x(Horizontal::Center)
-                   .width(Length::Fill)
-                   .height(Length::Fill)  
-           )
-           .width(Length::FillPortion(2)),
-   
-           container(
-               container(
-                   button("Set").on_press(Message::SetFastLimit(
-                       state.fast_input.parse().unwrap_or(0)
-                   ))
-               )
-                   .align_x(Horizontal::Center)
-                   .align_y(Vertical::Center)
-                   .width(Length::Fill)
-                   .height(Length::Fill)  
-           )
-           .width(Length::FillPortion(2)),
+                        text("Battery Profile")
+                        .align_x(Horizontal::Left)
+                        .align_y(Vertical::Center)
+                        .width(Length::FillPortion(2)),
 
-           create_tooltip("Enter value in miliWatts.\nAccepted value range\nbetween 4000 & 65000.")
-               .width(Length::FillPortion(1))
-        ],
-        row![
-            checkbox(
-                "Enable Low Battery Profile",
-                true),
-            text_input(
-                "Threshold %",
-                "20"
+                        text_input("mW", "")
+                        .align_x(Horizontal::Left)
+                        .style(text_input_style())
+                        .width(Length::FillPortion(1)),
+
+                        text_input("mW", "")
+                        .align_x(Horizontal::Left)
+                        .style(text_input_style())
+                        .width(Length::FillPortion(1)),
+
+                        text_input("mW", "")
+                        .align_x(Horizontal::Left)
+                        .style(text_input_style())
+                        .width(Length::FillPortion(1)),
+
+                        text_input("°C", "")
+                        .align_x(Horizontal::Left)
+                        .style(text_input_style())
+                        .width(Length::FillPortion(1)),
+
+                        button(
+                            text("Set")
+                            .align_x(Horizontal::Center)
+                            .align_y(Vertical::Center)
+                        )
+                        .width(Length::FillPortion(1))
+                    ]
+                    .spacing(10),
+                    // Low Battery / Saver Section
+                    row![
+                        row![
+                            checkbox(
+                                "",  // Empty string for checkbox
+                                true
+                            ),
+                            text("Enable Low Battery (Saver) Profile")
+                                .size(10)
+                                .align_y(Vertical::Center)
+                        ]
+                        .align_y(Vertical::Center),
+                        text_input(
+                            "Threshold %",
+                            ""
+                        )
+                        .style(text_input_style())
+                        .width(Length::Fixed(100.0))
+                    ].spacing(20),
+
+                    // Saver profile
+                    row![
+                        text("Saver Profile")
+                        .align_x(Horizontal::Left)
+                        .align_y(Vertical::Center)
+                        .width(Length::FillPortion(2)),
+
+                        text_input("mW", "")
+                        .align_x(Horizontal::Left)
+                        .style(text_input_style())
+                        .width(Length::FillPortion(1)),
+
+                        text_input("mW", "")
+                        .align_x(Horizontal::Left)
+                        .style(text_input_style())
+                        .width(Length::FillPortion(1)),
+
+                        text_input("mW", "")
+                        .align_x(Horizontal::Left)
+                        .style(text_input_style())
+                        .width(Length::FillPortion(1)),
+
+                        text_input("°C", "")
+                        .align_x(Horizontal::Left)
+                        .style(text_input_style())
+                        .width(Length::FillPortion(1)),
+
+                        button(
+                            text("Set")
+                            .align_x(Horizontal::Center)
+                            .align_y(Vertical::Center)
+                        )
+                        .width(Length::FillPortion(1))
+                    ]
+                    .spacing(10),
+                ].spacing(10)
             )
-            .style(text_input_style())
-            .width(Length::Fixed(100.0))
-        ].spacing(20),
-    ].spacing(10)
-)
-// .style(section_style())
-.padding(10)
+        ]
+    )
+    .style(card_style())
+    .padding(20)
+    .width(Length::Fill)
+    .into()
+    
+ }
+
+fn create_power_profile(state: &State) -> Element<Message> {
+    container(
+        column![
+           // Power profile section
+            container(
+                column![
+                    row![
+                        text("Power Profile")
+                        .align_x(Horizontal::Left)
+                        .align_y(Vertical::Center)
+                        .width(Length::FillPortion(2)),
+
+                        text_input("mW", "")
+                        .align_x(Horizontal::Left)
+                        .style(text_input_style())
+                        .width(Length::FillPortion(1)),
+
+                        text_input("mW", "")
+                        .align_x(Horizontal::Left)
+                        .style(text_input_style())
+                        .width(Length::FillPortion(1)),
+
+                        text_input("mW", "")
+                        .align_x(Horizontal::Left)
+                        .style(text_input_style())
+                        .width(Length::FillPortion(1)),
+
+                        text_input("°C", "")
+                        .align_x(Horizontal::Left)
+                        .style(text_input_style())
+                        .width(Length::FillPortion(1)),
+
+                        button(
+                            text("Set")
+                            .align_x(Horizontal::Center)
+                            .align_y(Vertical::Center)
+                        )
+                        .width(Length::FillPortion(1))
+                    ]
+                    .spacing(10),
+                    row![
+                        row![
+                            checkbox(
+                                "",  // Empty string for checkbox
+                                true
+                            ),
+                            text("Enable Turbo Profile")
+                                .size(10)
+                                .align_y(Vertical::Center)
+                        ]
+                        .align_y(Vertical::Center),
+                    ].spacing(20),
+                    container(
+                        row![
+                            button(
+                                text("Enable Turbo")
+                                .align_x(Horizontal::Center)
+                                .align_y(Vertical::Center)
+                            )
+                            .width(Length::Fixed(200.0)),
+                            button(
+                                text("Disable Turbo")
+                                .align_x(Horizontal::Center)
+                                .align_y(Vertical::Center)
+                            )
+                            .width(Length::Fixed(200.0)),
+                        ]
+                        .spacing(20)
+                    )
+                    .width(Length::Fill)
+                    .align_x(Horizontal::Center)
+                ].spacing(10)
+            )
         ]
     )
     .style(card_style())

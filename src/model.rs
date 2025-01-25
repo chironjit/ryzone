@@ -79,6 +79,8 @@ pub const TCTL_LIMIT_MAX: u32 = 100;
 pub struct State {
     // App states
     pub active_tab: Tab,
+    pub active_profile: String,
+    pub low_batt_profile: bool,
 
     // Current APU power status via libryzenadj
     pub curr_fast_value: u32,
