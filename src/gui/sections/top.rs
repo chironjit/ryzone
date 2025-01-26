@@ -118,9 +118,9 @@ fn create_gpu_view(state: &State) -> Element<Message> {
         ]
     ]
     .into()
- }
+}
  
- fn create_power_view(state: &State) -> Element<Message> {
+fn create_power_view(state: &State) -> Element<Message> {
     column![
         row![
             column![
@@ -157,4 +157,4 @@ fn create_gpu_view(state: &State) -> Element<Message> {
         ]
     ]
     .into()
- }
+}

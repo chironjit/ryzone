@@ -1,5 +1,4 @@
-use iced::border::color;
-use iced::widget::{button, container, text, text_input};
+use iced::widget::{button, text, text_input};
 use iced::widget::container::Style;
 use iced::{Theme, Border, Color, Shadow, Background, border, Vector};
 
@@ -110,7 +109,7 @@ pub fn tab_style(selected: bool) -> impl Fn(&Theme, button::Status) -> button::S
         }
         
     }
- }
+}
 
 
 

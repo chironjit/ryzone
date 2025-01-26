@@ -45,4 +45,4 @@ pub fn view(state: &State) -> Element<Message> {
     .padding([10, 0]) // Padding only for top and bottom
     .width(Length::Fill)
     .into()
- }
+}
