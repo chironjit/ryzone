@@ -9,21 +9,25 @@ use crate::gui::styles::styles::{card_style, header_style, hint_text_style, stat
 pub fn view(state: &State) -> Element<Message> {
     column![
         create_current_profile(state),
-        
+
         scrollable(
             column![
-                // create_header(),
-                create_battery_profile(state),
-                create_power_profile(state),
+                create_header(),
+                column![
+                    create_battery_profile(state),
+                    create_power_profile(state),
+
+                ]
+                .spacing(10)
+                
             ]
-            .spacing(10)
+            .padding(5)
         )
         .spacing(10)
         .height(Length::Fill)
         
     ]
     .spacing(10)
-    .padding(10)
     .into()
     
 }
@@ -34,186 +38,193 @@ fn create_current_profile(state: &State) -> Element<Message> {
 
             // Current fast limit
             container(
-                column![
-                    text("30 W")
-                        .size(20)
-                        .align_x(Horizontal::Center)
-                        .width(Length::Fill),
-                    text("Fast Limit")
+                row![
+                    text("Fast\nLimit")
                         .size(10)
                         .align_x(Horizontal::Center)
                         .width(Length::Fill),
-                ].align_x(Horizontal::Center)
+                    text("100 W")
+                        .size(14)
+                        .align_x(Horizontal::Center)
+                        .width(Length::Fill),
+                    
+                ].align_y(Vertical::Center)
 
             )
             .align_y(Vertical::Center)
             .align_x(Horizontal::Center)
             .style(stat_tip_style())
-            .padding([10, 20])
+            .padding([10, 10])
             .width(Length::Fill)
-            .height(Length::Fixed(60.0)),
+            .height(Length::Fixed(50.0)),
 
             // Current Slow limit
             container(
-                column![
-                    text("30 W")
-                        .size(20)
-                        .align_x(Horizontal::Center)
-                        .width(Length::Fill),
-                    text("Slow Limit")
+                row![
+                    text("Slow\nLimit")
                         .size(10)
                         .align_x(Horizontal::Center)
                         .width(Length::Fill),
-                ].align_x(Horizontal::Center)
+                    text("100 W")
+                        .size(14)
+                        .align_x(Horizontal::Center)
+                        .width(Length::Fill),
+                    
+                ].align_y(Vertical::Center)
 
             )
             .align_y(Vertical::Center)
             .align_x(Horizontal::Center)
             .style(stat_tip_style())
-            .padding([10, 20])
+            .padding([10, 10])
             .width(Length::Fill)
-            .height(Length::Fixed(60.0)),
+            .height(Length::Fixed(50.0)),
 
             // Current Stapm limit
             container(
-                column![
-                    text("30 W")
-                        .size(20)
-                        .align_x(Horizontal::Center)
-                        .width(Length::Fill),
-                    text("STAPM Limit")
+                row![
+                    text("STAPM\nLimit")
                         .size(10)
                         .align_x(Horizontal::Center)
                         .width(Length::Fill),
-                ].align_x(Horizontal::Center)
+                    text("100 W")
+                        .size(14)
+                        .align_x(Horizontal::Center)
+                        .width(Length::Fill),
+                    
+                ].align_y(Vertical::Center)
 
             )
             .align_y(Vertical::Center)
             .align_x(Horizontal::Center)
             .style(stat_tip_style())
-            .padding([10, 20])
+            .padding([10, 10])
             .width(Length::Fill)
-            .height(Length::Fixed(60.0)),
+            .height(Length::Fixed(50.0)),
 
             // Current power status
             container(
-                column![
-                    text("30 °C")
-                        .size(20)
-                        .align_x(Horizontal::Center)
-                        .width(Length::Fill),
-                    text("Temp Limit")
+                row![
+                    text("Temp\nLimit")
                         .size(10)
                         .align_x(Horizontal::Center)
                         .width(Length::Fill),
-                ].align_x(Horizontal::Center)
+                    text("100°C")
+                        .size(14)
+                        .align_x(Horizontal::Center)
+                        .width(Length::Fill),
+                    
+                ].align_y(Vertical::Center)
 
             )
             .align_y(Vertical::Center)
             .align_x(Horizontal::Center)
             .style(stat_tip_style())
-            .padding([10, 20])
+            .padding([10, 10])
             .width(Length::Fill)
-            .height(Length::Fixed(60.0)),
+            .height(Length::Fixed(50.0)),
 
             // Current power source
             container(
-                column![
-                    text("🔋") // 🔌
-                        .shaping(text::Shaping::Advanced)
-                        .size(20)
-                        .align_x(Horizontal::Center)
-                        .width(Length::Fill),
-                    text("Power Source")
+                row![
+                    text("Power\nSource")
                         .size(10)
                         .align_x(Horizontal::Center)
                         .width(Length::Fill),
-                ].align_x(Horizontal::Center)
+                    text("🔋") // 🔌
+                        .shaping(text::Shaping::Advanced)
+                        .size(14)
+                        .align_x(Horizontal::Center)
+                        .width(Length::Fill),
+                    
+                ].align_y(Vertical::Center)
 
             )
             .align_y(Vertical::Center)
             .align_x(Horizontal::Center)
             .style(stat_tip_style())
-            .padding([10, 20])
+            .padding([10, 10])
             .width(Length::Fill)
-            .height(Length::Fixed(60.0)),
+            .height(Length::Fixed(50.0)),
 
             // Current power profile
             container(
-                column![
-                    text("Saver") // Batt / Power / Custom / Saver / Turbo
-                        .size(20)
-                        .align_x(Horizontal::Center)
-                        .width(Length::Fill),
-                    text("Power Profile")
+                row![
+                    text("Power\nProfile")
                         .size(10)
                         .align_x(Horizontal::Center)
                         .width(Length::Fill),
-                ].align_x(Horizontal::Center)
+                    text("OS") // OS / Bat (Batt) / Pow(Power) / Cus(Custom) / Sav (Saver) / Tur (Turbo)
+                        .size(18)
+                        .align_x(Horizontal::Center)
+                        .width(Length::Fill),
+                    
+                ].align_y(Vertical::Center)
 
             )
             .align_y(Vertical::Center)
             .align_x(Horizontal::Center)
             .style(stat_tip_style())
-            .padding([10, 20])
+            .padding([10, 10])
             .width(Length::Fill)
-            .height(Length::Fixed(60.0)),
+            .height(Length::Fixed(50.0)),
         ]
         .spacing(10)
     ).into()
 }
 
-// fn create_header<'a>() -> Element<'a, Message>  {
-//     container(
-//         column![
-//             // Header Section
-//             container(
-//                 column![
-//                     row![
-//                         text("")
-//                         .align_x(Horizontal::Center)
-//                         .align_y(Vertical::Center)
-//                         .width(Length::FillPortion(2)),
+fn create_header<'a>() -> Element<'a, Message>  {
+    container(
+        column![
+            // Header Section
+            container(
+                column![
+                    row![
+                        text("Profile")
+                        .size(10)
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::FillPortion(2)),
 
-//                         text("Fast Limit")
-//                         .size(10)
-//                         .align_x(Horizontal::Center)
-//                         .align_y(Vertical::Center)
-//                         .width(Length::FillPortion(1)),
+                        text("Fast Limit")
+                        .size(10)
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::FillPortion(1)),
 
-//                         text("Slow Limit")
-//                         .size(10)
-//                         .align_x(Horizontal::Center)
-//                         .align_y(Vertical::Center)
-//                         .width(Length::FillPortion(1)),
+                        text("Slow Limit")
+                        .size(10)
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::FillPortion(1)),
 
-//                         text("STAPM Limit")
-//                         .size(10)
-//                         .align_x(Horizontal::Center)
-//                         .align_y(Vertical::Center)
-//                         .width(Length::FillPortion(1)),
+                        text("STAPM Limit")
+                        .size(10)
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::FillPortion(1)),
 
-//                         text("Temp Limit")
-//                         .size(10)
-//                         .align_x(Horizontal::Center)
-//                         .align_y(Vertical::Center)
-//                         .width(Length::FillPortion(1)),
+                        text("Temp Limit")
+                        .size(10)
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::FillPortion(1)),
 
-//                         text("")
-//                         .align_x(Horizontal::Center)
-//                         .align_y(Vertical::Center)
-//                         .width(Length::FillPortion(1)),
-//                     ]
-//                     .spacing(10),
-//                 ].spacing(10)
-//             )
-//         ]
-//     )
-//     .padding([0, 20])
-//     .width(Length::Fill)
-//     .into()
+                        text("")
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::FillPortion(1)),
+                    ]
+                    .spacing(10),
+                ].spacing(10)
+            )
+        ]
+    )
+    .padding([0, 20])
+    .width(Length::Fill)
+    .into()
     
-//  }
+ }
 
 fn create_battery_profile(state: &State) -> Element<Message> {
     container(
@@ -221,46 +232,16 @@ fn create_battery_profile(state: &State) -> Element<Message> {
             // Battery Section
             container(
                 column![
-                    // row![
-                    //     text("")
-                    //     .align_x(Horizontal::Center)
-                    //     .align_y(Vertical::Center)
-                    //     .width(Length::FillPortion(2)),
-
-                    //     text("Fast Limit")
-                    //     .size(10)
-                    //     .align_x(Horizontal::Center)
-                    //     .align_y(Vertical::Center)
-                    //     .width(Length::FillPortion(1)),
-
-                    //     text("Slow Limit")
-                    //     .size(10)
-                    //     .align_x(Horizontal::Center)
-                    //     .align_y(Vertical::Center)
-                    //     .width(Length::FillPortion(1)),
-
-                    //     text("STAPM Limit")
-                    //     .size(10)
-                    //     .align_x(Horizontal::Center)
-                    //     .align_y(Vertical::Center)
-                    //     .width(Length::FillPortion(1)),
-
-                    //     text("Temp Limit")
-                    //     .size(10)
-                    //     .align_x(Horizontal::Center)
-                    //     .align_y(Vertical::Center)
-                    //     .width(Length::FillPortion(1)),
-
-                    //     text("")
-                    //     .align_x(Horizontal::Center)
-                    //     .align_y(Vertical::Center)
-                    //     .width(Length::FillPortion(1)),
-                    // ],
                     row![
-                        text("Battery Profile")
+                        text("Battery")
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::FillPortion(1)),
+
+                        text("")
                         .align_x(Horizontal::Left)
                         .align_y(Vertical::Center)
-                        .width(Length::FillPortion(2)),
+                        .width(Length::FillPortion(1)),
 
                         text_input("mW", "")
                         .align_x(Horizontal::Left)
@@ -292,7 +273,6 @@ fn create_battery_profile(state: &State) -> Element<Message> {
                     .spacing(10),
                     // Low Battery / Saver Section
                     row![
-                        row![
                             checkbox(
                                 "",  // Empty string for checkbox
                                 true
@@ -300,51 +280,49 @@ fn create_battery_profile(state: &State) -> Element<Message> {
                             text("Enable Low Battery (Saver) Profile")
                                 .size(10)
                                 .align_y(Vertical::Center)
-                        ]
-                        .align_y(Vertical::Center),
-                        // text_input(
-                        //     "Threshold %",
-                        //     ""
-                        // )
-                        // .style(text_input_style())
-                        // .width(Length::Fixed(100.0))
-                    ].spacing(10),
+                    ]
+                    .align_y(Vertical::Center),
 
                     // Saver profile
-                    // row![
-                    //     text("Saver Profile")
-                    //     .align_x(Horizontal::Left)
-                    //     .align_y(Vertical::Center)
-                    //     .width(Length::FillPortion(2)),
+                    row![
+                        text("Saver")
+                        .align_x(Horizontal::Center)
+                        .width(Length::FillPortion(1)),
 
-                    //     text_input("mW", "")
-                    //     .align_x(Horizontal::Left)
-                    //     .style(text_input_style())
-                    //     .width(Length::FillPortion(1)),
+                        text_input("Batt %", "")
+                        .align_x(Horizontal::Left)
+                        .style(text_input_style())
+                        .width(Length::FillPortion(1)),
 
-                    //     text_input("mW", "")
-                    //     .align_x(Horizontal::Left)
-                    //     .style(text_input_style())
-                    //     .width(Length::FillPortion(1)),
+                        text_input("100000", "")
+                        .align_x(Horizontal::Left)
+                        .style(text_input_style())
+                        .width(Length::FillPortion(1)),
 
-                    //     text_input("mW", "")
-                    //     .align_x(Horizontal::Left)
-                    //     .style(text_input_style())
-                    //     .width(Length::FillPortion(1)),
+                        text_input("100000", "")
+                        .align_x(Horizontal::Left)
+                        .style(text_input_style())
+                        .width(Length::FillPortion(1)),
 
-                    //     text_input("°C", "")
-                    //     .align_x(Horizontal::Left)
-                    //     .style(text_input_style())
-                    //     .width(Length::FillPortion(1)),
+                        text_input("100000", "")
+                        .align_x(Horizontal::Left)
+                        .style(text_input_style())
+                        .width(Length::FillPortion(1)),
 
-                    //     button(
-                    //         text("Set")
-                    //         .align_x(Horizontal::Center)
-                    //         .align_y(Vertical::Center)
-                    //     )
-                    //     .width(Length::FillPortion(1))
-                    // ]
-                    // .spacing(10),
+                        text_input("100", "")
+                        .align_x(Horizontal::Left)
+                        .style(text_input_style())
+                        .width(Length::FillPortion(1)),
+
+                        button(
+                            text("Set")
+                            .align_x(Horizontal::Center)
+                            .align_y(Vertical::Center)
+                        )
+                        .width(Length::FillPortion(1))
+                    ]
+                    .align_y(Vertical::Center)
+                    .spacing(10),
                 ].spacing(10)
             )
         ]
@@ -362,46 +340,16 @@ fn create_power_profile(state: &State) -> Element<Message> {
            // Power profile section
             container(
                 column![
-                    // row![
-                    //     text("")
-                    //     .align_x(Horizontal::Center)
-                    //     .align_y(Vertical::Center)
-                    //     .width(Length::FillPortion(2)),
-
-                    //     text("Fast Limit")
-                    //     .size(10)
-                    //     .align_x(Horizontal::Center)
-                    //     .align_y(Vertical::Center)
-                    //     .width(Length::FillPortion(1)),
-
-                    //     text("Slow Limit")
-                    //     .size(10)
-                    //     .align_x(Horizontal::Center)
-                    //     .align_y(Vertical::Center)
-                    //     .width(Length::FillPortion(1)),
-
-                    //     text("STAPM Limit")
-                    //     .size(10)
-                    //     .align_x(Horizontal::Center)
-                    //     .align_y(Vertical::Center)
-                    //     .width(Length::FillPortion(1)),
-
-                    //     text("Temp Limit")
-                    //     .size(10)
-                    //     .align_x(Horizontal::Center)
-                    //     .align_y(Vertical::Center)
-                    //     .width(Length::FillPortion(1)),
-
-                    //     text("")
-                    //     .align_x(Horizontal::Center)
-                    //     .align_y(Vertical::Center)
-                    //     .width(Length::FillPortion(1)),
-                    // ],
                     row![
-                        text("Power Profile")
+                        text("Power")
+                        .align_x(Horizontal::Center)
+                        .align_y(Vertical::Center)
+                        .width(Length::FillPortion(1)),
+
+                        text("")
                         .align_x(Horizontal::Left)
                         .align_y(Vertical::Center)
-                        .width(Length::FillPortion(2)),
+                        .width(Length::FillPortion(1)),
 
                         text_input("mW", "")
                         .align_x(Horizontal::Left)

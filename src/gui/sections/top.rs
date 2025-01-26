@@ -26,21 +26,21 @@ pub fn view(state: &State) -> Element<Message> {
                 .style(card_style())
                 .padding(20)
                 .width(Length::Fill)
-                .height(Length::Fixed(140.0)),
+                .height(Length::Fixed(120.0)),
     
             // GPU container
             container(create_gpu_view(state))
                 .style(card_style())
                 .padding(20)
                 .width(Length::Fill)
-                .height(Length::Fixed(140.0)),
+                .height(Length::Fixed(120.0)),
     
             // Power container
             container(create_power_view(state))
                 .style(card_style())
                 .padding(20)
                 .width(Length::Fill)
-                .height(Length::Fixed(140.0))
+                .height(Length::Fixed(120.0))
         ]
         .spacing(20)
     ]
