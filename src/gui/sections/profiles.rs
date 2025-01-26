@@ -9,9 +9,10 @@ use crate::gui::styles::styles::{card_style, header_style, hint_text_style, stat
 pub fn view(state: &State) -> Element<Message> {
     column![
         create_current_profile(state),
-        create_header(),
+        
         scrollable(
             column![
+                // create_header(),
                 create_battery_profile(state),
                 create_power_profile(state),
             ]
@@ -162,56 +163,57 @@ fn create_current_profile(state: &State) -> Element<Message> {
     ).into()
 }
 
-fn create_header<'a>() -> Element<'a, Message>  {
-    container(
-        column![
-            // Header Section
-            container(
-                column![
-                    row![
-                        text("Battery Profile")
-                        .align_x(Horizontal::Left)
-                        .align_y(Vertical::Center)
-                        .width(Length::FillPortion(2)),
+// fn create_header<'a>() -> Element<'a, Message>  {
+//     container(
+//         column![
+//             // Header Section
+//             container(
+//                 column![
+//                     row![
+//                         text("")
+//                         .align_x(Horizontal::Center)
+//                         .align_y(Vertical::Center)
+//                         .width(Length::FillPortion(2)),
 
-                        text_input("mW", "")
-                        .align_x(Horizontal::Left)
-                        .style(text_input_style())
-                        .width(Length::FillPortion(1)),
+//                         text("Fast Limit")
+//                         .size(10)
+//                         .align_x(Horizontal::Center)
+//                         .align_y(Vertical::Center)
+//                         .width(Length::FillPortion(1)),
 
-                        text_input("mW", "")
-                        .align_x(Horizontal::Left)
-                        .style(text_input_style())
-                        .width(Length::FillPortion(1)),
+//                         text("Slow Limit")
+//                         .size(10)
+//                         .align_x(Horizontal::Center)
+//                         .align_y(Vertical::Center)
+//                         .width(Length::FillPortion(1)),
 
-                        text_input("mW", "")
-                        .align_x(Horizontal::Left)
-                        .style(text_input_style())
-                        .width(Length::FillPortion(1)),
+//                         text("STAPM Limit")
+//                         .size(10)
+//                         .align_x(Horizontal::Center)
+//                         .align_y(Vertical::Center)
+//                         .width(Length::FillPortion(1)),
 
-                        text_input("°C", "")
-                        .align_x(Horizontal::Left)
-                        .style(text_input_style())
-                        .width(Length::FillPortion(1)),
+//                         text("Temp Limit")
+//                         .size(10)
+//                         .align_x(Horizontal::Center)
+//                         .align_y(Vertical::Center)
+//                         .width(Length::FillPortion(1)),
 
-                        button(
-                            text("Set")
-                            .align_x(Horizontal::Center)
-                            .align_y(Vertical::Center)
-                        )
-                        .width(Length::FillPortion(1))
-                    ]
-                    .spacing(10),
-                ].spacing(10)
-            )
-        ]
-    )
-    .style(card_style())
-    .padding(20)
-    .width(Length::Fill)
-    .into()
+//                         text("")
+//                         .align_x(Horizontal::Center)
+//                         .align_y(Vertical::Center)
+//                         .width(Length::FillPortion(1)),
+//                     ]
+//                     .spacing(10),
+//                 ].spacing(10)
+//             )
+//         ]
+//     )
+//     .padding([0, 20])
+//     .width(Length::Fill)
+//     .into()
     
- }
+//  }
 
 fn create_battery_profile(state: &State) -> Element<Message> {
     container(
@@ -219,6 +221,41 @@ fn create_battery_profile(state: &State) -> Element<Message> {
             // Battery Section
             container(
                 column![
+                    // row![
+                    //     text("")
+                    //     .align_x(Horizontal::Center)
+                    //     .align_y(Vertical::Center)
+                    //     .width(Length::FillPortion(2)),
+
+                    //     text("Fast Limit")
+                    //     .size(10)
+                    //     .align_x(Horizontal::Center)
+                    //     .align_y(Vertical::Center)
+                    //     .width(Length::FillPortion(1)),
+
+                    //     text("Slow Limit")
+                    //     .size(10)
+                    //     .align_x(Horizontal::Center)
+                    //     .align_y(Vertical::Center)
+                    //     .width(Length::FillPortion(1)),
+
+                    //     text("STAPM Limit")
+                    //     .size(10)
+                    //     .align_x(Horizontal::Center)
+                    //     .align_y(Vertical::Center)
+                    //     .width(Length::FillPortion(1)),
+
+                    //     text("Temp Limit")
+                    //     .size(10)
+                    //     .align_x(Horizontal::Center)
+                    //     .align_y(Vertical::Center)
+                    //     .width(Length::FillPortion(1)),
+
+                    //     text("")
+                    //     .align_x(Horizontal::Center)
+                    //     .align_y(Vertical::Center)
+                    //     .width(Length::FillPortion(1)),
+                    // ],
                     row![
                         text("Battery Profile")
                         .align_x(Horizontal::Left)
@@ -265,49 +302,49 @@ fn create_battery_profile(state: &State) -> Element<Message> {
                                 .align_y(Vertical::Center)
                         ]
                         .align_y(Vertical::Center),
-                        text_input(
-                            "Threshold %",
-                            ""
-                        )
-                        .style(text_input_style())
-                        .width(Length::Fixed(100.0))
-                    ].spacing(20),
+                        // text_input(
+                        //     "Threshold %",
+                        //     ""
+                        // )
+                        // .style(text_input_style())
+                        // .width(Length::Fixed(100.0))
+                    ].spacing(10),
 
                     // Saver profile
-                    row![
-                        text("Saver Profile")
-                        .align_x(Horizontal::Left)
-                        .align_y(Vertical::Center)
-                        .width(Length::FillPortion(2)),
+                    // row![
+                    //     text("Saver Profile")
+                    //     .align_x(Horizontal::Left)
+                    //     .align_y(Vertical::Center)
+                    //     .width(Length::FillPortion(2)),
 
-                        text_input("mW", "")
-                        .align_x(Horizontal::Left)
-                        .style(text_input_style())
-                        .width(Length::FillPortion(1)),
+                    //     text_input("mW", "")
+                    //     .align_x(Horizontal::Left)
+                    //     .style(text_input_style())
+                    //     .width(Length::FillPortion(1)),
 
-                        text_input("mW", "")
-                        .align_x(Horizontal::Left)
-                        .style(text_input_style())
-                        .width(Length::FillPortion(1)),
+                    //     text_input("mW", "")
+                    //     .align_x(Horizontal::Left)
+                    //     .style(text_input_style())
+                    //     .width(Length::FillPortion(1)),
 
-                        text_input("mW", "")
-                        .align_x(Horizontal::Left)
-                        .style(text_input_style())
-                        .width(Length::FillPortion(1)),
+                    //     text_input("mW", "")
+                    //     .align_x(Horizontal::Left)
+                    //     .style(text_input_style())
+                    //     .width(Length::FillPortion(1)),
 
-                        text_input("°C", "")
-                        .align_x(Horizontal::Left)
-                        .style(text_input_style())
-                        .width(Length::FillPortion(1)),
+                    //     text_input("°C", "")
+                    //     .align_x(Horizontal::Left)
+                    //     .style(text_input_style())
+                    //     .width(Length::FillPortion(1)),
 
-                        button(
-                            text("Set")
-                            .align_x(Horizontal::Center)
-                            .align_y(Vertical::Center)
-                        )
-                        .width(Length::FillPortion(1))
-                    ]
-                    .spacing(10),
+                    //     button(
+                    //         text("Set")
+                    //         .align_x(Horizontal::Center)
+                    //         .align_y(Vertical::Center)
+                    //     )
+                    //     .width(Length::FillPortion(1))
+                    // ]
+                    // .spacing(10),
                 ].spacing(10)
             )
         ]
@@ -325,6 +362,41 @@ fn create_power_profile(state: &State) -> Element<Message> {
            // Power profile section
             container(
                 column![
+                    // row![
+                    //     text("")
+                    //     .align_x(Horizontal::Center)
+                    //     .align_y(Vertical::Center)
+                    //     .width(Length::FillPortion(2)),
+
+                    //     text("Fast Limit")
+                    //     .size(10)
+                    //     .align_x(Horizontal::Center)
+                    //     .align_y(Vertical::Center)
+                    //     .width(Length::FillPortion(1)),
+
+                    //     text("Slow Limit")
+                    //     .size(10)
+                    //     .align_x(Horizontal::Center)
+                    //     .align_y(Vertical::Center)
+                    //     .width(Length::FillPortion(1)),
+
+                    //     text("STAPM Limit")
+                    //     .size(10)
+                    //     .align_x(Horizontal::Center)
+                    //     .align_y(Vertical::Center)
+                    //     .width(Length::FillPortion(1)),
+
+                    //     text("Temp Limit")
+                    //     .size(10)
+                    //     .align_x(Horizontal::Center)
+                    //     .align_y(Vertical::Center)
+                    //     .width(Length::FillPortion(1)),
+
+                    //     text("")
+                    //     .align_x(Horizontal::Center)
+                    //     .align_y(Vertical::Center)
+                    //     .width(Length::FillPortion(1)),
+                    // ],
                     row![
                         text("Power Profile")
                         .align_x(Horizontal::Left)
