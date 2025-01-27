@@ -80,7 +80,10 @@ pub struct State {
     // App states
     pub active_tab: Tab,
     pub active_profile: String,
-    pub low_batt_profile: bool,
+    pub enable_low_batt_profile: bool,
+    pub enable_turbo: bool,
+    pub saver_profile_threshold: u32,
+
 
     // Current APU power status via libryzenadj
     pub curr_fast_value: u32,
@@ -121,4 +124,41 @@ pub struct State {
     pub manual_slow_limit: u32,
     pub manual_stapm_limit: u32,
     pub manual_tctl_limit: u32,
+
+    // Battery profile values input tracking
+    pub batt_fast_input: String,
+    pub batt_slow_input: String,
+    pub batt_stapm_input: String,
+    pub batt_tctl_input: String,
+
+    // Battery profile values store
+    pub batt_fast_limit: u32,
+    pub batt_slow_limit: u32,
+    pub batt_stapm_limit: u32,
+    pub batt_tctl_limit: u32,
+
+    // Saver profile values input tracking
+    pub saver_fast_input: String,
+    pub saver_slow_input: String,
+    pub saver_stapm_input: String,
+    pub saver_tctl_input: String,
+
+    // Saver override values store
+    pub saver_fast_limit: u32,
+    pub saver_slow_limit: u32,
+    pub saver_stapm_limit: u32,
+    pub saver_tctl_limit: u32,
+
+    // Power profile values input tracking
+    pub power_fast_input: String,
+    pub power_slow_input: String,
+    pub power_stapm_input: String,
+    pub power_tctl_input: String,
+
+    // Power override values store
+    pub power_fast_limit: u32,
+    pub power_slow_limit: u32,
+    pub power_stapm_limit: u32,
+    pub power_tctl_limit: u32,
+
 }
