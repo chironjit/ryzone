@@ -77,38 +77,38 @@ pub fn update(
             }
         }
         Message::FastLimitInputChanged(value) => {
-            if value.chars().all(|c| c.is_digit(10)) {
-                if let Ok(num) = value.parse::<u32>() {
-                    if num <= FAST_LIMIT_MAX {
-                        state.fast_input = value;
-                    }
+            if value.is_empty() {
+                state.fast_input = value;
+            } else if let Ok(num) = value.parse::<u32>() {
+                if num <= FAST_LIMIT_MAX {
+                    state.fast_input = value;
                 }
             }
         }
         Message::SlowLimitInputChanged(value) => {
-            if value.chars().all(|c| c.is_digit(10)) {
-                if let Ok(num) = value.parse::<u32>() {
-                    if num <= SLOW_LIMIT_MAX {
-                        state.slow_input = value;
-                    }
+            if value.is_empty() {
+                state.slow_input = value;
+            } else if let Ok(num) = value.parse::<u32>() {
+                if num <= SLOW_LIMIT_MAX {
+                    state.slow_input = value;
                 }
             }
         }
         Message::StapmLimitInputChanged(value) => {
-            if value.chars().all(|c| c.is_digit(10)) {
-                if let Ok(num) = value.parse::<u32>() {
-                    if num <= STAPM_LIMIT_MAX {
-                        state.stapm_input = value;
-                    }
+            if value.is_empty() {
+                state.stapm_input = value;
+            } else if let Ok(num) = value.parse::<u32>() {
+                if num <= STAPM_LIMIT_MAX {
+                    state.stapm_input = value;
                 }
             }
         }
         Message::TctlLimitInputChanged(value) => {
-            if value.chars().all(|c| c.is_digit(10)) {
-                if let Ok(num) = value.parse::<u32>() {
-                    if num <= TCTL_LIMIT_MAX {
-                        state.tctl_input = value;
-                    }
+            if value.is_empty() {
+                state.tctl_input = value;
+            } else if let Ok(num) = value.parse::<u32>() {
+                if num <= TCTL_LIMIT_MAX {
+                    state.tctl_input = value;
                 }
             }
         }
@@ -205,40 +205,50 @@ pub fn update(
         }
 
         Message::SaverThresholdInput(input) => {
-            if let Ok(value) = input.parse::<u32>() {
-                if value >= THRESHOLD_MIN && value <= THRESHOLD_MAX {
+            if input.is_empty() {
+                state.saver_threshold_input = input;
+            } else if let Ok(value) = input.parse::<u32>() {
+                if value <= THRESHOLD_MAX {
                     state.saver_threshold_input = input;
                 }
             }
         }
 
         Message::BattFastInput(input) => {
-            if let Ok(value) = input.parse::<u32>() {
-                if value >= FAST_LIMIT_MIN && value <= FAST_LIMIT_MAX {
+            if input.is_empty() {
+                state.batt_fast_input = input;
+            } else if let Ok(value) = input.parse::<u32>() {
+                if value <= FAST_LIMIT_MAX {
                     state.batt_fast_input = input;
                 }
             }
         }
 
         Message::BattSlowInput(input) => {
-            if let Ok(value) = input.parse::<u32>() {
-                if value >= SLOW_LIMIT_MIN && value <= SLOW_LIMIT_MAX {
+            if input.is_empty() {
+                state.batt_slow_input = input;
+            } else if let Ok(value) = input.parse::<u32>() {
+                if value <= SLOW_LIMIT_MAX {
                     state.batt_slow_input = input;
                 }
             }
         }
 
         Message::BattStapmInput(input) => {
-            if let Ok(value) = input.parse::<u32>() {
-                if value >= STAPM_LIMIT_MIN && value <= STAPM_LIMIT_MAX {
+            if input.is_empty() {
+                state.batt_stapm_input = input;
+            } else if let Ok(value) = input.parse::<u32>() {
+                if value <= STAPM_LIMIT_MAX {
                     state.batt_stapm_input = input;
                 }
             }
         }
 
         Message::BattTctlInput(input) => {
-            if let Ok(value) = input.parse::<u32>() {
-                if value >= TCTL_LIMIT_MIN && value <= TCTL_LIMIT_MAX {
+            if input.is_empty() {
+                state.batt_tctl_input = input;
+            } else if let Ok(value) = input.parse::<u32>() {
+                if value <= TCTL_LIMIT_MAX {
                     state.batt_tctl_input = input;
                 }
             }
