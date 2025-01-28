@@ -62,6 +62,17 @@ pub enum Tab {
    Settings
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Profile {
+    #[default]
+    OS,
+    Bat, // Battery
+    Pow, // Power
+    Cus, // Custom
+    Sav, // Saver
+    Tur  // Turbo
+}
+
 // Constants to limit input values
 pub const FAST_LIMIT_MIN: u32 = 4000;
 pub const FAST_LIMIT_MAX: u32 = 65000;
@@ -72,14 +83,26 @@ pub const STAPM_LIMIT_MAX: u32 = 65000;
 pub const TCTL_LIMIT_MIN: u32 = 40;
 pub const TCTL_LIMIT_MAX: u32 = 100;
 
-
+// Add this implementation where Profile enum is defined
+impl std::fmt::Display for Profile {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            Profile::OS => write!(f, "OS"),
+            Profile::Bat => write!(f, "Bat"),
+            Profile::Pow => write!(f, "Pow"),
+            Profile::Cus => write!(f, "Cus"),
+            Profile::Sav => write!(f, "Sav"),
+            Profile::Tur => write!(f, "Tur"),
+        }
+    }
+}
 
 // All the states managed by the app
 #[derive(Default, Debug, Clone)]
 pub struct State {
     // App states
     pub active_tab: Tab,
-    pub active_profile: String,
+    pub active_profile: Profile,
     pub enable_low_batt_profile: bool,
     pub enable_turbo: bool,
     pub saver_profile_threshold: u32,

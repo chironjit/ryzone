@@ -43,7 +43,7 @@ fn create_current_profile(state: &State) -> Element<Message> {
                         .size(10)
                         .align_x(Horizontal::Center)
                         .width(Length::Fill),
-                    text("100 W")
+                    text(format!("{} W", state.curr_fast_limit))
                         .size(14)
                         .align_x(Horizontal::Center)
                         .width(Length::Fill),
@@ -65,7 +65,7 @@ fn create_current_profile(state: &State) -> Element<Message> {
                         .size(10)
                         .align_x(Horizontal::Center)
                         .width(Length::Fill),
-                    text("100 W")
+                    text(format!("{} W", state.curr_slow_limit))
                         .size(14)
                         .align_x(Horizontal::Center)
                         .width(Length::Fill),
@@ -87,7 +87,7 @@ fn create_current_profile(state: &State) -> Element<Message> {
                         .size(10)
                         .align_x(Horizontal::Center)
                         .width(Length::Fill),
-                    text("100 W")
+                    text(format!("{} W", state.curr_stapm_limit))
                         .size(14)
                         .align_x(Horizontal::Center)
                         .width(Length::Fill),
@@ -109,7 +109,7 @@ fn create_current_profile(state: &State) -> Element<Message> {
                         .size(10)
                         .align_x(Horizontal::Center)
                         .width(Length::Fill),
-                    text("100°C")
+                    text(format!("{}°C", state.curr_tctl_limit))
                         .size(14)
                         .align_x(Horizontal::Center)
                         .width(Length::Fill),
@@ -131,7 +131,11 @@ fn create_current_profile(state: &State) -> Element<Message> {
                         .size(10)
                         .align_x(Horizontal::Center)
                         .width(Length::Fill),
-                    text("🔋") // 🔌
+                    text(if state.batt_status == "Discharging" {
+                        "🔋"
+                    } else {
+                        "🔌" 
+                    })
                         .shaping(text::Shaping::Advanced)
                         .size(14)
                         .align_x(Horizontal::Center)
@@ -154,7 +158,7 @@ fn create_current_profile(state: &State) -> Element<Message> {
                         .size(10)
                         .align_x(Horizontal::Center)
                         .width(Length::Fill),
-                    text("OS") // OS / Bat (Batt) / Pow(Power) / Cus(Custom) / Sav (Saver) / Tur (Turbo)
+                    text(format!("{:?}", state.active_profile))
                         .size(18)
                         .align_x(Horizontal::Center)
                         .width(Length::Fill),
