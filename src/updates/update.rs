@@ -6,7 +6,7 @@ use std::time::SystemTime;
 use iced::time::Duration;
 
 use crate::utils;
-use crate::model::{
+use crate::model::model::{
     Tab,
     State,
     HistoricalFreq,
@@ -37,7 +37,7 @@ pub enum Message {
     TabSelected(Tab),
 }
 
-// Standalone update function
+// Standalone update function for the state
 pub fn update(
     state: &mut State,
     message: Message

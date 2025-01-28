@@ -1,8 +1,8 @@
 use iced::widget::column;
 use iced::{Element, Length};
 
-use crate::model::{State, Tab};
-use crate::update::Message;
+use crate::model::model::{State, Tab};
+use crate::updates::update::Message;
 use crate::gui::sections::{top, tab, custom, profiles, settings};
 
 pub fn view(state: &State) -> Element<Message> {

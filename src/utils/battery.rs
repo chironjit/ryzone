@@ -4,7 +4,7 @@ use std::time::SystemTime;
 use std::collections::VecDeque;
 use std::path::PathBuf;
 
-use crate::model::HistoricalBattStat;
+use crate::model::model::HistoricalBattStat;
 
 fn find_battery_paths() -> Vec<String> {
     let mut battery_paths = Vec::new();

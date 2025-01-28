@@ -79,7 +79,7 @@ pub fn text_input_style() -> impl Fn(&Theme, text_input::Status) -> text_input::
 }
 
 pub fn tab_style(selected: bool) -> impl Fn(&Theme, button::Status) -> button::Style {
-    move |theme, status| {
+    move |theme, _status| {
         let palette = theme.extended_palette();
 
         if selected {

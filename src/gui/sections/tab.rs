@@ -1,10 +1,10 @@
-use iced::widget::{container, row, column, text, Space, button};
+use iced::widget::{row, text, button};
 use iced::{Element, Length};
 use iced::alignment::{Horizontal, Vertical};
 
 use crate::model::{State, Tab};
-use crate::update::Message;
-use crate::gui::styles::styles::tab_style;
+use crate::updates::Message;
+use crate::gui::style::tab_style;
 
 pub fn view(state: &State) -> Element<Message> {
     row![

@@ -3,8 +3,8 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::{Element, Length};
 
 use crate::model::State;
-use crate::update::Message;
-use crate::gui::styles::styles::{card_style, stat_tip_style, text_input_style};
+use crate::updates::Message;
+use crate::gui::style::{card_style, stat_tip_style, text_input_style};
 
 pub fn view(state: &State) -> Element<Message> {
     column![
