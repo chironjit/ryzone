@@ -43,11 +43,19 @@ pub enum Message {
     ToggleTurboOption,
     EnableTurbo,
     DisableTurbo,
-    SaverThresholdInput(String),
-    BattFastInput(String),
-    BattSlowInput(String),
-    BattStapmInput(String),
-    BattTctlInput(String),
+    BattFastInputChanged(String),
+    BattSlowInputChanged(String),
+    BattStapmInputChanged(String),
+    BattTctlInputChanged(String),
+    SaverThresholdInputChanged(String),
+    SaverFastInputChanged(String),
+    SaverSlowInputChanged(String),
+    SaverStapmInputChanged(String),
+    SaverTctlInputChanged(String),
+    PowerFastInputChanged(String),
+    PowerSlowInputChanged(String),
+    PowerStapmInputChanged(String),
+    PowerTctlInputChanged(String),
 }
 
 // Standalone update function for the state
@@ -204,7 +212,7 @@ pub fn update(
             state.enable_turbo = false;
         }
 
-        Message::SaverThresholdInput(input) => {
+        Message::SaverThresholdInputChanged(input) => {
             if input.is_empty() {
                 state.saver_threshold_input = input;
             } else if let Ok(value) = input.parse::<u32>() {
@@ -214,7 +222,7 @@ pub fn update(
             }
         }
 
-        Message::BattFastInput(input) => {
+        Message::BattFastInputChanged(input) => {
             if input.is_empty() {
                 state.batt_fast_input = input;
             } else if let Ok(value) = input.parse::<u32>() {
@@ -224,7 +232,7 @@ pub fn update(
             }
         }
 
-        Message::BattSlowInput(input) => {
+        Message::BattSlowInputChanged(input) => {
             if input.is_empty() {
                 state.batt_slow_input = input;
             } else if let Ok(value) = input.parse::<u32>() {
@@ -234,7 +242,7 @@ pub fn update(
             }
         }
 
-        Message::BattStapmInput(input) => {
+        Message::BattStapmInputChanged(input) => {
             if input.is_empty() {
                 state.batt_stapm_input = input;
             } else if let Ok(value) = input.parse::<u32>() {
@@ -244,7 +252,7 @@ pub fn update(
             }
         }
 
-        Message::BattTctlInput(input) => {
+        Message::BattTctlInputChanged(input) => {
             if input.is_empty() {
                 state.batt_tctl_input = input;
             } else if let Ok(value) = input.parse::<u32>() {
@@ -253,6 +261,87 @@ pub fn update(
                 }
             }
         }
+
+        Message::SaverFastInputChanged(value) => {
+            if value.is_empty() {
+                state.saver_fast_input = value;
+            } else if let Ok(num) = value.parse::<u32>() {
+                if num <= FAST_LIMIT_MAX {
+                    state.saver_fast_input = value;
+                }
+            }
+        }
+
+        Message::SaverSlowInputChanged(value) => {
+            if value.is_empty() {
+                state.saver_slow_input = value;
+            } else if let Ok(num) = value.parse::<u32>() {
+                if num <= SLOW_LIMIT_MAX {
+                    state.saver_slow_input = value;
+                }
+            }
+        }
+
+        Message::SaverStapmInputChanged(value) => {
+            if value.is_empty() {
+                state.saver_stapm_input = value;
+            } else if let Ok(num) = value.parse::<u32>() {
+                if num <= STAPM_LIMIT_MAX {
+                    state.saver_stapm_input = value;
+                }
+            }
+        }
+
+        Message::SaverTctlInputChanged(value) => {
+            if value.is_empty() {
+                state.saver_tctl_input = value;
+            } else if let Ok(num) = value.parse::<u32>() {
+                if num <= TCTL_LIMIT_MAX {
+                    state.saver_tctl_input = value;
+                }
+            }
+        }
+
+        Message::PowerFastInputChanged(value) => {
+            if value.is_empty() {
+                state.power_fast_input = value;
+            } else if let Ok(num) = value.parse::<u32>() {
+                if num <= FAST_LIMIT_MAX {
+                    state.power_fast_input = value;
+                }
+            }
+        }
+
+        Message::PowerSlowInputChanged(value) => {
+            if value.is_empty() {
+                state.power_slow_input = value;
+            } else if let Ok(num) = value.parse::<u32>() {
+                if num <= SLOW_LIMIT_MAX {
+                    state.power_slow_input = value;
+                }
+            }
+        }
+
+        Message::PowerStapmInputChanged(value) => {
+            if value.is_empty() {
+                state.power_stapm_input = value;
+            } else if let Ok(num) = value.parse::<u32>() {
+                if num <= STAPM_LIMIT_MAX {
+                    state.power_stapm_input = value;
+                }
+            }
+        }
+
+        Message::PowerTctlInputChanged(value) => {
+            if value.is_empty() {
+                state.power_tctl_input = value;
+            } else if let Ok(num) = value.parse::<u32>() {
+                if num <= TCTL_LIMIT_MAX {
+                    state.power_tctl_input = value;
+                }
+            }
+        }
+        
     }
 }
 

@@ -243,27 +243,43 @@ fn create_battery_profile(state: &State) -> Element<Message> {
                         .width(Length::FillPortion(1)),
 
                         text("")
-                        .align_x(Horizontal::Left)
+                        .align_x(Horizontal::Center)
                         .align_y(Vertical::Center)
                         .width(Length::FillPortion(1)),
 
-                        text_input("mW", "")
-                        .align_x(Horizontal::Left)
+                        text_input(
+                            &format!("{}", if state.batt_fast_limit == 0 { 15000 } else { state.batt_fast_limit }), 
+                            &state.batt_fast_input
+                        )
+                        .on_input(Message::BattFastInputChanged)
+                        .align_x(Horizontal::Center)
                         .style(text_input_style())
                         .width(Length::FillPortion(1)),
 
-                        text_input("mW", "")
-                        .align_x(Horizontal::Left)
+                        text_input(
+                            &format!("{}", if state.batt_slow_limit == 0 { 10000 } else { state.batt_slow_limit }), 
+                            &state.batt_slow_input
+                        )
+                        .on_input(Message::BattSlowInputChanged)
+                        .align_x(Horizontal::Center)
                         .style(text_input_style())
                         .width(Length::FillPortion(1)),
 
-                        text_input("mW", "")
-                        .align_x(Horizontal::Left)
+                        text_input(
+                            &format!("{}", if state.batt_stapm_limit == 0 { 15000 } else { state.batt_stapm_limit }), 
+                            &state.batt_stapm_input
+                        )
+                        .on_input(Message::BattStapmInputChanged)
+                        .align_x(Horizontal::Center)
                         .style(text_input_style())
                         .width(Length::FillPortion(1)),
 
-                        text_input("°C", "")
-                        .align_x(Horizontal::Left)
+                        text_input(
+                            &format!("{}", if state.batt_tctl_limit == 0 { 70 } else { state.batt_tctl_limit }), 
+                            &state.batt_tctl_input
+                        )
+                        .on_input(Message::BattTctlInputChanged)
+                        .align_x(Horizontal::Center)
                         .style(text_input_style())
                         .width(Length::FillPortion(1)),
 
@@ -298,31 +314,31 @@ fn create_battery_profile(state: &State) -> Element<Message> {
                                 &format!("{}", if state.saver_threshold == 0 { 20 } else { state.saver_threshold }),
                                 &state.saver_threshold_input
                             )
-                            .on_input(Message::SaverThresholdInput)
+                            .on_input(Message::SaverThresholdInputChanged)
                             .align_x(Horizontal::Center)
                             .style(text_input_style())
                             .width(Length::FillPortion(1)),
 
-                            text_input(&format!("{}", if state.batt_fast_limit == 0 { 10000 } else { state.batt_fast_limit }), &state.batt_fast_input)
-                            .on_input(Message::BattFastInput)
+                            text_input(&format!("{}", if state.saver_fast_limit == 0 { 10000 } else { state.saver_fast_limit }), &state.saver_fast_input)
+                            .on_input(Message::SaverFastInputChanged)
                             .align_x(Horizontal::Center)
                             .style(text_input_style())
                             .width(Length::FillPortion(1)),
 
-                            text_input(&format!("{}", if state.batt_slow_limit == 0 { 8000 } else { state.batt_slow_limit }), &state.batt_slow_input)
-                            .on_input(Message::BattSlowInput)
+                            text_input(&format!("{}", if state.saver_slow_limit == 0 { 8000 } else { state.saver_slow_limit }), &state.saver_slow_input)
+                            .on_input(Message::SaverSlowInputChanged)
                             .align_x(Horizontal::Center)
                             .style(text_input_style())
                             .width(Length::FillPortion(1)),
 
-                            text_input(&format!("{}", if state.batt_stapm_limit == 0 { 10000 } else { state.batt_stapm_limit }), &state.batt_stapm_input)
-                            .on_input(Message::BattStapmInput)
+                            text_input(&format!("{}", if state.saver_stapm_limit == 0 { 10000 } else { state.saver_stapm_limit }), &state.saver_stapm_input)
+                            .on_input(Message::SaverStapmInputChanged)
                             .align_x(Horizontal::Center)
                             .style(text_input_style())
                             .width(Length::FillPortion(1)),
 
-                            text_input(&format!("{}", if state.batt_tctl_limit == 0 { 90 } else { state.batt_tctl_limit }), &state.batt_tctl_input)
-                            .on_input(Message::BattTctlInput)
+                            text_input(&format!("{}", if state.saver_tctl_limit == 0 { 60 } else { state.saver_tctl_limit }), &state.saver_tctl_input)
+                            .on_input(Message::SaverTctlInputChanged)
                             .align_x(Horizontal::Center)
                             .style(text_input_style())
                             .width(Length::FillPortion(1)),
@@ -363,27 +379,43 @@ fn create_power_profile(state: &State) -> Element<Message> {
                         .width(Length::FillPortion(1)),
 
                         text("")
-                        .align_x(Horizontal::Left)
+                        .align_x(Horizontal::Center)
                         .align_y(Vertical::Center)
                         .width(Length::FillPortion(1)),
 
-                        text_input("mW", "")
-                        .align_x(Horizontal::Left)
+                        text_input(
+                            &format!("{}", if state.power_fast_limit == 0 { 35000 } else { state.power_fast_limit }), 
+                            &state.power_fast_input
+                        )
+                        .on_input(Message::PowerFastInputChanged)
+                        .align_x(Horizontal::Center)
                         .style(text_input_style())
                         .width(Length::FillPortion(1)),
 
-                        text_input("mW", "")
-                        .align_x(Horizontal::Left)
+                        text_input(
+                            &format!("{}", if state.power_slow_limit == 0 { 30000 } else { state.power_slow_limit }), 
+                            &state.power_slow_input
+                        )
+                        .on_input(Message::PowerSlowInputChanged)
+                        .align_x(Horizontal::Center)
                         .style(text_input_style())
                         .width(Length::FillPortion(1)),
 
-                        text_input("mW", "")
-                        .align_x(Horizontal::Left)
+                        text_input(
+                            &format!("{}", if state.power_stapm_limit == 0 { 35000 } else { state.power_stapm_limit }), 
+                            &state.power_stapm_input
+                        )
+                        .on_input(Message::PowerStapmInputChanged)
+                        .align_x(Horizontal::Center)
                         .style(text_input_style())
                         .width(Length::FillPortion(1)),
 
-                        text_input("°C", "")
-                        .align_x(Horizontal::Left)
+                        text_input(
+                            &format!("{}", if state.power_tctl_limit == 0 { 90 } else { state.power_tctl_limit }), 
+                            &state.power_tctl_input
+                        )
+                        .on_input(Message::PowerTctlInputChanged)
+                        .align_x(Horizontal::Center)
                         .style(text_input_style())
                         .width(Length::FillPortion(1)),
 
@@ -399,33 +431,42 @@ fn create_power_profile(state: &State) -> Element<Message> {
                         row![
                             checkbox(
                                 "",  // Empty string for checkbox
-                                true
-                            ),
+                                state.enable_turbo
+                            )
+                            .on_toggle(|_| Message::ToggleTurboOption),
                             text("Enable Turbo Profile")
                                 .size(10)
                                 .align_y(Vertical::Center)
                         ]
                         .align_y(Vertical::Center),
                     ].spacing(20),
-                    container(
-                        row![
-                            button(
-                                text("Enable Turbo")
-                                .align_x(Horizontal::Center)
-                                .align_y(Vertical::Center)
-                            )
-                            .width(Length::Fixed(200.0)),
-                            button(
-                                text("Disable Turbo")
-                                .align_x(Horizontal::Center)
-                                .align_y(Vertical::Center)
-                            )
-                            .width(Length::Fixed(200.0)),
-                        ]
-                        .spacing(20)
-                    )
-                    .width(Length::Fill)
-                    .align_x(Horizontal::Center)
+                    if state.enable_turbo {
+                        container(
+                            row![
+                                button(
+                                    text("Enable Turbo")
+                                    .align_x(Horizontal::Center)
+                                    .align_y(Vertical::Center)
+                                )
+                                .width(Length::Fixed(200.0)),
+                                button(
+                                    text("Disable Turbo")
+                                    .align_x(Horizontal::Center)
+                                    .align_y(Vertical::Center)
+                                )
+                                .width(Length::Fixed(200.0)),
+                            ]
+                            .spacing(20)
+                        )
+                        .width(Length::Fill)
+                        .align_x(Horizontal::Center)
+
+                    } else {
+                        container(
+                            row![].spacing(0)
+                        )
+                    }
+                    
                 ].spacing(10)
             )
         ]
