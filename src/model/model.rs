@@ -4,7 +4,7 @@ use std::time::SystemTime;
 #[derive(Debug, Clone)]
 pub struct HistoricalFreq {
     pub timestamp: SystemTime,
-    pub freq: u32,  // MHz
+    pub freq: u32, // MHz
 }
 
 impl Default for HistoricalFreq {
@@ -19,7 +19,7 @@ impl Default for HistoricalFreq {
 #[derive(Debug, Clone)]
 pub struct HistoricalGpuFreq {
     pub timestamp: SystemTime,
-    pub freq: u32,  // MHz
+    pub freq: u32, // MHz
 }
 
 impl Default for HistoricalGpuFreq {
@@ -34,8 +34,8 @@ impl Default for HistoricalGpuFreq {
 #[derive(Debug, Clone)]
 pub struct HistoricalBattStat {
     pub timestamp: SystemTime,
-    pub charge: u32, // charge
-    pub capacity: u32, // capacity (0 - 100)
+    pub charge: u32,         // charge
+    pub capacity: u32,       // capacity (0 - 100)
     pub discharge_rate: f64, // Rate of discharge per minute
     pub status: String, // Charging / Discharging (Other states stored for debugging and / or status update)
     pub status_count: u32,
@@ -56,10 +56,10 @@ impl Default for HistoricalBattStat {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Tab {
-   #[default]
-   Profiles,
-   Overrides,
-   Settings
+    #[default]
+    Profiles,
+    Overrides,
+    Settings,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -70,7 +70,7 @@ pub enum Profile {
     Pow, // Power
     Cus, // Custom
     Sav, // Saver
-    Tur  // Turbo
+    Tur, // Turbo
 }
 
 // Constants to limit input values
@@ -85,8 +85,6 @@ pub const TCTL_LIMIT_MAX: u32 = 95;
 pub const THRESHOLD_MIN: u32 = 5;
 pub const THRESHOLD_MAX: u32 = 80;
 
-
-
 // All the states managed by the app
 #[derive(Default, Debug, Clone)]
 pub struct State {
@@ -95,7 +93,6 @@ pub struct State {
     pub active_profile: Profile,
     pub enable_saver_profile: bool,
     pub enable_turbo: bool,
-
 
     // Current APU power status via libryzenadj
     pub curr_fast_value: u32,
@@ -174,6 +171,4 @@ pub struct State {
     pub power_slow_limit: u32,
     pub power_stapm_limit: u32,
     pub power_tctl_limit: u32,
-
 }
-

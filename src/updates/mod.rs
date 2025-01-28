@@ -1,3 +1,3 @@
 pub mod update;
 
-pub use update::{Message, update};
+pub use update::{update, Message};

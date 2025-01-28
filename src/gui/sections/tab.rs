@@ -1,10 +1,10 @@
-use iced::widget::{row, text, button};
-use iced::{Element, Length};
 use iced::alignment::{Horizontal, Vertical};
+use iced::widget::{button, row, text};
+use iced::{Element, Length};
 
+use crate::gui::style::tab_style;
 use crate::model::{State, Tab};
 use crate::updates::Message;
-use crate::gui::style::tab_style;
 
 pub fn view(state: &State) -> Element<Message> {
     row![
@@ -17,8 +17,6 @@ pub fn view(state: &State) -> Element<Message> {
         .height(Length::Fixed(40.0))
         .style(tab_style(state.active_tab == Tab::Profiles))
         .on_press(Message::TabSelected(Tab::Profiles)),
-        
-
         button(
             text("Custom Overrides")
                 .size(16)
@@ -29,8 +27,6 @@ pub fn view(state: &State) -> Element<Message> {
         .height(Length::Fixed(40.0))
         .style(tab_style(state.active_tab == Tab::Overrides))
         .on_press(Message::TabSelected(Tab::Overrides)),
-
-
         button(
             text("Settings")
                 .align_x(Horizontal::Center)
@@ -40,7 +36,6 @@ pub fn view(state: &State) -> Element<Message> {
         .height(Length::Fixed(40.0))
         .style(tab_style(state.active_tab == Tab::Settings))
         .on_press(Message::TabSelected(Tab::Settings))
-
     ]
     .padding([10, 0]) // Padding only for top and bottom
     .width(Length::Fill)

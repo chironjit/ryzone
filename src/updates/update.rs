@@ -1,27 +1,16 @@
 use glob::glob;
+use iced::time::Duration;
+use std::collections::VecDeque;
 use std::fs;
 use std::io;
-use std::collections::VecDeque;
 use std::time::SystemTime;
-use iced::time::Duration;
 
-use crate::utils;
 use crate::model::model::{
-    Tab,
-    State,
-    HistoricalFreq,
-    HistoricalGpuFreq,
-    FAST_LIMIT_MIN,
-    FAST_LIMIT_MAX,
-    SLOW_LIMIT_MIN,
-    SLOW_LIMIT_MAX,
-    STAPM_LIMIT_MIN,
-    STAPM_LIMIT_MAX,
-    TCTL_LIMIT_MIN,
-    TCTL_LIMIT_MAX,
-    THRESHOLD_MIN,
-    THRESHOLD_MAX
+    HistoricalFreq, HistoricalGpuFreq, State, Tab, FAST_LIMIT_MAX, FAST_LIMIT_MIN, SLOW_LIMIT_MAX,
+    SLOW_LIMIT_MIN, STAPM_LIMIT_MAX, STAPM_LIMIT_MIN, TCTL_LIMIT_MAX, TCTL_LIMIT_MIN,
+    THRESHOLD_MAX, THRESHOLD_MIN,
 };
+use crate::utils;
 
 use libryzenadj::RyzenAdj;
 
@@ -59,10 +48,7 @@ pub enum Message {
 }
 
 // Standalone update function for the state
-pub fn update(
-    state: &mut State,
-    message: Message
-) {
+pub fn update(state: &mut State, message: Message) {
     match message {
         Message::SetFastLimit(value) => {
             if value >= FAST_LIMIT_MIN && value <= FAST_LIMIT_MAX {
@@ -123,19 +109,24 @@ pub fn update(
         Message::UpdateStateValues => {
             // Every second, check what the actual values are
             // If values don't match the override
-            // (and the manual values are not 0), 
+            // (and the manual values are not 0),
             // try to apply the override value
             // Then check the latest figures and then update the state
 
             let ryzen = RyzenAdj::new().unwrap();
 
-
-            state.curr_fast_limit = (ryzen.get_fast_limit().unwrap_or_default() * 1000.).round() as u32;
-            state.curr_fast_value = (ryzen.get_fast_value().unwrap_or_default() * 1000.).round() as u32;
-            state.curr_slow_limit = (ryzen.get_slow_limit().unwrap_or_default() * 1000.).round() as u32;
-            state.curr_slow_value = (ryzen.get_slow_value().unwrap_or_default() * 1000.).round() as u32;
-            state.curr_stapm_limit = (ryzen.get_stapm_limit().unwrap_or_default() * 1000.).round() as u32;
-            state.curr_stapm_value = (ryzen.get_stapm_value().unwrap_or_default() * 1000.).round() as u32;
+            state.curr_fast_limit =
+                (ryzen.get_fast_limit().unwrap_or_default() * 1000.).round() as u32;
+            state.curr_fast_value =
+                (ryzen.get_fast_value().unwrap_or_default() * 1000.).round() as u32;
+            state.curr_slow_limit =
+                (ryzen.get_slow_limit().unwrap_or_default() * 1000.).round() as u32;
+            state.curr_slow_value =
+                (ryzen.get_slow_value().unwrap_or_default() * 1000.).round() as u32;
+            state.curr_stapm_limit =
+                (ryzen.get_stapm_limit().unwrap_or_default() * 1000.).round() as u32;
+            state.curr_stapm_value =
+                (ryzen.get_stapm_value().unwrap_or_default() * 1000.).round() as u32;
             state.curr_tctl_limit = ryzen.get_tctl_temp().unwrap_or_default().round() as u32;
             state.curr_tctl_value = ryzen.get_tctl_temp_value().unwrap_or_default().round() as u32;
 
@@ -151,14 +142,13 @@ pub fn update(
             state.min_gpu_freq_5min = min_5min;
             state.max_gpu_freq_5min = max_5min;
 
-
             // Power stats updates
-            let (power, time, status) = utils::battery::get_battery_metrics(&mut state.batt_history);
+            let (power, time, status) =
+                utils::battery::get_battery_metrics(&mut state.batt_history);
 
             state.batt_power = power;
             state.batt_time = time;
             state.batt_status = status;
-
 
             if state.manual_fast_limit != 0 && state.curr_fast_limit != state.manual_fast_limit {
                 let _ = ryzen.set_fast_limit(state.manual_fast_limit);
@@ -341,7 +331,6 @@ pub fn update(
                 }
             }
         }
-        
     }
 }
 
@@ -350,7 +339,8 @@ fn get_cpu_frequency() -> Result<Vec<u32>, io::Error> {
     let cpu_count = fs::read_dir("/sys/devices/system/cpu")
         .unwrap()
         .filter(|entry| {
-            entry.as_ref()
+            entry
+                .as_ref()
                 .unwrap()
                 .file_name()
                 .to_string_lossy()
@@ -359,7 +349,10 @@ fn get_cpu_frequency() -> Result<Vec<u32>, io::Error> {
         .count();
 
     for cpu in 0..cpu_count {
-        let freq_path = format!("/sys/devices/system/cpu/cpu{}/cpufreq/scaling_cur_freq", cpu);
+        let freq_path = format!(
+            "/sys/devices/system/cpu/cpu{}/cpufreq/scaling_cur_freq",
+            cpu
+        );
         if let Ok(freq_str) = fs::read_to_string(freq_path) {
             let freq_khz: u32 = freq_str.trim().parse().unwrap_or(0);
             frequencies.push(freq_khz); // Keep as kHz
@@ -372,7 +365,7 @@ fn get_cpu_frequency() -> Result<Vec<u32>, io::Error> {
 fn get_cpu_metrics(history: &mut VecDeque<HistoricalFreq>) -> (u32, u32, u32) {
     let now = SystemTime::now();
     let five_mins_ago = now - Duration::from_secs(300);
-    
+
     // Read current frequencies (converting kHz to MHz)
     let mut current_max = 0;
     if let Ok(freqs) = get_cpu_frequency() {
@@ -380,33 +373,36 @@ fn get_cpu_metrics(history: &mut VecDeque<HistoricalFreq>) -> (u32, u32, u32) {
             current_max = freqs.iter().max().unwrap_or(&0) / 1000; // Convert kHz to MHz
         }
     }
-    
+
     // Add to history
     history.push_back(HistoricalFreq {
         timestamp: now,
         freq: current_max,
     });
-    
+
     // Remove old entries
-    while history.front().map_or(false, |h| h.timestamp < five_mins_ago) {
+    while history
+        .front()
+        .map_or(false, |h| h.timestamp < five_mins_ago)
+    {
         history.pop_front();
     }
-    
+
     // Calculate min and max from history
     let mut min_5min = current_max;
     let mut max_5min = current_max;
-    
+
     for hist in history.iter() {
         min_5min = min_5min.min(hist.freq);
         max_5min = max_5min.max(hist.freq);
     }
-    
+
     (current_max, min_5min, max_5min)
 }
 
 fn get_gpu_frequency() -> Result<Vec<u32>, io::Error> {
     let mut frequencies = Vec::new();
-    
+
     // Look for AMD GPU sclk files
     for entry in glob("/sys/class/drm/card*/device/pp_dpm_sclk").unwrap() {
         if let Ok(path) = entry {
@@ -414,9 +410,12 @@ fn get_gpu_frequency() -> Result<Vec<u32>, io::Error> {
                 // Each line looks like: "0: 200Mhz *"
                 // The * indicates which state is active
                 for line in content.lines() {
-                    if line.contains('*') {  // This is the active frequency
+                    if line.contains('*') {
+                        // This is the active frequency
                         if let Some(freq_str) = line.split_whitespace().nth(1) {
-                            if let Some(freq_num) = freq_str.trim_end_matches("Mhz").parse::<u32>().ok() {
+                            if let Some(freq_num) =
+                                freq_str.trim_end_matches("Mhz").parse::<u32>().ok()
+                            {
                                 frequencies.push(freq_num);
                             }
                         }
@@ -425,41 +424,44 @@ fn get_gpu_frequency() -> Result<Vec<u32>, io::Error> {
             }
         }
     }
-    
+
     Ok(frequencies)
 }
 
 fn get_gpu_metrics(history: &mut VecDeque<HistoricalGpuFreq>) -> (u32, u32, u32) {
     let now = SystemTime::now();
     let five_mins_ago = now - Duration::from_secs(300);
-    
+
     // Read current frequencies
     let mut current = 0;
     if let Ok(freqs) = get_gpu_frequency() {
         if !freqs.is_empty() {
-            current = freqs[0];  // Usually there's only one GPU
+            current = freqs[0]; // Usually there's only one GPU
         }
     }
-    
+
     // Add to history
     history.push_back(HistoricalGpuFreq {
         timestamp: now,
         freq: current,
     });
-    
+
     // Remove old entries
-    while history.front().map_or(false, |h| h.timestamp < five_mins_ago) {
+    while history
+        .front()
+        .map_or(false, |h| h.timestamp < five_mins_ago)
+    {
         history.pop_front();
     }
-    
+
     // Calculate min and max from history
     let mut min_5min = current;
     let mut max_5min = current;
-    
+
     for hist in history.iter() {
         min_5min = min_5min.min(hist.freq);
         max_5min = max_5min.max(hist.freq);
     }
-    
+
     (current, min_5min, max_5min)
 }

@@ -1,5 +1,6 @@
 pub fn format_frequency(freq: u32) -> String {
-    if freq < 1000 {  // Less than 1000 MHz (1 GHz)
+    if freq < 1000 {
+        // Less than 1000 MHz (1 GHz)
         format!("{} MHz", freq)
     } else {
         format!("{:.2} GHz", freq as f32 / 1000.0)

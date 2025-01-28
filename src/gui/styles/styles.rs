@@ -1,14 +1,16 @@
-use iced::widget::{button, text, text_input};
 use iced::widget::container::Style;
-use iced::{Theme, Border, Color, Shadow, Background, border, Vector};
+use iced::widget::{button, text, text_input};
+use iced::{border, Background, Border, Color, Shadow, Theme, Vector};
 
 pub fn header_style() -> impl Fn(&Theme) -> Style {
     |theme| Style {
         text_color: None,
-        background: Some(Background::Color(theme.extended_palette().background.weak.color)),
+        background: Some(Background::Color(
+            theme.extended_palette().background.weak.color,
+        )),
         border: Border {
             radius: border::Radius::new(4.0),
-            width: 0.0, 
+            width: 0.0,
             color: Color::TRANSPARENT,
         },
         shadow: Shadow {
@@ -22,10 +24,12 @@ pub fn header_style() -> impl Fn(&Theme) -> Style {
 pub fn card_style() -> impl Fn(&Theme) -> Style {
     |theme| Style {
         text_color: None,
-        background: Some(Background::Color(theme.extended_palette().background.weak.color)),
+        background: Some(Background::Color(
+            theme.extended_palette().background.weak.color,
+        )),
         border: Border {
             radius: border::Radius::new(16.0),
-            width: 0.0, 
+            width: 0.0,
             color: Color::TRANSPARENT,
         },
         shadow: Shadow {
@@ -39,10 +43,12 @@ pub fn card_style() -> impl Fn(&Theme) -> Style {
 pub fn stat_tip_style() -> impl Fn(&Theme) -> Style {
     |theme| Style {
         text_color: None,
-        background: Some(Background::Color(theme.extended_palette().background.weak.color)),
+        background: Some(Background::Color(
+            theme.extended_palette().background.weak.color,
+        )),
         border: Border {
             radius: border::Radius::new(12.0),
-            width: 0.0, 
+            width: 0.0,
             color: Color::TRANSPARENT,
         },
         shadow: Shadow {
@@ -93,7 +99,6 @@ pub fn tab_style(selected: bool) -> impl Fn(&Theme, button::Status) -> button::S
                 text_color: Color::WHITE,
                 ..button::Style::default()
             }
-
         } else {
             button::Style {
                 background: Some(Background::Color(palette.background.weak.color)),
@@ -105,11 +110,6 @@ pub fn tab_style(selected: bool) -> impl Fn(&Theme, button::Status) -> button::S
                 text_color: palette.primary.base.color,
                 ..button::Style::default()
             }
-
         }
-        
     }
 }
-
-
-
