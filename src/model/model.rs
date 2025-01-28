@@ -75,27 +75,17 @@ pub enum Profile {
 
 // Constants to limit input values
 pub const FAST_LIMIT_MIN: u32 = 4000;
-pub const FAST_LIMIT_MAX: u32 = 65000;
+pub const FAST_LIMIT_MAX: u32 = 100000;
 pub const SLOW_LIMIT_MIN: u32 = 4000;
-pub const SLOW_LIMIT_MAX: u32 = 65000;
+pub const SLOW_LIMIT_MAX: u32 = 100000;
 pub const STAPM_LIMIT_MIN: u32 = 4000;
-pub const STAPM_LIMIT_MAX: u32 = 65000;
+pub const STAPM_LIMIT_MAX: u32 = 100000;
 pub const TCTL_LIMIT_MIN: u32 = 40;
-pub const TCTL_LIMIT_MAX: u32 = 100;
+pub const TCTL_LIMIT_MAX: u32 = 95;
+pub const THRESHOLD_MIN: u32 = 5;
+pub const THRESHOLD_MAX: u32 = 80;
 
-// Add this implementation where Profile enum is defined
-impl std::fmt::Display for Profile {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            Profile::OS => write!(f, "OS"),
-            Profile::Bat => write!(f, "Bat"),
-            Profile::Pow => write!(f, "Pow"),
-            Profile::Cus => write!(f, "Cus"),
-            Profile::Sav => write!(f, "Sav"),
-            Profile::Tur => write!(f, "Tur"),
-        }
-    }
-}
+
 
 // All the states managed by the app
 #[derive(Default, Debug, Clone)]
@@ -103,9 +93,8 @@ pub struct State {
     // App states
     pub active_tab: Tab,
     pub active_profile: Profile,
-    pub enable_low_batt_profile: bool,
+    pub enable_saver_profile: bool,
     pub enable_turbo: bool,
-    pub saver_profile_threshold: u32,
 
 
     // Current APU power status via libryzenadj
@@ -161,12 +150,14 @@ pub struct State {
     pub batt_tctl_limit: u32,
 
     // Saver profile values input tracking
+    pub saver_threshold_input: String,
     pub saver_fast_input: String,
     pub saver_slow_input: String,
     pub saver_stapm_input: String,
     pub saver_tctl_input: String,
 
     // Saver override values store
+    pub saver_threshold: u32,
     pub saver_fast_limit: u32,
     pub saver_slow_limit: u32,
     pub saver_stapm_limit: u32,
@@ -185,3 +176,4 @@ pub struct State {
     pub power_tctl_limit: u32,
 
 }
+

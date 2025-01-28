@@ -18,7 +18,9 @@ use crate::model::model::{
     STAPM_LIMIT_MIN,
     STAPM_LIMIT_MAX,
     TCTL_LIMIT_MIN,
-    TCTL_LIMIT_MAX
+    TCTL_LIMIT_MAX,
+    THRESHOLD_MIN,
+    THRESHOLD_MAX
 };
 
 use libryzenadj::RyzenAdj;
@@ -35,6 +37,17 @@ pub enum Message {
     TctlLimitInputChanged(String),
     UpdateStateValues,
     TabSelected(Tab),
+    SetBattProfile(u32, u32, u32, u32),
+    SetSaverProfile(u32, u32, u32, u32, u32),
+    ToggleSaverProfile,
+    ToggleTurboOption,
+    EnableTurbo,
+    DisableTurbo,
+    SaverThresholdInput(String),
+    BattFastInput(String),
+    BattSlowInput(String),
+    BattStapmInput(String),
+    BattTctlInput(String),
 }
 
 // Standalone update function for the state
@@ -158,6 +171,77 @@ pub fn update(
 
         Message::TabSelected(tab) => {
             state.active_tab = tab;
+        }
+
+        Message::ToggleSaverProfile => {
+            state.enable_saver_profile = !state.enable_saver_profile;
+        }
+
+        Message::ToggleTurboOption => {
+            state.enable_turbo = !state.enable_turbo;
+        }
+
+        Message::SetBattProfile(fast, slow, stapm, tctl) => {
+            state.batt_fast_limit = fast;
+            state.batt_slow_limit = slow;
+            state.batt_stapm_limit = stapm;
+            state.batt_tctl_limit = tctl;
+        }
+
+        Message::SetSaverProfile(fast, slow, stapm, tctl, threshold) => {
+            state.saver_fast_limit = fast;
+            state.saver_slow_limit = slow;
+            state.saver_stapm_limit = stapm;
+            state.saver_tctl_limit = tctl;
+            state.saver_threshold = threshold;
+        }
+
+        Message::EnableTurbo => {
+            state.enable_turbo = true;
+        }
+
+        Message::DisableTurbo => {
+            state.enable_turbo = false;
+        }
+
+        Message::SaverThresholdInput(input) => {
+            if let Ok(value) = input.parse::<u32>() {
+                if value >= THRESHOLD_MIN && value <= THRESHOLD_MAX {
+                    state.saver_threshold_input = input;
+                }
+            }
+        }
+
+        Message::BattFastInput(input) => {
+            if let Ok(value) = input.parse::<u32>() {
+                if value >= FAST_LIMIT_MIN && value <= FAST_LIMIT_MAX {
+                    state.batt_fast_input = input;
+                }
+            }
+        }
+
+        Message::BattSlowInput(input) => {
+            if let Ok(value) = input.parse::<u32>() {
+                if value >= SLOW_LIMIT_MIN && value <= SLOW_LIMIT_MAX {
+                    state.batt_slow_input = input;
+                }
+            }
+        }
+
+        Message::BattStapmInput(input) => {
+            if let Ok(value) = input.parse::<u32>() {
+                if value >= STAPM_LIMIT_MIN && value <= STAPM_LIMIT_MAX {
+                    state.batt_stapm_input = input;
+                }
+            }
+        }
+
+        Message::BattTctlInput(input) => {
+            if let Ok(value) = input.parse::<u32>() {
+                if value >= TCTL_LIMIT_MIN && value <= TCTL_LIMIT_MAX {
+                    state.batt_tctl_input = input;
+                }
+            }
         }
     }
 }

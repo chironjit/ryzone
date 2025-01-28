@@ -279,8 +279,8 @@ fn create_battery_profile(state: &State) -> Element<Message> {
                     row![
                             checkbox(
                                 "",  // Empty string for checkbox
-                                true
-                            ),
+                                state.enable_saver_profile
+                            ).on_toggle(|_| Message::ToggleSaverProfile),
                             text("Enable Low Battery (Saver) Profile")
                                 .size(10)
                                 .align_y(Vertical::Center)
@@ -288,45 +288,57 @@ fn create_battery_profile(state: &State) -> Element<Message> {
                     .align_y(Vertical::Center),
 
                     // Saver profile
-                    row![
-                        text("Saver")
-                        .align_x(Horizontal::Center)
-                        .width(Length::FillPortion(1)),
-
-                        text_input("Batt %", "")
-                        .align_x(Horizontal::Left)
-                        .style(text_input_style())
-                        .width(Length::FillPortion(1)),
-
-                        text_input("100000", "")
-                        .align_x(Horizontal::Left)
-                        .style(text_input_style())
-                        .width(Length::FillPortion(1)),
-
-                        text_input("100000", "")
-                        .align_x(Horizontal::Left)
-                        .style(text_input_style())
-                        .width(Length::FillPortion(1)),
-
-                        text_input("100000", "")
-                        .align_x(Horizontal::Left)
-                        .style(text_input_style())
-                        .width(Length::FillPortion(1)),
-
-                        text_input("100", "")
-                        .align_x(Horizontal::Left)
-                        .style(text_input_style())
-                        .width(Length::FillPortion(1)),
-
-                        button(
-                            text("Set")
+                    if state.enable_saver_profile {
+                        row![
+                            text("Saver")
                             .align_x(Horizontal::Center)
-                            .align_y(Vertical::Center)
-                        )
-                        .width(Length::FillPortion(1))
-                    ]
-                    .align_y(Vertical::Center)
-                    .spacing(10),
+                            .width(Length::FillPortion(1)),
+
+                            text_input(
+                                &format!("{}", if state.saver_threshold == 0 { 20 } else { state.saver_threshold }),
+                                &state.saver_threshold_input
+                            )
+                            .on_input(Message::SaverThresholdInput)
+                            .align_x(Horizontal::Center)
+                            .style(text_input_style())
+                            .width(Length::FillPortion(1)),
+
+                            text_input(&format!("{}", if state.batt_fast_limit == 0 { 10000 } else { state.batt_fast_limit }), &state.batt_fast_input)
+                            .on_input(Message::BattFastInput)
+                            .align_x(Horizontal::Center)
+                            .style(text_input_style())
+                            .width(Length::FillPortion(1)),
+
+                            text_input(&format!("{}", if state.batt_slow_limit == 0 { 8000 } else { state.batt_slow_limit }), &state.batt_slow_input)
+                            .on_input(Message::BattSlowInput)
+                            .align_x(Horizontal::Center)
+                            .style(text_input_style())
+                            .width(Length::FillPortion(1)),
+
+                            text_input(&format!("{}", if state.batt_stapm_limit == 0 { 10000 } else { state.batt_stapm_limit }), &state.batt_stapm_input)
+                            .on_input(Message::BattStapmInput)
+                            .align_x(Horizontal::Center)
+                            .style(text_input_style())
+                            .width(Length::FillPortion(1)),
+
+                            text_input(&format!("{}", if state.batt_tctl_limit == 0 { 90 } else { state.batt_tctl_limit }), &state.batt_tctl_input)
+                            .on_input(Message::BattTctlInput)
+                            .align_x(Horizontal::Center)
+                            .style(text_input_style())
+                            .width(Length::FillPortion(1)),
+
+                            button(
+                                text("Set")
+                                .align_x(Horizontal::Center)
+                                .align_y(Vertical::Center)
+                            )
+                            .width(Length::FillPortion(1))
+                        ]
+                        .align_y(Vertical::Center)
+                        .spacing(10)
+                    } else {
+                        row![].spacing(0)
+                    }
                 ].spacing(10)
             )
         ]
