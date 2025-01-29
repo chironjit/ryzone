@@ -170,4 +170,17 @@ pub struct State {
     pub power_slow_limit: u32,
     pub power_stapm_limit: u32,
     pub power_tctl_limit: u32,
+
+    // Turbo override values store
+    pub turbo_fast_limit: u32,
+    pub turbo_slow_limit: u32,
+    pub turbo_stapm_limit: u32,
+    pub turbo_tctl_limit: u32,
+
+    // Pre-turbo values store
+    pub pre_turbo_profile: Profile,
+    pub pre_turbo_fast_limit: u32,
+    pub pre_turbo_slow_limit: u32,
+    pub pre_turbo_stapm_limit: u32,
+    pub pre_turbo_tctl_limit: u32,
 }

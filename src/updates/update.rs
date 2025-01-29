@@ -6,7 +6,7 @@ use std::io;
 use std::time::SystemTime;
 
 use crate::model::state::{
-    HistoricalFreq, HistoricalGpuFreq, State, Tab, ActiveSection,
+    HistoricalFreq, HistoricalGpuFreq, State, Tab, ActiveSection, Profile,
 };
 
 use crate::model::constants::{
@@ -186,33 +186,131 @@ pub fn update(state: &mut State, message: Message) {
         }
 
         Message::SetBattProfile() => {
-            state.batt_fast_limit = state.batt_fast_input.parse::<u32>().unwrap();
-            state.batt_slow_limit = state.batt_slow_input.parse::<u32>().unwrap();
-            state.batt_stapm_limit = state.batt_stapm_input.parse::<u32>().unwrap();
-            state.batt_tctl_limit = state.batt_tctl_input.parse::<u32>().unwrap();
+            if !state.batt_fast_input.is_empty() {
+                if let Ok(value) = state.batt_fast_input.parse::<u32>() {
+                    if value != 0 {
+                        state.batt_fast_limit = value;
+                    }
+                }
+            }
+            if !state.batt_slow_input.is_empty() {
+                if let Ok(value) = state.batt_slow_input.parse::<u32>() {
+                    if value != 0 {
+                        state.batt_slow_limit = value;
+                    }
+                }
+            }
+            if !state.batt_stapm_input.is_empty() {
+                if let Ok(value) = state.batt_stapm_input.parse::<u32>() {
+                    if value != 0 {
+                        state.batt_stapm_limit = value;
+                    }
+                }
+            }
+            if !state.batt_tctl_input.is_empty() {
+                if let Ok(value) = state.batt_tctl_input.parse::<u32>() {
+                    if value != 0 {
+                        state.batt_tctl_limit = value;
+                    }
+                }
+            }
         }
 
         Message::SetSaverProfile() => {
-            state.saver_fast_limit = state.saver_fast_input.parse::<u32>().unwrap();
-            state.saver_slow_limit = state.saver_slow_input.parse::<u32>().unwrap();
-            state.saver_stapm_limit = state.saver_stapm_input.parse::<u32>().unwrap();
-            state.saver_tctl_limit = state.saver_tctl_input.parse::<u32>().unwrap();
-            state.saver_threshold = state.saver_threshold_input.parse::<u32>().unwrap();
+            if !state.saver_fast_input.is_empty() {
+                if let Ok(value) = state.saver_fast_input.parse::<u32>() {
+                    if value != 0 {
+                        state.saver_fast_limit = value;
+                    }
+                }
+            }
+            if !state.saver_slow_input.is_empty() {
+                if let Ok(value) = state.saver_slow_input.parse::<u32>() {
+                    if value != 0 {
+                        state.saver_slow_limit = value;
+                    }
+                }
+            }
+            if !state.saver_stapm_input.is_empty() {
+                if let Ok(value) = state.saver_stapm_input.parse::<u32>() {
+                    if value != 0 {
+                        state.saver_stapm_limit = value;
+                    }
+                }
+            }
+            if !state.saver_tctl_input.is_empty() {
+                if let Ok(value) = state.saver_tctl_input.parse::<u32>() {
+                    if value != 0 {
+                        state.saver_tctl_limit = value;
+                    }
+                }
+            }
+            if !state.saver_threshold_input.is_empty() {
+                if let Ok(value) = state.saver_threshold_input.parse::<u32>() {
+                    if value != 0 {
+                        state.saver_threshold = value;
+                    }
+                }
+            }
         }
 
         Message::SetPowerProfile() => {
-            state.power_fast_limit = state.power_fast_input.parse::<u32>().unwrap();
-            state.power_slow_limit = state.power_slow_input.parse::<u32>().unwrap();
-            state.power_stapm_limit = state.power_stapm_input.parse::<u32>().unwrap();
-            state.power_tctl_limit = state.power_tctl_input.parse::<u32>().unwrap();
+            if !state.power_fast_input.is_empty() {
+                if let Ok(value) = state.power_fast_input.parse::<u32>() {
+                    if value != 0 {
+                        state.power_fast_limit = value;
+                    }
+                }
+            }
+            if !state.power_slow_input.is_empty() {
+                if let Ok(value) = state.power_slow_input.parse::<u32>() {
+                    if value != 0 {
+                        state.power_slow_limit = value;
+                    }
+                }
+            }
+            if !state.power_stapm_input.is_empty() {
+                if let Ok(value) = state.power_stapm_input.parse::<u32>() {
+                    if value != 0 {
+                        state.power_stapm_limit = value;
+                    }
+                }
+            }
+            if !state.power_tctl_input.is_empty() {
+                if let Ok(value) = state.power_tctl_input.parse::<u32>() {
+                    if value != 0 {
+                        state.power_tctl_limit = value;
+                    }
+                }
+            }
         }
 
         Message::EnableTurbo => {
+            // Save pre-turbo values
+            state.pre_turbo_profile = state.active_profile;
+            state.pre_turbo_fast_limit = state.curr_fast_limit;
+            state.pre_turbo_slow_limit = state.curr_slow_limit;
+            state.pre_turbo_stapm_limit = state.curr_stapm_limit;
+            state.pre_turbo_tctl_limit = state.curr_tctl_limit;
+            
+            // Set turbo values
             state.enable_turbo = true;
+            state.active_profile = Profile::Tur;
+            state.turbo_fast_limit = FAST_LIMIT_MAX;
+            state.turbo_slow_limit = SLOW_LIMIT_MAX;
+            state.turbo_stapm_limit = STAPM_LIMIT_MAX;
+            state.turbo_tctl_limit = TCTL_LIMIT_MAX;
+
+
         }
 
         Message::DisableTurbo => {
             state.enable_turbo = false;
+            state.active_profile = state.pre_turbo_profile;
+            state.curr_fast_limit = state.pre_turbo_fast_limit;
+            state.curr_slow_limit = state.pre_turbo_slow_limit;
+            state.curr_stapm_limit = state.pre_turbo_stapm_limit;
+            state.curr_tctl_limit = state.pre_turbo_tctl_limit;
         }
 
         Message::SaverThresholdInputChanged(input) => {
