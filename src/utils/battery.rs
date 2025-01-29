@@ -70,11 +70,11 @@ fn calc_discharge_rate_per_min(
     discharge_rate_per_sec * 60.
 }
 
-pub fn get_battery_metrics(batt_stat: &mut VecDeque<HistoricalBattStat>) -> (u32, u32, String) {
+pub fn get_battery_metrics(batt_stat: &mut VecDeque<HistoricalBattStat>) -> (u32, u32, String, u32) {
     let battery_paths = find_battery_paths();
 
     match battery_paths.len() {
-        0 => (0, 0, "No batt detected".to_string()),
+        0 => (0, 0, "No batt detected".to_string(), 0),
         1 => {
             // Get status
             let status = get_batt_stat(&battery_paths[0], "status");
@@ -158,8 +158,8 @@ pub fn get_battery_metrics(batt_stat: &mut VecDeque<HistoricalBattStat>) -> (u32
             }
 
             // // Return results
-            (power_now, batt_time, status)
+            (power_now, batt_time, status, capacity)
         }
-        _ => (0, 0, "Multiple batteries detected".to_string()),
+        _ => (0, 0, "Multiple batteries detected".to_string(), 0),
     }
 }

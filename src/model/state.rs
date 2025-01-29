@@ -119,6 +119,7 @@ pub struct State {
     pub batt_power: u32,
     pub batt_time: u32,
     pub batt_status: String,
+    pub batt_capacity: u32,
     pub batt_history: VecDeque<HistoricalBattStat>,
 
     // Custom values input tracking

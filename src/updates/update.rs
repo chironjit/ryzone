@@ -149,28 +149,144 @@ pub fn update(state: &mut State, message: Message) {
             state.max_gpu_freq_5min = max_5min;
 
             // Power stats updates
-            let (power, time, status) =
+            let (power, time, status, capacity) =
                 utils::battery::get_battery_metrics(&mut state.batt_history);
 
             state.batt_power = power;
             state.batt_time = time;
             state.batt_status = status;
+            state.batt_capacity = capacity;
+            match state.active_profile {
+                Profile::Bat => {
+                    // Check if saver profile is enabled
+                    // and if the battery is at or below the threshold
+                    // if so change profile to saver
+                    // else just implement batt profile settings
+                    if state.enable_saver_profile && state.batt_capacity <= state.saver_threshold {
+                        state.active_profile = Profile::Sav;
+                    } else {
+                        if state.batt_fast_limit != 0 && state.curr_fast_limit != state.batt_fast_limit {
+                            let _ = ryzen.set_fast_limit(state.batt_fast_limit);
+                        }
+            
+                        if state.batt_slow_limit != 0 && state.curr_slow_limit != state.batt_slow_limit {
+                            let _ = ryzen.set_slow_limit(state.batt_slow_limit);
+                        }
+            
+                        if state.batt_stapm_limit != 0 && state.curr_stapm_limit != state.batt_stapm_limit {
+                            let _ = ryzen.set_stapm_limit(state.batt_stapm_limit);
+                        }
+            
+                        if state.batt_tctl_limit != 0 && state.curr_tctl_limit != state.batt_tctl_limit {
+                            let _ = ryzen.set_tctl_temp(state.batt_tctl_limit);
+                        }
+                    }
 
-            if state.manual_fast_limit != 0 && state.curr_fast_limit != state.manual_fast_limit {
-                let _ = ryzen.set_fast_limit(state.manual_fast_limit);
+                }
+                Profile::Pow => {
+                    if state.power_fast_limit != 0 && state.curr_fast_limit != state.power_fast_limit {
+                        let _ = ryzen.set_fast_limit(state.power_fast_limit);
+                    }
+
+                    if state.power_slow_limit != 0 && state.curr_slow_limit != state.power_slow_limit {
+                        let _ = ryzen.set_slow_limit(state.power_slow_limit);
+                    }
+
+                    if state.power_stapm_limit != 0 && state.curr_stapm_limit != state.power_stapm_limit {
+                        let _ = ryzen.set_stapm_limit(state.power_stapm_limit);
+                    }
+
+                    if state.power_tctl_limit != 0 && state.curr_tctl_limit != state.power_tctl_limit {
+                        let _ = ryzen.set_tctl_temp(state.power_tctl_limit);
+                    }
+                }
+
+                Profile::Sav => {
+                    if state.saver_fast_limit != 0 && state.curr_fast_limit != state.saver_fast_limit {
+                        let _ = ryzen.set_fast_limit(state.saver_fast_limit);
+                    }
+        
+                    if state.saver_slow_limit != 0 && state.curr_slow_limit != state.saver_slow_limit {
+                        let _ = ryzen.set_slow_limit(state.saver_slow_limit);
+                    }
+        
+                    if state.saver_stapm_limit != 0 && state.curr_stapm_limit != state.saver_stapm_limit {
+                        let _ = ryzen.set_stapm_limit(state.saver_stapm_limit);
+                    }
+        
+                    if state.saver_tctl_limit != 0 && state.curr_tctl_limit != state.saver_tctl_limit {
+                        let _ = ryzen.set_tctl_temp(state.saver_tctl_limit);
+                    }
+
+                }
+                Profile::Tur => {
+                    // Apply turbo values
+                    if state.turbo_fast_limit != 0 && state.curr_fast_limit != state.turbo_fast_limit {
+                        let _ = ryzen.set_fast_limit(state.turbo_fast_limit);
+                    }
+        
+                    if state.turbo_slow_limit != 0 && state.curr_slow_limit != state.turbo_slow_limit {
+                        let _ = ryzen.set_slow_limit(state.turbo_slow_limit);
+                    }
+        
+                    if state.turbo_stapm_limit != 0 && state.curr_stapm_limit != state.turbo_stapm_limit {
+                        let _ = ryzen.set_stapm_limit(state.turbo_stapm_limit);
+                    }
+        
+                    if state.turbo_tctl_limit != 0 && state.curr_tctl_limit != state.turbo_tctl_limit {
+                        let _ = ryzen.set_tctl_temp(state.turbo_tctl_limit);
+                    }
+
+                    // Update the state with the new values
+                    state.curr_fast_limit =
+                        (ryzen.get_fast_limit().unwrap_or_default() * 1000.).round() as u32;
+                    state.curr_fast_value =
+                        (ryzen.get_fast_value().unwrap_or_default() * 1000.).round() as u32;
+                    state.curr_slow_limit =
+                        (ryzen.get_slow_limit().unwrap_or_default() * 1000.).round() as u32;
+                    state.curr_slow_value =
+                        (ryzen.get_slow_value().unwrap_or_default() * 1000.).round() as u32;
+                    state.curr_stapm_limit =
+                        (ryzen.get_stapm_limit().unwrap_or_default() * 1000.).round() as u32;
+                    state.curr_stapm_value =
+                        (ryzen.get_stapm_value().unwrap_or_default() * 1000.).round() as u32;
+                    state.curr_tctl_limit = ryzen.get_tctl_temp().unwrap_or_default().round() as u32;
+                    state.curr_tctl_value = ryzen.get_tctl_temp_value().unwrap_or_default().round() as u32;
+
+                    // Update the turbo values recursively 
+                    // as the system's max values don't match the turbo values
+                    // due to inherent limitations of knowledge of what hard limits are
+                    // for each system
+                    state.turbo_fast_limit = state.curr_fast_limit;
+                    state.turbo_slow_limit = state.curr_slow_limit;
+                    state.turbo_stapm_limit = state.curr_stapm_limit;
+                    state.turbo_tctl_limit = state.curr_tctl_limit;
+
+                }
+                Profile::OS => {
+
+                }
+                Profile::Cus => {
+                    if state.manual_fast_limit != 0 && state.curr_fast_limit != state.manual_fast_limit {
+                        let _ = ryzen.set_fast_limit(state.manual_fast_limit);
+                    }
+        
+                    if state.manual_slow_limit != 0 && state.curr_slow_limit != state.manual_slow_limit {
+                        let _ = ryzen.set_slow_limit(state.manual_slow_limit);
+                    }
+        
+                    if state.manual_stapm_limit != 0 && state.curr_stapm_limit != state.manual_stapm_limit {
+                        let _ = ryzen.set_stapm_limit(state.manual_stapm_limit);
+                    }
+        
+                    if state.manual_tctl_limit != 0 && state.curr_tctl_limit != state.manual_tctl_limit {
+                        let _ = ryzen.set_tctl_temp(state.manual_tctl_limit);
+                    }
+
+                }
             }
 
-            if state.manual_slow_limit != 0 && state.curr_slow_limit != state.manual_slow_limit {
-                let _ = ryzen.set_slow_limit(state.manual_slow_limit);
-            }
-
-            if state.manual_stapm_limit != 0 && state.curr_stapm_limit != state.manual_stapm_limit {
-                let _ = ryzen.set_stapm_limit(state.manual_stapm_limit);
-            }
-
-            if state.manual_tctl_limit != 0 && state.curr_tctl_limit != state.manual_tctl_limit {
-                let _ = ryzen.set_tctl_temp(state.manual_tctl_limit);
-            }
+            
         }
 
         Message::TabSelected(tab) => {
@@ -294,7 +410,6 @@ pub fn update(state: &mut State, message: Message) {
             state.pre_turbo_tctl_limit = state.curr_tctl_limit;
             
             // Set turbo values
-            state.enable_turbo = true;
             state.active_profile = Profile::Tur;
             state.turbo_fast_limit = FAST_LIMIT_MAX;
             state.turbo_slow_limit = SLOW_LIMIT_MAX;
@@ -305,7 +420,6 @@ pub fn update(state: &mut State, message: Message) {
         }
 
         Message::DisableTurbo => {
-            state.enable_turbo = false;
             state.active_profile = state.pre_turbo_profile;
             state.curr_fast_limit = state.pre_turbo_fast_limit;
             state.curr_slow_limit = state.pre_turbo_slow_limit;
