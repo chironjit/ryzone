@@ -1,20 +1,45 @@
 use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{button, column, container, row, text, text_input, tooltip};
+use iced::widget::{button, column, container, row, text, text_input, tooltip, checkbox};
 use iced::{Element, Length};
 
 use crate::gui::style::{card_style, hint_text_style, text_input_style};
 use crate::model::State;
 use crate::updates::Message;
-
+use crate::model::state::ActiveSection;
 pub fn view(state: &State) -> Element<Message> {
-    column![
-        create_column_titles(),
-        create_fast_limit_row(state),
-        create_slow_limit_row(state),
-        create_stapm_limit_row(state),
-        create_tctl_limit_row(state)
-    ]
-    .spacing(10)
+    if state.active_section != ActiveSection::Custom {
+        create_profile_enabler_overlay(state)
+    } else {
+        column![
+            create_column_titles(),
+            create_fast_limit_row(state),
+            create_slow_limit_row(state),
+            create_stapm_limit_row(state),
+            create_tctl_limit_row(state)
+        ]
+        .spacing(10)
+        .into()
+
+    }
+    
+}
+
+fn create_profile_enabler_overlay(state: &State) -> Element<Message> {
+    container(
+        column![
+            checkbox(
+                "Enable Custom Overrides",
+                state.active_section == ActiveSection::Custom,
+            )
+            .on_toggle(|_| Message::SetActiveSection(ActiveSection::Custom))
+        ]
+        .align_x(Horizontal::Center)
+    )
+    .style(card_style())
+    .align_x(Horizontal::Center)
+    .align_y(Vertical::Center)
+    .height(Length::Fill)
+    .width(Length::Fill)
     .into()
 }
 

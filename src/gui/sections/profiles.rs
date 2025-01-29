@@ -7,21 +7,46 @@ use iced::{Element, Length};
 use crate::gui::style::{card_style, stat_tip_style, text_input_style};
 use crate::model::State;
 use crate::updates::Message;
+use crate::model::state::ActiveSection;
 
 pub fn view(state: &State) -> Element<Message> {
     column![
         create_current_profile(state),
-        scrollable(
-            column![
-                create_header(),
-                column![create_battery_profile(state), create_power_profile(state),].spacing(10)
-            ]
-            .padding(5)
-        )
-        .spacing(10)
-        .height(Length::Fill)
+        if state.active_section != ActiveSection::Profiles {
+            create_profile_enabler_overlay(state)
+        } else {
+            scrollable(
+                column![
+                    create_header(),
+                    column![create_battery_profile(state), create_power_profile(state),].spacing(10)
+                ]
+                .padding(5)
+            )
+            .spacing(10)
+            .height(Length::Fill)
+            .into()
+        }
     ]
     .spacing(10)
+    .into()
+}
+
+fn create_profile_enabler_overlay(state: &State) -> Element<Message> {
+    container(
+        column![
+            checkbox(
+                "Enable Battery & Power Profiles",
+                state.active_section == ActiveSection::Profiles,
+            )
+            .on_toggle(|_| Message::SetActiveSection(ActiveSection::Profiles))
+        ]
+        .align_x(Horizontal::Center)
+    )
+    .style(card_style())
+    .align_x(Horizontal::Center)
+    .align_y(Vertical::Center)
+    .height(Length::Fill)
+    .width(Length::Fill)
     .into()
 }
 
@@ -532,3 +557,4 @@ fn create_power_profile(state: &State) -> Element<Message> {
     .width(Length::Fill)
     .into()
 }
+
