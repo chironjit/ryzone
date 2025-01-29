@@ -277,11 +277,13 @@ fn create_battery_profile(state: &State) -> Element<Message> {
                     .align_x(Horizontal::Center)
                     .style(text_input_style())
                     .width(Length::FillPortion(1)),
+
                     button(
                         text("Set")
                             .align_x(Horizontal::Center)
                             .align_y(Vertical::Center)
                     )
+                    .on_press(Message::SetBattProfile())
                     .width(Length::FillPortion(1))
                 ]
                 .spacing(10),
@@ -383,6 +385,7 @@ fn create_battery_profile(state: &State) -> Element<Message> {
                                 .align_x(Horizontal::Center)
                                 .align_y(Vertical::Center)
                         )
+                        .on_press(Message::SetSaverProfile())
                         .width(Length::FillPortion(1))
                     ]
                     .align_y(Vertical::Center)
@@ -479,6 +482,7 @@ fn create_power_profile(state: &State) -> Element<Message> {
                             .align_x(Horizontal::Center)
                             .align_y(Vertical::Center)
                     )
+                    .on_press(Message::SetPowerProfile())
                     .width(Length::FillPortion(1))
                 ]
                 .spacing(10),
@@ -502,12 +506,14 @@ fn create_power_profile(state: &State) -> Element<Message> {
                                     .align_x(Horizontal::Center)
                                     .align_y(Vertical::Center)
                             )
+                            .on_press(Message::EnableTurbo)
                             .width(Length::Fixed(200.0)),
                             button(
                                 text("Disable Turbo")
                                     .align_x(Horizontal::Center)
                                     .align_y(Vertical::Center)
                             )
+                            .on_press(Message::DisableTurbo)
                             .width(Length::Fixed(200.0)),
                         ]
                         .spacing(20),

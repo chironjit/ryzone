@@ -26,8 +26,9 @@ pub enum Message {
     TctlLimitInputChanged(String),
     UpdateStateValues,
     TabSelected(Tab),
-    SetBattProfile(u32, u32, u32, u32),
-    SetSaverProfile(u32, u32, u32, u32, u32),
+    SetBattProfile(),
+    SetSaverProfile(),
+    SetPowerProfile(),
     ToggleSaverProfile,
     ToggleTurboOption,
     EnableTurbo,
@@ -179,19 +180,26 @@ pub fn update(state: &mut State, message: Message) {
             state.enable_turbo = !state.enable_turbo;
         }
 
-        Message::SetBattProfile(fast, slow, stapm, tctl) => {
-            state.batt_fast_limit = fast;
-            state.batt_slow_limit = slow;
-            state.batt_stapm_limit = stapm;
-            state.batt_tctl_limit = tctl;
+        Message::SetBattProfile() => {
+            state.batt_fast_limit = state.batt_fast_input.parse::<u32>().unwrap();
+            state.batt_slow_limit = state.batt_slow_input.parse::<u32>().unwrap();
+            state.batt_stapm_limit = state.batt_stapm_input.parse::<u32>().unwrap();
+            state.batt_tctl_limit = state.batt_tctl_input.parse::<u32>().unwrap();
         }
 
-        Message::SetSaverProfile(fast, slow, stapm, tctl, threshold) => {
-            state.saver_fast_limit = fast;
-            state.saver_slow_limit = slow;
-            state.saver_stapm_limit = stapm;
-            state.saver_tctl_limit = tctl;
-            state.saver_threshold = threshold;
+        Message::SetSaverProfile() => {
+            state.saver_fast_limit = state.saver_fast_input.parse::<u32>().unwrap();
+            state.saver_slow_limit = state.saver_slow_input.parse::<u32>().unwrap();
+            state.saver_stapm_limit = state.saver_stapm_input.parse::<u32>().unwrap();
+            state.saver_tctl_limit = state.saver_tctl_input.parse::<u32>().unwrap();
+            state.saver_threshold = state.saver_threshold_input.parse::<u32>().unwrap();
+        }
+
+        Message::SetPowerProfile() => {
+            state.power_fast_limit = state.power_fast_input.parse::<u32>().unwrap();
+            state.power_slow_limit = state.power_slow_input.parse::<u32>().unwrap();
+            state.power_stapm_limit = state.power_stapm_input.parse::<u32>().unwrap();
+            state.power_tctl_limit = state.power_tctl_input.parse::<u32>().unwrap();
         }
 
         Message::EnableTurbo => {
