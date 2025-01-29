@@ -1,3 +1,4 @@
-pub mod model;
+pub mod state;
+pub mod constants;
 
-pub use model::{State, Tab};
+pub use state::{State, Tab};

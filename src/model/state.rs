@@ -73,23 +73,22 @@ pub enum Profile {
     Tur, // Turbo
 }
 
-// Constants to limit input values
-pub const FAST_LIMIT_MIN: u32 = 4000;
-pub const FAST_LIMIT_MAX: u32 = 100000;
-pub const SLOW_LIMIT_MIN: u32 = 4000;
-pub const SLOW_LIMIT_MAX: u32 = 100000;
-pub const STAPM_LIMIT_MIN: u32 = 4000;
-pub const STAPM_LIMIT_MAX: u32 = 100000;
-pub const TCTL_LIMIT_MIN: u32 = 40;
-pub const TCTL_LIMIT_MAX: u32 = 95;
-pub const THRESHOLD_MIN: u32 = 5;
-pub const THRESHOLD_MAX: u32 = 80;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum ActiveSection {
+    #[default]
+    None,
+    Profiles,
+    Custom,
+}
+
+
 
 // All the states managed by the app
 #[derive(Default, Debug, Clone)]
 pub struct State {
     // App states
     pub active_tab: Tab,
+    pub active_section: ActiveSection,
     pub active_profile: Profile,
     pub enable_saver_profile: bool,
     pub enable_turbo: bool,

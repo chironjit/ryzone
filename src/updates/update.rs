@@ -5,8 +5,12 @@ use std::fs;
 use std::io;
 use std::time::SystemTime;
 
-use crate::model::model::{
-    HistoricalFreq, HistoricalGpuFreq, State, Tab, FAST_LIMIT_MAX, FAST_LIMIT_MIN, SLOW_LIMIT_MAX,
+use crate::model::state::{
+    HistoricalFreq, HistoricalGpuFreq, State, Tab, ActiveSection,
+};
+
+use crate::model::constants::{
+    FAST_LIMIT_MAX, FAST_LIMIT_MIN, SLOW_LIMIT_MAX,
     SLOW_LIMIT_MIN, STAPM_LIMIT_MAX, STAPM_LIMIT_MIN, TCTL_LIMIT_MAX, TCTL_LIMIT_MIN,
     THRESHOLD_MAX, THRESHOLD_MIN,
 };
@@ -46,6 +50,7 @@ pub enum Message {
     PowerSlowInputChanged(String),
     PowerStapmInputChanged(String),
     PowerTctlInputChanged(String),
+    SetActiveSection(ActiveSection),
 }
 
 // Standalone update function for the state
@@ -338,6 +343,10 @@ pub fn update(state: &mut State, message: Message) {
                     state.power_tctl_input = value;
                 }
             }
+        }
+
+        Message::SetActiveSection(section) => {
+            state.active_section = section;
         }
     }
 }
