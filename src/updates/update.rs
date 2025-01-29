@@ -156,30 +156,57 @@ pub fn update(state: &mut State, message: Message) {
             state.batt_time = time;
             state.batt_status = status;
             state.batt_capacity = capacity;
+
+            match state.active_section {
+                ActiveSection::Custom => {
+                    if state.active_profile != Profile::Cus {
+                        state.active_profile = Profile::Cus;
+                    }
+
+                }
+                ActiveSection::Profiles => {
+                    if state.active_profile != Profile::Tur{
+                        match state.batt_status.as_str() {
+                            "Discharging"=> {
+                                if state.batt_capacity <= state.saver_threshold {
+                                    if state.saver_threshold != 0 {
+                                        state.active_profile = Profile::Sav;
+                                    }
+                                } else {
+                                    if state.batt_fast_limit != 0  {
+                                        state.active_profile = Profile::Bat;
+                                    }
+                                }
+                            }
+                            "Charging" => {
+                                if state.power_fast_limit != 0 {
+                                    state.active_profile = Profile::Pow;
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+                ActiveSection::None => {
+
+                }
+            }
             match state.active_profile {
                 Profile::Bat => {
-                    // Check if saver profile is enabled
-                    // and if the battery is at or below the threshold
-                    // if so change profile to saver
-                    // else just implement batt profile settings
-                    if state.enable_saver_profile && state.batt_capacity <= state.saver_threshold {
-                        state.active_profile = Profile::Sav;
-                    } else {
-                        if state.batt_fast_limit != 0 && state.curr_fast_limit != state.batt_fast_limit {
-                            let _ = ryzen.set_fast_limit(state.batt_fast_limit);
-                        }
-            
-                        if state.batt_slow_limit != 0 && state.curr_slow_limit != state.batt_slow_limit {
-                            let _ = ryzen.set_slow_limit(state.batt_slow_limit);
-                        }
-            
-                        if state.batt_stapm_limit != 0 && state.curr_stapm_limit != state.batt_stapm_limit {
-                            let _ = ryzen.set_stapm_limit(state.batt_stapm_limit);
-                        }
-            
-                        if state.batt_tctl_limit != 0 && state.curr_tctl_limit != state.batt_tctl_limit {
-                            let _ = ryzen.set_tctl_temp(state.batt_tctl_limit);
-                        }
+                    if state.batt_fast_limit != 0 && state.curr_fast_limit != state.batt_fast_limit {
+                        let _ = ryzen.set_fast_limit(state.batt_fast_limit);
+                    }
+        
+                    if state.batt_slow_limit != 0 && state.curr_slow_limit != state.batt_slow_limit {
+                        let _ = ryzen.set_slow_limit(state.batt_slow_limit);
+                    }
+        
+                    if state.batt_stapm_limit != 0 && state.curr_stapm_limit != state.batt_stapm_limit {
+                        let _ = ryzen.set_stapm_limit(state.batt_stapm_limit);
+                    }
+        
+                    if state.batt_tctl_limit != 0 && state.curr_tctl_limit != state.batt_tctl_limit {
+                        let _ = ryzen.set_tctl_temp(state.batt_tctl_limit);
                     }
 
                 }

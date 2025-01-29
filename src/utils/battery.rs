@@ -61,7 +61,7 @@ fn calc_discharge_rate_per_min(
     curr_time: SystemTime,
     prev_time: SystemTime,
 ) -> f64 {
-    let charge_diff = prev_charge - curr_charge;
+    let charge_diff = prev_charge.checked_sub(curr_charge).unwrap_or_default();
     let time_diff = curr_time
         .duration_since(prev_time)
         .unwrap_or_default()
