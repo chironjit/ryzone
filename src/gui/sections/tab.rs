@@ -10,11 +10,12 @@ pub fn view(state: &State) -> Element<Message> {
     row![
         button(
             text("Profiles")
+                .size(16)
                 .align_x(Horizontal::Center)
                 .align_y(Vertical::Center)
         )
         .width(Length::Fill)
-        .height(Length::Fixed(40.0))
+        .height(Length::Fixed(48.0))
         .style(tab_style(state.active_tab == Tab::Profiles))
         .on_press(Message::TabSelected(Tab::Profiles)),
         button(
@@ -24,20 +25,22 @@ pub fn view(state: &State) -> Element<Message> {
                 .align_y(Vertical::Center)
         )
         .width(Length::Fill)
-        .height(Length::Fixed(40.0))
+        .height(Length::Fixed(48.0))
         .style(tab_style(state.active_tab == Tab::Overrides))
         .on_press(Message::TabSelected(Tab::Overrides)),
         button(
             text("Settings")
+                .size(16)
                 .align_x(Horizontal::Center)
                 .align_y(Vertical::Center)
         )
         .width(Length::Fill)
-        .height(Length::Fixed(40.0))
+        .height(Length::Fixed(48.0))
         .style(tab_style(state.active_tab == Tab::Settings))
         .on_press(Message::TabSelected(Tab::Settings))
     ]
-    .padding([10, 0]) // Padding only for top and bottom
+    .spacing(12)
+    .padding([16, 0])
     .width(Length::Fill)
     .into()
 }

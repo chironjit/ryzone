@@ -17,8 +17,8 @@ fn update_state_values(_: &State) -> Subscription<Message> {
 fn main() -> iced::Result {
     iced::application("Ryzone", update, view)
         .window(window::Settings {
-            min_size: Some(Size::new(600.0, 450.0)),
-            size: Size::new(800.0, 600.0),
+            min_size: Some(Size::new(900.0, 650.0)),
+            size: Size::new(1200.0, 800.0),
             icon: Some(
                 window::icon::from_file_data(
                     include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/icon.ico")),

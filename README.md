@@ -13,14 +13,19 @@ Ryzone is a linux graphical interface for manually controlling mobile Ryzen proc
 This app is a work in progress. Some key pending items:
 
 1.  Background daemon
-2.  Pkexec (instead of sudo -E) 
-3.  Packaging and release of appimage 
+2.  Pkexec (instead of sudo -E)
+3.  Packaging and release of appimage
 4.  Tray icon
 5.  Power profiles
 6.  Install / deploy script
-   
+
+## Required for build
+Building the app requires `cmake`, `build-essential`, `libpci-dev` & `libclang-dev`
+
+`sudo apt install cmake build-essential libpci-dev libclang-dev`
+
 ## Building & Running the app
-To build and run the release version, run 
+To build and run the release version, run
 
 `cargo build && sudo -E ./target/release/ryzone`
 

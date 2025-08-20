@@ -15,8 +15,8 @@ pub fn view(state: &State) -> Element<Message> {
             Tab::Settings => settings::view(state),
         }
     ]
-    .spacing(10)
-    .padding(20)
+    .spacing(24)
+    .padding(32)
     .width(Length::Fill)
     .height(Length::Fill)
     .into()

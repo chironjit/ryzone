@@ -4,10 +4,12 @@ use iced::widget::{
 };
 use iced::{Element, Length};
 
-use crate::gui::style::{card_style, stat_tip_style, text_input_style};
+use crate::gui::style::{
+    card_style, primary_button_style, secondary_button_style, stat_tip_style, text_input_style,
+};
+use crate::model::state::ActiveSection;
 use crate::model::State;
 use crate::updates::Message;
-use crate::model::state::ActiveSection;
 
 pub fn view(state: &State) -> Element<Message> {
     column![
@@ -18,9 +20,10 @@ pub fn view(state: &State) -> Element<Message> {
             scrollable(
                 column![
                     create_header(),
-                    column![create_battery_profile(state), create_power_profile(state),].spacing(10)
+                    column![create_battery_profile(state), create_power_profile(state),]
+                        .spacing(10)
                 ]
-                .padding(5)
+                .padding(5),
             )
             .spacing(10)
             .height(Length::Fill)
@@ -33,14 +36,12 @@ pub fn view(state: &State) -> Element<Message> {
 
 fn create_profile_enabler_overlay(state: &State) -> Element<Message> {
     container(
-        column![
-            checkbox(
-                "Enable Battery & Power Profiles",
-                state.active_section == ActiveSection::Profiles,
-            )
-            .on_toggle(|_| Message::SetActiveSection(ActiveSection::Profiles))
-        ]
-        .align_x(Horizontal::Center)
+        column![checkbox(
+            "Enable Battery & Power Profiles",
+            state.active_section == ActiveSection::Profiles,
+        )
+        .on_toggle(|_| Message::SetActiveSection(ActiveSection::Profiles))]
+        .align_x(Horizontal::Center),
     )
     .style(card_style())
     .align_x(Horizontal::Center)
@@ -179,7 +180,7 @@ fn create_current_profile(state: &State) -> Element<Message> {
             .width(Length::Fill)
             .height(Length::Fixed(50.0)),
         ]
-        .spacing(10),
+        .spacing(16),
     )
     .into()
 }
@@ -302,12 +303,12 @@ fn create_battery_profile(state: &State) -> Element<Message> {
                     .align_x(Horizontal::Center)
                     .style(text_input_style())
                     .width(Length::FillPortion(1)),
-
                     button(
                         text("Set")
                             .align_x(Horizontal::Center)
                             .align_y(Vertical::Center)
                     )
+                    .style(primary_button_style())
                     .on_press(Message::SetBattProfile())
                     .width(Length::FillPortion(1))
                 ]
@@ -410,6 +411,7 @@ fn create_battery_profile(state: &State) -> Element<Message> {
                                 .align_x(Horizontal::Center)
                                 .align_y(Vertical::Center)
                         )
+                        .style(primary_button_style())
                         .on_press(Message::SetSaverProfile())
                         .width(Length::FillPortion(1))
                     ]
@@ -507,6 +509,7 @@ fn create_power_profile(state: &State) -> Element<Message> {
                             .align_x(Horizontal::Center)
                             .align_y(Vertical::Center)
                     )
+                    .style(primary_button_style())
                     .on_press(Message::SetPowerProfile())
                     .width(Length::FillPortion(1))
                 ]
@@ -531,6 +534,7 @@ fn create_power_profile(state: &State) -> Element<Message> {
                                     .align_x(Horizontal::Center)
                                     .align_y(Vertical::Center)
                             )
+                            .style(primary_button_style())
                             .on_press(Message::EnableTurbo)
                             .width(Length::Fixed(200.0)),
                             button(
@@ -538,6 +542,7 @@ fn create_power_profile(state: &State) -> Element<Message> {
                                     .align_x(Horizontal::Center)
                                     .align_y(Vertical::Center)
                             )
+                            .style(secondary_button_style())
                             .on_press(Message::DisableTurbo)
                             .width(Length::Fixed(200.0)),
                         ]
@@ -557,4 +562,3 @@ fn create_power_profile(state: &State) -> Element<Message> {
     .width(Length::Fill)
     .into()
 }
-
