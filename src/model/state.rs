@@ -1,5 +1,6 @@
 use std::collections::VecDeque;
 use std::time::SystemTime;
+use std::fmt;
 
 #[derive(Debug, Clone)]
 pub struct HistoricalFreq {
@@ -81,7 +82,79 @@ pub enum ActiveSection {
     Custom,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum AppTheme {
+    Light,
+    Dark,
+    CatppuccinLatte,
+    CatppuccinFrappe,
+    CatppuccinMacchiato,
+    CatppuccinMocha,
+    TokyoNight,
+    #[default]
+    TokyoNightStorm,
+    TokyoNightLight,
+    KanagawaWave,
+    KanagawaDragon,
+    KanagawaLotus,
+    Moonfly,
+    Nightfly,
+    Oxocarbon,
+}
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum PowerUnit {
+    #[default]
+    MilliWatt, // mW - storage unit
+    Watt,      // W - display unit
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum TemperatureUnit {
+    #[default]
+    Celsius,    // °C - storage unit
+    Fahrenheit, // °F - display unit
+}
+
+impl fmt::Display for AppTheme {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            AppTheme::Light => write!(f, "Light"),
+            AppTheme::Dark => write!(f, "Dark"),
+            AppTheme::CatppuccinLatte => write!(f, "Catppuccin Latte"),
+            AppTheme::CatppuccinFrappe => write!(f, "Catppuccin Frappe"),
+            AppTheme::CatppuccinMacchiato => write!(f, "Catppuccin Macchiato"),
+            AppTheme::CatppuccinMocha => write!(f, "Catppuccin Mocha"),
+            AppTheme::TokyoNight => write!(f, "Tokyo Night"),
+            AppTheme::TokyoNightStorm => write!(f, "Tokyo Night Storm"),
+            AppTheme::TokyoNightLight => write!(f, "Tokyo Night Light"),
+            AppTheme::KanagawaWave => write!(f, "Kanagawa Wave"),
+            AppTheme::KanagawaDragon => write!(f, "Kanagawa Dragon"),
+            AppTheme::KanagawaLotus => write!(f, "Kanagawa Lotus"),
+            AppTheme::Moonfly => write!(f, "Moonfly"),
+            AppTheme::Nightfly => write!(f, "Nightfly"),
+            AppTheme::Oxocarbon => write!(f, "Oxocarbon"),
+        }
+    }
+}
+
+impl fmt::Display for PowerUnit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            PowerUnit::MilliWatt => write!(f, "mW (MilliWatt)"),
+            PowerUnit::Watt => write!(f, "W (Watt)"),
+        }
+    }
+}
+
+impl fmt::Display for TemperatureUnit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            TemperatureUnit::Celsius => write!(f, "°C (Celsius)"),
+            TemperatureUnit::Fahrenheit => write!(f, "°F (Fahrenheit)"),
+        }
+    }
+}
 
 // All the states managed by the app
 #[derive(Default, Debug, Clone)]
@@ -184,4 +257,9 @@ pub struct State {
     pub pre_turbo_slow_limit: u32,
     pub pre_turbo_stapm_limit: u32,
     pub pre_turbo_tctl_limit: u32,
+
+    // Settings
+    pub selected_theme: AppTheme,
+    pub power_display_unit: PowerUnit,
+    pub temperature_display_unit: TemperatureUnit,
 }

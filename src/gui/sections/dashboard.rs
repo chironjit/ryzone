@@ -6,6 +6,7 @@ use crate::gui::formatting::{format_frequency, format_time_remaining};
 use crate::gui::style::{metrics_card_style, stat_tip_style};
 use crate::model::State;
 use crate::updates::Message;
+use crate::utils::units::{format_power, format_temperature};
 
 pub fn view(state: &State) -> Element<Message> {
     column![
@@ -91,7 +92,7 @@ fn create_performance_status_row(state: &State) -> Element<Message> {
                 .spacing(2),
                 Space::with_width(Length::Fill),
                 column![
-                    text(format!("{:.1} W", state.curr_stapm_value as f32 / 1000.0)).size(24).color([1.0, 1.0, 1.0]),
+                    text(format_power(state.curr_stapm_value, state.power_display_unit)).size(24).color([1.0, 1.0, 1.0]),
                     text(power_source_label).size(12).color(power_source_color),
                 ]
                 .spacing(4)
@@ -115,7 +116,7 @@ fn create_performance_status_row(state: &State) -> Element<Message> {
                 Space::with_width(Length::Fill),
                 column![
                     text(format_time_remaining(state.batt_time)).size(20).color([1.0, 1.0, 1.0]),
-                    text(format!("{:.1} W draw", state.batt_power as f64 / 10.0)).size(12).color([0.8, 0.8, 0.8]),
+                    text(format!("{} draw", format_power((state.batt_power * 100) as u32, state.power_display_unit))).size(12).color([0.8, 0.8, 0.8]),
                 ]
                 .spacing(4)
                 .align_x(Horizontal::Right),
@@ -162,7 +163,7 @@ fn create_configuration_row(state: &State) -> Element<Message> {
             row![
                 column![
                     text("Fast Limit").size(12).color([0.6, 0.6, 0.6]),
-                    text(format!("{} W", state.curr_fast_limit)).size(16).color([0.3, 1.0, 0.6]),
+                    text(format_power(state.curr_fast_limit, state.power_display_unit)).size(16).color([0.3, 1.0, 0.6]),
                 ]
                 .align_x(Horizontal::Center)
             ]
@@ -178,7 +179,7 @@ fn create_configuration_row(state: &State) -> Element<Message> {
             row![
                 column![
                     text("Slow Limit").size(12).color([0.6, 0.6, 0.6]),
-                    text(format!("{} W", state.curr_slow_limit)).size(16).color([1.0, 0.8, 0.3]),
+                    text(format_power(state.curr_slow_limit, state.power_display_unit)).size(16).color([1.0, 0.8, 0.3]),
                 ]
                 .align_x(Horizontal::Center)
             ]
@@ -194,7 +195,7 @@ fn create_configuration_row(state: &State) -> Element<Message> {
             row![
                 column![
                     text("STAPM Limit").size(12).color([0.6, 0.6, 0.6]),
-                    text(format!("{} W", state.curr_stapm_limit)).size(16).color([1.0, 0.5, 0.3]),
+                    text(format_power(state.curr_stapm_limit, state.power_display_unit)).size(16).color([1.0, 0.5, 0.3]),
                 ]
                 .align_x(Horizontal::Center)
             ]
@@ -210,7 +211,7 @@ fn create_configuration_row(state: &State) -> Element<Message> {
             row![
                 column![
                     text("Temp Limit").size(12).color([0.6, 0.6, 0.6]),
-                    text(format!("{}°C", state.curr_tctl_limit)).size(16).color([1.0, 0.5, 0.3]),
+                    text(format_temperature(state.curr_tctl_limit, state.temperature_display_unit)).size(16).color([1.0, 0.5, 0.3]),
                 ]
                 .align_x(Horizontal::Center)
             ]

@@ -7,6 +7,7 @@ use std::time::SystemTime;
 
 use crate::model::state::{
     HistoricalFreq, HistoricalGpuFreq, State, Tab, ActiveSection, Profile,
+    AppTheme, PowerUnit, TemperatureUnit,
 };
 
 use crate::model::constants::{
@@ -51,6 +52,9 @@ pub enum Message {
     PowerStapmInputChanged(String),
     PowerTctlInputChanged(String),
     SetActiveSection(ActiveSection),
+    SetTheme(AppTheme),
+    SetPowerUnit(PowerUnit),
+    SetTemperatureUnit(TemperatureUnit),
 }
 
 // Standalone update function for the state
@@ -586,6 +590,18 @@ pub fn update(state: &mut State, message: Message) {
 
         Message::SetActiveSection(section) => {
             state.active_section = section;
+        }
+
+        Message::SetTheme(theme) => {
+            state.selected_theme = theme;
+        }
+
+        Message::SetPowerUnit(unit) => {
+            state.power_display_unit = unit;
+        }
+
+        Message::SetTemperatureUnit(unit) => {
+            state.temperature_display_unit = unit;
         }
     }
 }

@@ -1,5 +1,6 @@
 use iced::time::{self, Duration};
 use iced::{window, Size, Subscription, Theme};
+use model::AppTheme;
 
 mod gui;
 mod model;
@@ -33,6 +34,22 @@ fn main() -> iced::Result {
         .run()
 }
 
-fn theme(_state: &State) -> Theme {
-    Theme::TokyoNightStorm
+fn theme(state: &State) -> Theme {
+    match state.selected_theme {
+        AppTheme::Light => Theme::Light,
+        AppTheme::Dark => Theme::Dark,
+        AppTheme::CatppuccinLatte => Theme::CatppuccinLatte,
+        AppTheme::CatppuccinFrappe => Theme::CatppuccinFrappe,
+        AppTheme::CatppuccinMacchiato => Theme::CatppuccinMacchiato,
+        AppTheme::CatppuccinMocha => Theme::CatppuccinMocha,
+        AppTheme::TokyoNight => Theme::TokyoNight,
+        AppTheme::TokyoNightStorm => Theme::TokyoNightStorm,
+        AppTheme::TokyoNightLight => Theme::TokyoNightLight,
+        AppTheme::KanagawaWave => Theme::KanagawaWave,
+        AppTheme::KanagawaDragon => Theme::KanagawaDragon,
+        AppTheme::KanagawaLotus => Theme::KanagawaLotus,
+        AppTheme::Moonfly => Theme::Moonfly,
+        AppTheme::Nightfly => Theme::Nightfly,
+        AppTheme::Oxocarbon => Theme::Oxocarbon,
+    }
 }

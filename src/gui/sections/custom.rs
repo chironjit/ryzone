@@ -6,6 +6,7 @@ use crate::gui::style::{card_style, hint_text_style, tab_content_style, text_inp
 use crate::model::state::ActiveSection;
 use crate::model::State;
 use crate::updates::Message;
+use crate::utils::units::{format_power, format_temperature};
 pub fn view(state: &State) -> Element<Message> {
     container(if state.active_section != ActiveSection::Custom {
         create_profile_enabler_overlay(state)
@@ -103,7 +104,7 @@ fn create_fast_limit_row(state: &State) -> Element<Message> {
             )
             .width(Length::FillPortion(4)),
             container(
-                container(text(format!("{:.1} W", state.curr_fast_value as f32 / 1000.0)).size(16))
+                container(text(format_power(state.curr_fast_value, state.power_display_unit)).size(16))
                     .align_x(Horizontal::Center)
                     .align_y(Vertical::Center)
                     .width(Length::Fill)
@@ -111,7 +112,7 @@ fn create_fast_limit_row(state: &State) -> Element<Message> {
             )
             .width(Length::FillPortion(2)),
             container(
-                container(text(format!("{:.1} W", state.curr_fast_limit as f32 / 1000.0)).size(16))
+                container(text(format_power(state.curr_fast_limit, state.power_display_unit)).size(16))
                     .align_x(Horizontal::Center)
                     .align_y(Vertical::Center)
                     .width(Length::Fill)
@@ -142,7 +143,10 @@ fn create_fast_limit_row(state: &State) -> Element<Message> {
             )
             .width(Length::FillPortion(2)),
             create_tooltip(
-                "Enter value in miliWatts.\nAccepted value range\nbetween 4000 & 65000."
+                match state.power_display_unit {
+                    crate::model::PowerUnit::MilliWatt => "Enter value in mW.\nAccepted value range\nbetween 4000 & 65000.",
+                    crate::model::PowerUnit::Watt => "Enter value in W.\nAccepted value range\nbetween 4 & 65.",
+                }
             )
             .width(Length::FillPortion(1))
         ]
@@ -159,11 +163,16 @@ fn create_slow_limit_row(state: &State) -> Element<Message> {
     container(
        row![
            create_label_container("Slow Limit"),
-           create_value_container(format!("{:.1} W", state.curr_slow_value as f32 / 1000.0)),
-           create_value_container(format!("{:.1} W", state.curr_slow_limit as f32 / 1000.0)),
+           create_value_container(format_power(state.curr_slow_value, state.power_display_unit)),
+           create_value_container(format_power(state.curr_slow_limit, state.power_display_unit)),
            create_input_container(&state.slow_input, Message::SlowLimitInputChanged),
            create_button_container(Message::SetSlowLimit(state.slow_input.parse().unwrap_or(0))),
-           create_tooltip("Enter value in miliWatts.\nAccepted value range\nbetween 4000 & 65000.\nSlow limit must be less\nthan or equal to fast limit.")
+           create_tooltip(
+               match state.power_display_unit {
+                   crate::model::PowerUnit::MilliWatt => "Enter value in mW.\nAccepted value range\nbetween 4000 & 65000.\nSlow limit must be less\nthan or equal to fast limit.",
+                   crate::model::PowerUnit::Watt => "Enter value in W.\nAccepted value range\nbetween 4 & 65.\nSlow limit must be less\nthan or equal to fast limit.",
+               }
+           )
                .width(Length::FillPortion(1))
        ]
        .spacing(20)
@@ -179,11 +188,16 @@ fn create_stapm_limit_row(state: &State) -> Element<Message> {
     container(
        row![
            create_label_container("STAPM Limit"),
-           create_value_container(format!("{:.1} W", state.curr_stapm_value as f32 / 1000.0)),
-           create_value_container(format!("{:.1} W", state.curr_stapm_limit as f32 / 1000.0)),
+           create_value_container(format_power(state.curr_stapm_value, state.power_display_unit)),
+           create_value_container(format_power(state.curr_stapm_limit, state.power_display_unit)),
            create_input_container(&state.stapm_input, Message::StapmLimitInputChanged),
            create_button_container(Message::SetStapmLimit(state.stapm_input.parse().unwrap_or(0))),
-           create_tooltip("Enter value in miliWatts.\nAccepted value range\nbetween 4000 & 65000.\nStapm limit must be less\nthan or equal to slow limit.")
+           create_tooltip(
+               match state.power_display_unit {
+                   crate::model::PowerUnit::MilliWatt => "Enter value in mW.\nAccepted value range\nbetween 4000 & 65000.\nStapm limit must be less\nthan or equal to slow limit.",
+                   crate::model::PowerUnit::Watt => "Enter value in W.\nAccepted value range\nbetween 4 & 65.\nStapm limit must be less\nthan or equal to slow limit.",
+               }
+           )
                .width(Length::FillPortion(1))
        ]
        .spacing(20)
@@ -199,11 +213,16 @@ fn create_tctl_limit_row(state: &State) -> Element<Message> {
     container(
         row![
             create_label_container("TCTL Limit"),
-            create_value_container(format!("{}°C", state.curr_tctl_value)),
-            create_value_container(format!("{}°C", state.curr_tctl_limit)),
+            create_value_container(format_temperature(state.curr_tctl_value, state.temperature_display_unit)),
+            create_value_container(format_temperature(state.curr_tctl_limit, state.temperature_display_unit)),
             create_input_container(&state.tctl_input, Message::TctlLimitInputChanged),
             create_button_container(Message::SetTctlLimit(state.tctl_input.parse().unwrap_or(0))),
-            create_tooltip("Enter value in °C.\nAccepted value range\nbetween 40 and 100.")
+            create_tooltip(
+                match state.temperature_display_unit {
+                    crate::model::TemperatureUnit::Celsius => "Enter value in °C.\nAccepted value range\nbetween 40 and 100.",
+                    crate::model::TemperatureUnit::Fahrenheit => "Enter value in °F.\nAccepted value range\nbetween 104 and 212.",
+                }
+            )
                 .width(Length::FillPortion(1))
         ]
         .spacing(20),
