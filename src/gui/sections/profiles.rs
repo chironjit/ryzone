@@ -5,36 +5,30 @@ use iced::widget::{
 use iced::{Element, Length};
 
 use crate::gui::style::{
-    card_style, primary_button_style, secondary_button_style, stat_tip_style, text_input_style, tab_content_style,
+    card_style, primary_button_style, secondary_button_style, stat_tip_style, tab_content_style,
+    text_input_style,
 };
 use crate::model::state::ActiveSection;
 use crate::model::State;
 use crate::updates::Message;
 
 pub fn view(state: &State) -> Element<Message> {
-    container(
-        column![
-            create_current_profile(state),
-            if state.active_section != ActiveSection::Profiles {
-                create_profile_enabler_overlay(state)
-            } else {
-                scrollable(
-                    column![
-                        create_header(),
-                        column![create_battery_profile(state), create_power_profile(state),]
-                            .spacing(10)
-                    ]
-                    .padding(5),
-                )
-                .spacing(10)
-                .height(Length::Fill)
-                .into()
-            }
-        ]
+    container(if state.active_section != ActiveSection::Profiles {
+        create_profile_enabler_overlay(state)
+    } else {
+        scrollable(
+            column![
+                create_header(),
+                column![create_battery_profile(state), create_power_profile(state),].spacing(10)
+            ]
+            .padding(5),
+        )
         .spacing(10)
-        .padding(20)
-    )
+        .height(Length::Fill)
+        .into()
+    })
     .style(tab_content_style())
+    .padding(20)
     .width(Length::Fill)
     .height(Length::Fill)
     .into()
@@ -49,145 +43,10 @@ fn create_profile_enabler_overlay(state: &State) -> Element<Message> {
         .on_toggle(|_| Message::SetActiveSection(ActiveSection::Profiles))]
         .align_x(Horizontal::Center),
     )
-    .style(card_style())
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
     .height(Length::Fill)
     .width(Length::Fill)
-    .into()
-}
-
-fn create_current_profile(state: &State) -> Element<Message> {
-    container(
-        row![
-            // Current fast limit
-            container(
-                row![
-                    text("Fast\nLimit")
-                        .size(10)
-                        .align_x(Horizontal::Center)
-                        .width(Length::Fill),
-                    text(format!("{} W", state.curr_fast_limit))
-                        .size(14)
-                        .align_x(Horizontal::Center)
-                        .width(Length::Fill),
-                ]
-                .align_y(Vertical::Center)
-            )
-            .align_y(Vertical::Center)
-            .align_x(Horizontal::Center)
-            .style(stat_tip_style())
-            .padding([10, 10])
-            .width(Length::Fill)
-            .height(Length::Fixed(50.0)),
-            // Current Slow limit
-            container(
-                row![
-                    text("Slow\nLimit")
-                        .size(10)
-                        .align_x(Horizontal::Center)
-                        .width(Length::Fill),
-                    text(format!("{} W", state.curr_slow_limit))
-                        .size(14)
-                        .align_x(Horizontal::Center)
-                        .width(Length::Fill),
-                ]
-                .align_y(Vertical::Center)
-            )
-            .align_y(Vertical::Center)
-            .align_x(Horizontal::Center)
-            .style(stat_tip_style())
-            .padding([10, 10])
-            .width(Length::Fill)
-            .height(Length::Fixed(50.0)),
-            // Current Stapm limit
-            container(
-                row![
-                    text("STAPM\nLimit")
-                        .size(10)
-                        .align_x(Horizontal::Center)
-                        .width(Length::Fill),
-                    text(format!("{} W", state.curr_stapm_limit))
-                        .size(14)
-                        .align_x(Horizontal::Center)
-                        .width(Length::Fill),
-                ]
-                .align_y(Vertical::Center)
-            )
-            .align_y(Vertical::Center)
-            .align_x(Horizontal::Center)
-            .style(stat_tip_style())
-            .padding([10, 10])
-            .width(Length::Fill)
-            .height(Length::Fixed(50.0)),
-            // Current power status
-            container(
-                row![
-                    text("Temp\nLimit")
-                        .size(10)
-                        .align_x(Horizontal::Center)
-                        .width(Length::Fill),
-                    text(format!("{}°C", state.curr_tctl_limit))
-                        .size(14)
-                        .align_x(Horizontal::Center)
-                        .width(Length::Fill),
-                ]
-                .align_y(Vertical::Center)
-            )
-            .align_y(Vertical::Center)
-            .align_x(Horizontal::Center)
-            .style(stat_tip_style())
-            .padding([10, 10])
-            .width(Length::Fill)
-            .height(Length::Fixed(50.0)),
-            // Current power source
-            container(
-                row![
-                    text("Power\nSource")
-                        .size(10)
-                        .align_x(Horizontal::Center)
-                        .width(Length::Fill),
-                    text(if state.batt_status == "Discharging" {
-                        "🔋"
-                    } else {
-                        "🔌"
-                    })
-                    .shaping(text::Shaping::Advanced)
-                    .size(14)
-                    .align_x(Horizontal::Center)
-                    .width(Length::Fill),
-                ]
-                .align_y(Vertical::Center)
-            )
-            .align_y(Vertical::Center)
-            .align_x(Horizontal::Center)
-            .style(stat_tip_style())
-            .padding([10, 10])
-            .width(Length::Fill)
-            .height(Length::Fixed(50.0)),
-            // Current power profile
-            container(
-                row![
-                    text("Power\nProfile")
-                        .size(10)
-                        .align_x(Horizontal::Center)
-                        .width(Length::Fill),
-                    text(format!("{:?}", state.active_profile))
-                        .size(18)
-                        .align_x(Horizontal::Center)
-                        .width(Length::Fill),
-                ]
-                .align_y(Vertical::Center)
-            )
-            .align_y(Vertical::Center)
-            .align_x(Horizontal::Center)
-            .style(stat_tip_style())
-            .padding([10, 10])
-            .width(Length::Fill)
-            .height(Length::Fixed(50.0)),
-        ]
-        .spacing(16),
-    )
     .into()
 }
 

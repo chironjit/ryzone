@@ -1,28 +1,26 @@
 use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{button, column, container, row, text, text_input, tooltip, checkbox};
+use iced::widget::{button, checkbox, column, container, row, text, text_input, tooltip};
 use iced::{Element, Length};
 
-use crate::gui::style::{card_style, hint_text_style, text_input_style, tab_content_style};
+use crate::gui::style::{card_style, hint_text_style, tab_content_style, text_input_style};
+use crate::model::state::ActiveSection;
 use crate::model::State;
 use crate::updates::Message;
-use crate::model::state::ActiveSection;
 pub fn view(state: &State) -> Element<Message> {
-    container(
-        if state.active_section != ActiveSection::Custom {
-            create_profile_enabler_overlay(state)
-        } else {
-            column![
-                create_column_titles(),
-                create_fast_limit_row(state),
-                create_slow_limit_row(state),
-                create_stapm_limit_row(state),
-                create_tctl_limit_row(state)
-            ]
-            .spacing(10)
-            .padding(20)
-            .into()
-        }
-    )
+    container(if state.active_section != ActiveSection::Custom {
+        create_profile_enabler_overlay(state)
+    } else {
+        column![
+            create_column_titles(),
+            create_fast_limit_row(state),
+            create_slow_limit_row(state),
+            create_stapm_limit_row(state),
+            create_tctl_limit_row(state)
+        ]
+        .spacing(10)
+        .padding(20)
+        .into()
+    })
     .style(tab_content_style())
     .width(Length::Fill)
     .height(Length::Fill)
@@ -31,16 +29,13 @@ pub fn view(state: &State) -> Element<Message> {
 
 fn create_profile_enabler_overlay(state: &State) -> Element<Message> {
     container(
-        column![
-            checkbox(
-                "Enable Custom Overrides",
-                state.active_section == ActiveSection::Custom,
-            )
-            .on_toggle(|_| Message::SetActiveSection(ActiveSection::Custom))
-        ]
-        .align_x(Horizontal::Center)
+        column![checkbox(
+            "Enable Custom Overrides",
+            state.active_section == ActiveSection::Custom,
+        )
+        .on_toggle(|_| Message::SetActiveSection(ActiveSection::Custom))]
+        .align_x(Horizontal::Center),
     )
-    .style(card_style())
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
     .height(Length::Fill)

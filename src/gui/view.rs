@@ -1,13 +1,14 @@
 use iced::widget::column;
 use iced::{Element, Length};
 
-use crate::gui::sections::{custom, profiles, settings, tab, top};
+use crate::gui::sections::{custom, dashboard, header, profiles, settings, tab};
 use crate::model::state::{State, Tab};
 use crate::updates::update::Message;
 
 pub fn view(state: &State) -> Element<Message> {
     column![
-        top::view(state),
+        header::view(state),
+        dashboard::view(state),
         column![
             tab::view(state),
             match state.active_tab {
