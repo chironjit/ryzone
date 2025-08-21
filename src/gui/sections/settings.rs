@@ -2,7 +2,7 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{button, column, container, row, text, text_input, tooltip};
 use iced::{Element, Length};
 
-use crate::gui::style::{card_style, hint_text_style, text_input_style};
+use crate::gui::style::{card_style, hint_text_style, text_input_style, tab_content_style};
 use crate::model::State;
 use crate::updates::Message;
 
@@ -30,6 +30,7 @@ pub fn view(state: &State) -> Element<Message> {
     .width(Length::Fill);
 
     container(content)
+        .style(tab_content_style())
         .width(Length::Fill)
         .height(Length::Fill)
         .align_x(Horizontal::Left)

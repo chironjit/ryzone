@@ -8,12 +8,15 @@ use crate::updates::update::Message;
 pub fn view(state: &State) -> Element<Message> {
     column![
         top::view(state),
-        tab::view(state),
-        match state.active_tab {
-            Tab::Profiles => profiles::view(state),
-            Tab::Overrides => custom::view(state),
-            Tab::Settings => settings::view(state),
-        }
+        column![
+            tab::view(state),
+            match state.active_tab {
+                Tab::Profiles => profiles::view(state),
+                Tab::Overrides => custom::view(state),
+                Tab::Settings => settings::view(state),
+            }
+        ]
+        .spacing(0)  // No gap for true connection
     ]
     .spacing(24)
     .padding(32)

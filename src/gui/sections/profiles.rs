@@ -5,32 +5,38 @@ use iced::widget::{
 use iced::{Element, Length};
 
 use crate::gui::style::{
-    card_style, primary_button_style, secondary_button_style, stat_tip_style, text_input_style,
+    card_style, primary_button_style, secondary_button_style, stat_tip_style, text_input_style, tab_content_style,
 };
 use crate::model::state::ActiveSection;
 use crate::model::State;
 use crate::updates::Message;
 
 pub fn view(state: &State) -> Element<Message> {
-    column![
-        create_current_profile(state),
-        if state.active_section != ActiveSection::Profiles {
-            create_profile_enabler_overlay(state)
-        } else {
-            scrollable(
-                column![
-                    create_header(),
-                    column![create_battery_profile(state), create_power_profile(state),]
-                        .spacing(10)
-                ]
-                .padding(5),
-            )
-            .spacing(10)
-            .height(Length::Fill)
-            .into()
-        }
-    ]
-    .spacing(10)
+    container(
+        column![
+            create_current_profile(state),
+            if state.active_section != ActiveSection::Profiles {
+                create_profile_enabler_overlay(state)
+            } else {
+                scrollable(
+                    column![
+                        create_header(),
+                        column![create_battery_profile(state), create_power_profile(state),]
+                            .spacing(10)
+                    ]
+                    .padding(5),
+                )
+                .spacing(10)
+                .height(Length::Fill)
+                .into()
+            }
+        ]
+        .spacing(10)
+        .padding(20)
+    )
+    .style(tab_content_style())
+    .width(Length::Fill)
+    .height(Length::Fill)
     .into()
 }
 

@@ -89,27 +89,34 @@ pub fn tab_style(selected: bool) -> impl Fn(&Theme, button::Status) -> button::S
         let palette = theme.extended_palette();
 
         if selected {
+            // Selected tab: connected to content area below
             button::Style {
-                background: Some(Background::Color(palette.primary.base.color)),
+                background: Some(Background::Color(palette.background.base.color)),
                 border: Border {
-                    radius: border::Radius::new(12.0),
-                    width: 0.0,
-                    color: Color::TRANSPARENT,
+                    radius: border::Radius {
+                        top_left: 12.0,
+                        top_right: 12.0,
+                        bottom_left: 0.0, // No bottom radius to connect with content
+                        bottom_right: 0.0,
+                    },
+                    width: 1.0,
+                    color: palette.background.strong.color,
                 },
-                text_color: Color::WHITE,
+                text_color: palette.primary.base.color,
                 shadow: Shadow {
-                    color: Color::from_rgba(0.0, 0.0, 0.0, 0.15),
-                    offset: Vector::new(0.0, 2.0),
-                    blur_radius: 8.0,
+                    // Subtle shadow only on top and sides
+                    color: Color::from_rgba(0.0, 0.0, 0.0, 0.08),
+                    offset: Vector::new(0.0, -1.0),
+                    blur_radius: 6.0,
                 },
                 ..button::Style::default()
             }
         } else {
-            let bg_color = match status {
-                button::Status::Hovered => palette.background.strong.color,
-                _ => palette.background.weak.color,
+            let (bg_color, shadow_opacity) = match status {
+                button::Status::Hovered => (palette.background.strong.color, 0.12),
+                _ => (palette.background.weak.color, 0.08),
             };
-            
+
             button::Style {
                 background: Some(Background::Color(bg_color)),
                 border: Border {
@@ -119,9 +126,9 @@ pub fn tab_style(selected: bool) -> impl Fn(&Theme, button::Status) -> button::S
                 },
                 text_color: palette.primary.base.color,
                 shadow: Shadow {
-                    color: Color::from_rgba(0.0, 0.0, 0.0, 0.05),
-                    offset: Vector::new(0.0, 1.0),
-                    blur_radius: 4.0,
+                    color: Color::from_rgba(0.0, 0.0, 0.0, shadow_opacity),
+                    offset: Vector::new(0.0, 4.0),
+                    blur_radius: 12.0,
                 },
                 ..button::Style::default()
             }
@@ -151,7 +158,7 @@ pub fn metrics_card_style() -> impl Fn(&Theme) -> Style {
 pub fn primary_button_style() -> impl Fn(&Theme, button::Status) -> button::Style {
     |theme, status| {
         let palette = theme.extended_palette();
-        
+
         let (bg_color, shadow_opacity) = match status {
             button::Status::Hovered => (palette.primary.strong.color, 0.25),
             button::Status::Pressed => (palette.primary.weak.color, 0.15),
@@ -179,11 +186,18 @@ pub fn primary_button_style() -> impl Fn(&Theme, button::Status) -> button::Styl
 pub fn secondary_button_style() -> impl Fn(&Theme, button::Status) -> button::Style {
     |theme, status| {
         let palette = theme.extended_palette();
-        
+
         let (bg_color, border_color) = match status {
-            button::Status::Hovered => (palette.background.strong.color, palette.primary.base.color),
-            button::Status::Pressed => (palette.background.weak.color, palette.primary.strong.color),
-            _ => (palette.background.weak.color, palette.background.strong.color),
+            button::Status::Hovered => {
+                (palette.background.strong.color, palette.primary.base.color)
+            }
+            button::Status::Pressed => {
+                (palette.background.weak.color, palette.primary.strong.color)
+            }
+            _ => (
+                palette.background.weak.color,
+                palette.background.strong.color,
+            ),
         };
 
         button::Style {
@@ -201,5 +215,29 @@ pub fn secondary_button_style() -> impl Fn(&Theme, button::Status) -> button::St
             },
             ..button::Style::default()
         }
+    }
+}
+
+pub fn tab_content_style() -> impl Fn(&Theme) -> Style {
+    |theme| Style {
+        text_color: None,
+        background: Some(Background::Color(
+            theme.extended_palette().background.base.color,
+        )),
+        border: Border {
+            radius: border::Radius {
+                top_left: 8.0,    // Smaller radius where tab connects
+                top_right: 8.0,   // Smaller radius where tab connects  
+                bottom_left: 20.0,
+                bottom_right: 20.0,
+            },
+            width: 1.0,
+            color: theme.extended_palette().background.strong.color,
+        },
+        shadow: Shadow {
+            color: Color::from_rgba(0.0, 0.0, 0.0, 0.12),
+            offset: Vector::new(0.0, 6.0),
+            blur_radius: 25.0,
+        },
     }
 }
