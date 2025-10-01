@@ -1,0 +1,27 @@
+[Unit]
+Description=ryzone daemon
+After=network.target
+
+[Service]
+Type=simple
+User=ryzoned
+Group=ryzoned
+
+AmbientCapabilities=CAP_SYS_RAWIO
+CapabilityBoundingSet=CAP_SYS_RAWIO
+SupplementaryGroups=kmem
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+ReadWritePaths=/var/lib/ryzoned /var/log/ryzoned /home/${USERNAME}/.ryzoned
+
+Environment=RYZONE_CONFIG_PATH=/home/${USERNAME}/.ryzoned
+
+ExecStart=/usr/bin/ryzoned
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

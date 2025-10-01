@@ -1,0 +1,7 @@
+[package]
+name = "ryzoned"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+libryzenadj = { git = "https://gitlab.com/chironjit/libryzenadj-rs" }
