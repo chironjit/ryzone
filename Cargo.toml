@@ -1,3 +1,6 @@
 [workspace]
-members = ["ryzoned"]
+members = [
+    "app",
+    "ryzoned", "app",
+]
 resolver = "2"

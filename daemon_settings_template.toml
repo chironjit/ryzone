@@ -1,0 +1,44 @@
+[profile]
+profile = "system" # system | custom | overide | turbo | 
+
+
+
+[limits.override]
+fast = 0
+slow = 0
+stapm = 0
+temp = 0
+
+[limits.battery]
+fast = 0
+slow = 0
+stapm = 0
+temp = 0
+
+[limits.low_battery]
+fast = 0
+slow = 0
+stapm = 0
+temp = 0
+
+[limits.sleep]
+fast = 4000
+slow = 4000
+stapm = 4000
+temp = 40
+
+[limits.ac]
+fast = 25000
+slow = 20000
+stapm = 25000
+temp = 90
+
+[limits.turbo]
+fast = 53000
+slow = 53000
+stapm = 53000
+temp = 100
+
+
+
+
