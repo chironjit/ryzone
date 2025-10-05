@@ -3,20 +3,11 @@
 //! component  to be used in our app.
 
 
-mod navbar;
-mod stats;
-mod tab;
-mod custom_profile;
-mod override_profile;
-mod system_profile;
+mod dashboard;
+mod profiles;
 mod settings;
 
-
-pub use navbar::Navbar;
-pub use stats::Stats;
-pub use tab::Tabs;
-pub use custom_profile::CustomProfile;
-pub use override_profile::OverrideProfile;
-pub use system_profile::SystemProfile;
+pub use dashboard::Dashboard;
+pub use profiles::Profiles;
 pub use settings::Settings;
 

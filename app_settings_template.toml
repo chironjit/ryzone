@@ -3,8 +3,8 @@ power = "watt"                      # watt | mwatt
 temp = "celcius"                    # celcius | fahrenheit | kelvin | rankine | réaumur
 
 [style]
-theme_source = "system"             # system | custom
 theme_mode = "dark"                 # dark | light
 theme_light_palette = "winter"      # winter | black | nord
 theme_dark_palette =  "dim"         # dracula | night | dim 
-tab = "settings"                    # system | custom | override| settings
+tab = "settings"                    # dashboard | profiles | settings
+profile = "system"                  # system | custom | turbo | fixed

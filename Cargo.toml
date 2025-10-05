@@ -1,6 +1,6 @@
 [workspace]
 members = [
     "app",
-    "ryzoned", "app",
+    "ryzoned",
 ]
 resolver = "2"

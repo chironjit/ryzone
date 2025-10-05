@@ -1,9 +1,25 @@
 [profile]
-profile = "system" # system | custom | overide | turbo | 
+profile = "system" # system | custom | overide | turbo |
 
+[limits.performance]
+fast = 0
+slow = 0
+stapm = 0
+temp = 0
 
+[limits.balanced]
+fast = 0
+slow = 0
+stapm = 0
+temp = 0
 
-[limits.override]
+[limits.power_saver]
+fast = 0
+slow = 0
+stapm = 0
+temp = 0
+
+[limits.fixed]
 fast = 0
 slow = 0
 stapm = 0
