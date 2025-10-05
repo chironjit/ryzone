@@ -2,7 +2,7 @@
 // need dioxus
 use dioxus::prelude::*;
 
-use components::{Dashboard, Profiles, Settings};
+use components::{Battery, Dashboard, Info, Profiles, Settings};
 
 /// Define a components module that contains all shared components for our app.
 mod components;
@@ -117,18 +117,15 @@ fn App() -> Element {
                             onclick: move |_| active_tab.set("dashboard".to_string()),
                             "Dashboard"
                         }
-                        // button { class: "px-6 py-3 font-semibold border-b-2 border-transparent text-[var(--color-base-content)]/70 hover:text-[var(--color-base-content)] hover:border-[var(--color-base-content)]/30 transition-colors",
-                        //     "CPU Control"
-                        // }
-                        // button { class: "px-6 py-3 font-semibold border-b-2 border-transparent text-[var(--color-base-content)]/70 hover:text-[var(--color-base-content)] hover:border-[var(--color-base-content)]/30 transition-colors",
-                        //     "GPU Control"
-                        // }
-                        // button { class: "px-6 py-3 font-semibold border-b-2 border-transparent text-[var(--color-base-content)]/70 hover:text-[var(--color-base-content)] hover:border-[var(--color-base-content)]/30 transition-colors",
-                        //     "Power Settings"
-                        // }
-                        // button { class: "px-6 py-3 font-semibold border-b-2 border-transparent text-[var(--color-base-content)]/70 hover:text-[var(--color-base-content)] hover:border-[var(--color-base-content)]/30 transition-colors",
-                        //     "Fan Control"
-                        // }
+                        button {
+                            class: if active_tab() == "battery" {
+                                "px-6 py-3 font-semibold border-b-2 border-[var(--color-primary)] text-[var(--color-base-content)] bg-[var(--color-base-200)] transition-colors"
+                            } else {
+                                "px-6 py-3 font-semibold border-b-2 border-transparent text-[var(--color-base-content)]/70 hover:text-[var(--color-base-content)] hover:border-[var(--color-base-content)]/30 transition-colors"
+                            },
+                            onclick: move |_| active_tab.set("battery".to_string()),
+                            "Battery"
+                        }
                         button {
                             class: if active_tab() == "profiles" {
                                 "px-6 py-3 font-semibold border-b-2 border-[var(--color-primary)] text-[var(--color-base-content)] bg-[var(--color-base-200)] transition-colors"
@@ -146,6 +143,15 @@ fn App() -> Element {
                             },
                             onclick: move |_| active_tab.set("settings".to_string()),
                             "Settings"
+                        }
+                        button {
+                            class: if active_tab() == "info" {
+                                "px-6 py-3 font-semibold border-b-2 border-[var(--color-primary)] text-[var(--color-base-content)] bg-[var(--color-base-200)] transition-colors"
+                            } else {
+                                "px-6 py-3 font-semibold border-b-2 border-transparent text-[var(--color-base-content)]/70 hover:text-[var(--color-base-content)] hover:border-[var(--color-base-content)]/30 transition-colors"
+                            },
+                            onclick: move |_| active_tab.set("info".to_string()),
+                            "Info"
                         }
                     }
 
@@ -259,8 +265,10 @@ fn App() -> Element {
             main { class: "flex-1 overflow-auto",
                 match active_tab().as_str() {
                     "dashboard" => rsx! { Dashboard {} },
+                    "battery" => rsx! { Battery {} },
                     "profiles" => rsx! { Profiles {} },
                     "settings" => rsx! { Settings {} },
+                    "info" => rsx! { Info {} },
                     _ => rsx! { Dashboard {} },
                 }
             }
