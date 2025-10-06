@@ -276,7 +276,7 @@ pub fn Settings() -> Element {
                     }
                     input {
                         r#type: "checkbox",
-                        class: "w-5 h-5 accent-[var(--color-primary)] cursor-pointer"
+                        class: "w-5 h-5 appearance-none bg-[var(--color-base-100)] border-2 border-[var(--color-base-300)] rounded cursor-pointer checked:bg-[var(--color-primary)] checked:border-[var(--color-primary)] checked:bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOSIgdmlld0JveD0iMCAwIDEyIDkiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgNEw0LjUgNy41TDExIDEiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] checked:bg-center checked:bg-no-repeat"
                     }
                 }
 
@@ -292,7 +292,7 @@ pub fn Settings() -> Element {
                     }
                     input {
                         r#type: "checkbox",
-                        class: "w-5 h-5 accent-[var(--color-primary)] cursor-pointer"
+                        class: "w-5 h-5 appearance-none bg-[var(--color-base-100)] border-2 border-[var(--color-base-300)] rounded cursor-pointer checked:bg-[var(--color-primary)] checked:border-[var(--color-primary)] checked:bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOSIgdmlld0JveD0iMCAwIDEyIDkiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgNEw0LjUgNy41TDExIDEiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] checked:bg-center checked:bg-no-repeat"
                     }
                 }
 
