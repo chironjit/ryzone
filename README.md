@@ -6,18 +6,17 @@ Ryzone is a linux graphical interface for manually controlling mobile Ryzen proc
 > *Use of this tool is not sanctioned by AMD*
 
 ## OS Support
-1. Please note that this app has been designed for any linux distro but has only been tested on Pop OS
+1. Please note that this app has been designed for any linux distro but has only been tested in a small number of distros
 2. You will need elevated privileges to run the app. For now, you will have to use `sudo -E`
 
 ## Work in progress
 This app is a work in progress. Some key pending items:
 
-1.  Background daemon
-2.  Pkexec (instead of sudo -E)
+1.  App
+2.  Pkexec (instead of sudo -E) and / or systemd settings
 3.  Packaging and release of appimage
-4.  Tray icon
-5.  Power profiles
-6.  Install / deploy script
+4.  Power profiles
+5.  Install / deploy script
 
 ## Required for build
 Building the app requires `cmake`, `build-essential`, `libpci-dev` & `libclang-dev`
@@ -27,11 +26,11 @@ Building the app requires `cmake`, `build-essential`, `libpci-dev` & `libclang-d
 ## Building & Running the app
 To build and run the release version, run
 
-`cargo build && sudo -E ./target/release/ryzone`
+`dx build && sudo -E ./target/debug/ryzone`
 
 To build and run the release version, run
 
-`cargo build --release && sudo -E ./target/release/ryzone`
+`dx build --release && sudo -E ./target/release/ryzone`
 
 ## Building an Appimage
 To build the appimage, you will need to set up the appimagetool AppImage first on your system. Use the following steps:
