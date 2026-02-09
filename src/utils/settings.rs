@@ -1,128 +1,102 @@
-// All app settings read and loaded into a struct
+use std::fs;
+use std::path::Path;
+use serde::{Deserialize, Serialize};
+
+#[derive(Deserialize, Serialize)]
 pub struct AppSettings {
-    // App settings
+    pub units: Units,
+    pub style: Style,
+    pub app: App,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct Units {
+    pub power: String,
+    pub temp: String,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct Style {
     pub theme_mode: String,
     pub theme_light_palette: String,
     pub theme_dark_palette: String,
-    pub power_unit: String,
-    pub temp_unit: String,
-    pub update_frequency: String,
-    pub start_on_boot: bool,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct App {
+    pub start_on_login: bool,
     pub minimize_to_tray: bool,
-    pub active_profile: String,
+    pub enable_logging: bool,
+    pub update_frequency: i32,
+    pub logging_frequency: i32,
 }
 
+#[derive(Deserialize, Serialize)]
 pub struct ProfileSettings {
-    // System profile
-    // Performance
-    pub system_performance_fast_limit: i32,
-    pub system_performance_slow_limit: i32,
-    pub system_performance_stapm_limit: i32,
-    pub system_performance_tctl_limit: i32,
-    // Balanced
-    pub system_balanced_fast_limit: i32,
-    pub system_balanced_slow_limit: i32,
-    pub system_balanced_stapm_limit: i32,
-    pub system_balanced_tctl_limit: i32,
-    // Power Saver
-    pub system_power_saver_fast_limit: i32,
-    pub system_power_saver_slow_limit: i32,
-    pub system_power_saver_stapm_limit: i32,
-    pub system_power_saver_tctl_limit: i32,
-
-    // Custom profile
-    // AC
-    pub custom_ac_fast_limit: i32,
-    pub custom_ac_slow_limit: i32,
-    pub custom_ac_stapm_limit: i32,
-    pub custom_ac_tctl_limit: i32,
-    // Battery
-    pub custom_battery_fast_limit: i32,
-    pub custom_battery_slow_limit: i32,
-    pub custom_battery_stapm_limit: i32,
-    pub custom_battery_tctl_limit: i32,
-    // Low Battery
-    pub custom_low_battery_fast_limit: i32,
-    pub custom_low_battery_slow_limit: i32,
-    pub custom_low_battery_stapm_limit: i32,
-    pub custom_low_battery_tctl_limit: i32,
-    pub custom_low_battery_threshold: i32,
-
-    // Turbo profile
-    pub turbo_fast_limit: i32,
-    pub turbo_slow_limit: i32,
-    pub turbo_stapm_limit: i32,
-    pub turbo_tctl_limit: i32,
-
-    // Fixed profile
-    pub fixed_fast_limit: i32,
-    pub fixed_slow_limit: i32,
-    pub fixed_stapm_limit: i32,
-    pub fixed_tctl_limit: i32,
+    pub profile: String,
+    pub low_batt_threshold: i32,
+    pub system: SystemProfiles,
+    pub custom: CustomProfiles,
+    pub turbo: TurboProfile,
+    pub fixed: FixedProfile,
 }
 
-pub struct CurrentStatus {
-    // CPU
-    pub cpu_frequency: i32,
-    pub cpu_temperature: i32,
-    pub cpu_load: i32,
-    // GPU
-    pub gpu_frequency: i32,
-    pub gpu_temperature: i32,
-    pub gpu_load: i32,
-
-    // Power
-    pub power_draw: i32,
-
-    // Battery
-    pub batt_charge_status: String,
-    pub batt_charge_percentage: i32,
-    pub batt_design_capacity: i32,
-    pub batt_full_charge_capacity: i32,
-    pub batt_current_capacity: i32,
-    pub batt_health: i32,
-    pub batt_voltage: i32,
-    pub batt_cycle_count: i32,
-    pub batt_temperature: i32,
-
-    // Runtime estimates
-    pub current_load: i32,
-    pub light_usage: i32,
-    pub heavy_usage: i32,
-    pub avg_discharge_rate: i32,
-    
-    // Power Limits
-    // Curreng Limits
-    pub curr_fast_limit: i32,
-    pub curr_slow_limit: i32,
-    pub curr_stapm_limit: i32,
-    pub curr_tctl_limit: i32,
-    // Current Values
-    pub curr_fast_value: i32,
-    pub curr_slow_value: i32,
-    pub curr_stapm_value: i32,
-    pub curr_tctl_value: i32,
-    // Current percentages (of limits)
-    pub curr_fast_percentage: i32,
-    pub curr_slow_percentage: i32,
-    pub curr_stapm_percentage: i32,
-    pub curr_tctl_percentage: i32,
+#[derive(Deserialize, Serialize)]
+pub struct SystemProfiles {
+    pub performance: PowerLimits,
+    pub balanced: PowerLimits,
+    pub power_saver: PowerLimits,
 }
 
-pub static APP_SETTINGS_TEMPLATE: &str = r#"
-[units]
+#[derive(Deserialize, Serialize)]
+pub struct CustomProfiles {
+    pub ac: PowerLimits,
+    pub batt: PowerLimits,
+    pub low_batt: PowerLimits,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct TurboProfile {
+    pub turbo: PowerLimits,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct FixedProfile {
+    pub fixed: PowerLimits,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct PowerLimits {
+    pub fast: i32,
+    pub slow: i32,
+    pub stapm: i32,
+    pub temp: i32,
+}
+
+
+
+pub static APP_SETTINGS_TEMPLATE: &str = 
+r#"[units]
 power = "watt"                      # watt | mwatt
-temp = "celcius"                    # celcius | fahrenheit | kelvin | rankine | réaumur
+temp = "celcius"                    # celcius | fahrenheit
 
 [style]
 theme_mode = "dark"                 # dark | light
 theme_light_palette = "winter"      # winter | black | nord
-theme_dark_palette =  "dim"         # dracula | night | dim 
-tab = "settings"                    # dashboard | profiles | settings
-profile = "system"                  # system | custom | turbo | fixed
+theme_dark_palette =  "dim"         # dracula | night | dim
+
+[app]
+start_on_login = true               # true | false
+minimize_to_tray = true             # true | false
+enable_logging = true               # true | false
+update_frequency = 1                # 10 | 5 | 1
+logging_frequency = 1               # 60 | 30 | 10 | 5 | 1
 "#;
 
-pub static PROFILE_SETTINGS_TEMPLATE: &str = r#"
+pub static PROFILE_SETTINGS_TEMPLATE: &str = 
+r#"profile = "system"                  # system | custom | turbo | fixed
+low_batt_threshold = 20
+
 [system.performance]
 fast = 0
 slow = 0
@@ -158,43 +132,63 @@ fast = 0
 slow = 0
 stapm = 0
 temp = 0
-threshold = 0
 
-[turbo]
+[turbo.turbo]
 fast = 0
 slow = 0
 stapm = 0
 temp = 0
 
-[fixed]
+[fixed.fixed]
 fast = 0
 slow = 0
 stapm = 0
 temp = 0
 "#;
 
-pub fn read_app_settings() -> AppSettings {
+pub fn read_app_settings() -> Result<AppSettings, Box<dyn std::error::Error>> {
+    let home_dir = std::env::var("HOME")?;
+    let settings_file = format!("{}/.ryzone/app_settings.toml", home_dir);
 
+    if !Path::new(&settings_file).exists() {
+        let dir = format!("{}/.ryzone", home_dir);
+        fs::create_dir_all(&dir)?;
+        fs::write(&settings_file, APP_SETTINGS_TEMPLATE)?;
+    }
+
+    let contents = fs::read_to_string(&settings_file)?;
+    let settings = toml::from_str(&contents)?;
+    Ok(settings)
 }
 
-pub fn read_profile_settings() -> ProfileSettings {
+pub fn read_profile_settings() -> Result<ProfileSettings, Box<dyn std::error::Error>> {
+    let home_dir = std::env::var("HOME")?;
+    let settings_file = format!("{}/.ryzone/profile_settings.toml", home_dir);
 
+    if !Path::new(&settings_file).exists() {
+        let dir = format!("{}/.ryzone", home_dir);
+        fs::create_dir_all(&dir)?;
+        fs::write(&settings_file, PROFILE_SETTINGS_TEMPLATE)?;
+    }
+
+    let contents = fs::read_to_string(&settings_file)?;
+    let settings = toml::from_str(&contents)?;
+    Ok(settings)
 }
 
-pub fn write_app_settings(settings: AppSettings) {
-
+pub fn write_app_settings(settings: &AppSettings) -> Result<(), Box<dyn std::error::Error>> {
+    let home_dir = std::env::var("HOME")?;
+    let settings_file = format!("{}/.ryzone/app_settings.toml", home_dir);
+    let contents = toml::to_string_pretty(settings)?;
+    fs::write(&settings_file, contents)?;
+    Ok(())
 }
 
-pub fn write_profile_settings(settings: ProfileSettings) {
-
-}
-
-pub fn create_settings_file() {
-    // Create new settings file in the /home/<user>/.ryzone folder
-    let home_dir = std::env::var("HOME").unwrap();
-    let settings_file = format!("{}/{}", home_dir, ".ryzone/app_settings.toml");
-    let mut file = File::create(settings_file).unwrap();
-    file.write_all(APP_SETTINGS_TEMPLATE.as_bytes()).unwrap();
-    file.write_all(PROFILE_SETTINGS_TEMPLATE.as_bytes()).unwrap();
+pub fn write_profile_settings(settings: &ProfileSettings) -> Result<(), Box<dyn std::error::Error>> {
+    let home_dir = std::env::var("HOME")?;
+    let settings_file = format!("{}/.ryzone/profile_settings.toml", home_dir);
+    let contents = toml::to_string_pretty(settings)?;
+    fs::write(&settings_file, contents)?;
+    Ok(())
 }
 

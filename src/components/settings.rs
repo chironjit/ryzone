@@ -15,8 +15,9 @@ pub fn Settings() -> Element {
     let mut show_temp_unit_dropdown = use_signal(|| false);
     let mut show_power_unit_dropdown = use_signal(|| false);
     let mut show_update_freq_dropdown = use_signal(|| false);
+    let mut show_logging_freq_dropdown = use_signal(|| false);
     let mut update_frequency = use_signal(|| "1000".to_string());
-
+    let mut logging_frequency = use_signal(|| "10000".to_string());
     rsx! {
         div { class: "p-8 max-w-[1600px] mx-auto",
             // Appearance and Units Grid
@@ -268,7 +269,7 @@ pub fn Settings() -> Element {
                 div { class: "flex items-center justify-between mb-4",
                     div {
                         label { class: "text-sm font-semibold text-[var(--color-base-content)]",
-                            "Start on Boot"
+                            "Start on Login"
                         }
                         p { class: "text-xs text-[var(--color-base-content)]/70",
                             "Launch Ryzone automatically when system starts"
@@ -296,6 +297,22 @@ pub fn Settings() -> Element {
                     }
                 }
 
+                // Enable logging
+                div { class: "flex items-center justify-between mb-4",
+                    div {
+                        label { class: "text-sm font-semibold text-[var(--color-base-content)]",
+                            "Enable logging"
+                        }
+                        p { class: "text-xs text-[var(--color-base-content)]/70",
+                            "Store log files in the /home/<user>/.ryzone/logs folder for future reference"
+                        }
+                    }
+                    input {
+                        r#type: "checkbox",
+                        class: "w-5 h-5 appearance-none bg-[var(--color-base-100)] border-2 border-[var(--color-base-300)] rounded cursor-pointer checked:bg-[var(--color-primary)] checked:border-[var(--color-primary)] checked:bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOSIgdmlld0JveD0iMCAwIDEyIDkiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgNEw0LjUgNy41TDExIDEiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] checked:bg-center checked:bg-no-repeat"
+                    }
+                }
+
                 // Update frequency
                 div { class: "mb-4 relative",
                     label { class: "block text-sm font-semibold text-[var(--color-base-content)] mb-3",
@@ -307,10 +324,9 @@ pub fn Settings() -> Element {
                         onclick: move |_| show_update_freq_dropdown.set(!show_update_freq_dropdown()),
                         span { class: "text-sm font-medium",
                             {match update_frequency().as_str() {
-                                "500" => "0.5 seconds",
                                 "1000" => "1 second",
-                                "2000" => "2 seconds",
                                 "5000" => "5 seconds",
+                                "10000" => "10 seconds",
                                 _ => "1 second"
                             }}
                         }
@@ -332,14 +348,6 @@ pub fn Settings() -> Element {
                             onclick: move |_| show_update_freq_dropdown.set(false),
                         }
                         div { class: "absolute left-0 right-0 mt-2 bg-[var(--color-base-200)] border border-[var(--color-base-300)] rounded-lg shadow-xl z-50 overflow-hidden",
-                            button {
-                                class: if update_frequency() == "500" { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
-                                onclick: move |_| {
-                                    update_frequency.set("500".to_string());
-                                    show_update_freq_dropdown.set(false);
-                                },
-                                "0.5 seconds"
-                            }
                             div { class: "border-t border-[var(--color-base-300)]" }
                             button {
                                 class: if update_frequency() == "1000" { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
@@ -351,21 +359,107 @@ pub fn Settings() -> Element {
                             }
                             div { class: "border-t border-[var(--color-base-300)]" }
                             button {
-                                class: if update_frequency() == "2000" { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
-                                onclick: move |_| {
-                                    update_frequency.set("2000".to_string());
-                                    show_update_freq_dropdown.set(false);
-                                },
-                                "2 seconds"
-                            }
-                            div { class: "border-t border-[var(--color-base-300)]" }
-                            button {
                                 class: if update_frequency() == "5000" { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
                                 onclick: move |_| {
                                     update_frequency.set("5000".to_string());
                                     show_update_freq_dropdown.set(false);
                                 },
                                 "5 seconds"
+                            }
+                            div { class: "border-t border-[var(--color-base-300)]" }
+                            button {
+                                class: if update_frequency() == "10000" { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
+                                onclick: move |_| {
+                                    update_frequency.set("10000".to_string());
+                                    show_update_freq_dropdown.set(false);
+                                },
+                                "10 seconds"
+                            }
+                        }
+                    }
+                }
+
+                // Logging frequency
+                div { class: "mb-4 relative",
+                    label { class: "block text-sm font-semibold text-[var(--color-base-content)] mb-3",
+                        "Logging Frequency"
+                    }
+                    button {
+                        class: "flex items-center justify-between w-full px-4 py-3 rounded-lg bg-[var(--color-base-300)] text-[var(--color-base-content)] hover:bg-[var(--color-primary)] hover:text-[var(--color-neutral)] transition-all duration-200 shadow-sm hover:shadow-md border border-transparent hover:border-[var(--color-primary)]",
+                        title: "Select Logging Frequency",
+                        onclick: move |_| show_logging_freq_dropdown.set(!show_logging_freq_dropdown()),
+                        span { class: "text-sm font-medium",
+                            {match logging_frequency().as_str() {
+                                "1000" => "1 seconds",
+                                "5000" => "5 seconds",
+                                "10000" => "10 seconds",
+                                "30000" => "30 seconds",
+                                "60000" => "1 minute",
+                                _ => "10 seconds"
+                            }}
+                        }
+                        svg {
+                            class: if show_logging_freq_dropdown() { "w-4 h-4 transform rotate-180 transition-transform duration-200" } else { "w-4 h-4 transition-transform duration-200" },
+                            view_box: "0 0 24 24",
+                            fill: "none",
+                            stroke: "currentColor",
+                            stroke_width: "2",
+                            stroke_linecap: "round",
+                            stroke_linejoin: "round",
+                            path { d: "M6 9l6 6 6-6" }
+                        }
+                    }
+
+                    if show_logging_freq_dropdown() {
+                        div {
+                            class: "fixed inset-0 z-40",
+                            onclick: move |_| show_logging_freq_dropdown.set(false),
+                        }
+                        div { class: "absolute left-0 right-0 mt-2 bg-[var(--color-base-200)] border border-[var(--color-base-300)] rounded-lg shadow-xl z-50 overflow-hidden",
+                            div { class: "border-t border-[var(--color-base-300)]" }
+                            button {
+                                class: if logging_frequency() == "1000" { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
+                                onclick: move |_| {
+                                    logging_frequency.set("1000".to_string());
+                                    show_logging_freq_dropdown.set(false);
+                                },
+                                "1 second"
+                            }
+                            div { class: "border-t border-[var(--color-base-300)]" }
+                            button {
+                                class: if logging_frequency() == "5000" { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
+                                onclick: move |_| {
+                                    logging_frequency.set("5000".to_string());
+                                    show_logging_freq_dropdown.set(false);
+                                },
+                                "5 seconds"
+                            }
+                            div { class: "border-t border-[var(--color-base-300)]" }
+                            button {
+                                class: if logging_frequency() == "10000" { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
+                                onclick: move |_| {
+                                    logging_frequency.set("10000".to_string());
+                                    show_logging_freq_dropdown.set(false);
+                                },
+                                "10 seconds"
+                            }
+                            div { class: "border-t border-[var(--color-base-300)]" }
+                            button {
+                                class: if logging_frequency() == "30000" { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
+                                onclick: move |_| {
+                                    logging_frequency.set("30000".to_string());
+                                    show_logging_freq_dropdown.set(false);
+                                },
+                                "30 seconds"
+                            }
+                            div { class: "border-t border-[var(--color-base-300)]" }
+                            button {
+                                class: if logging_frequency() == "60000" { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
+                                onclick: move |_| {
+                                    logging_frequency.set("60000".to_string());
+                                    show_logging_freq_dropdown.set(false);
+                                },
+                                "1 minute"
                             }
                         }
                     }

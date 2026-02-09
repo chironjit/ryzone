@@ -14,6 +14,10 @@ use std::path::PathBuf;
 
 /// Define a components module that contains all shared components for our app.
 mod components;
+mod utils;
+
+use utils::settings::{AppSettings, ProfileSettings, read_app_settings, read_profile_settings};
+use utils::stats::CurrentStats;
 
 // We can import assets in dioxus with the `asset!` macro. This macro takes a path to an asset relative to the crate root.
 // The macro returns an `Asset` type that will display as the path to the asset in the browser or a local path in desktop bundles.
@@ -62,6 +66,15 @@ fn main() {
 
     // No existing instance -- clean up stale socket and start
     let _ = std::fs::remove_file(&sock);
+
+    // Read the app settings
+    let mut app_settings = read_app_settings().expect("Failed to read app settings");
+    // Read the profile settings
+    let mut profile_settings = read_profile_settings().expect("Failed to read profile settings");
+
+    // Initialise the current stats struct
+    let mut current_stats = CurrentStats::default();
+
 
     // App should close to the background when the window is closed
     dioxus::LaunchBuilder::desktop()
