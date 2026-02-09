@@ -2,7 +2,15 @@
 // need dioxus
 use dioxus::prelude::*;
 
+use dioxus_desktop::{Config, WindowCloseBehaviour};
+
 use components::{Battery, Dashboard, Info, Profiles, Settings};
+
+use std::os::unix::net::{UnixStream, UnixListener};
+use std::io::Write;
+use std::path::PathBuf;
+
+
 
 /// Define a components module that contains all shared components for our app.
 mod components;
@@ -12,6 +20,8 @@ mod components;
 const FAVICON: Asset = asset!("/assets/icon.ico");
 // The asset macro also minifies some assets like CSS and JS to make bundled smaller
 const TAILWIND_CSS: Asset = asset!("/assets/tailwind.css");
+
+
 
 // State tracking
 #[derive(Clone, Copy)]
@@ -25,10 +35,41 @@ pub struct AppState {
     profile: Signal<String>,
 }
 
+fn socket_path() -> PathBuf {
+    // XDG_RUNTIME_DIR is per-user, tmpfs, and cleaned on logout
+    let runtime_dir = std::env::var("XDG_RUNTIME_DIR")
+        .unwrap_or_else(|_| "/tmp".to_string());
+    PathBuf::from(runtime_dir).join("ryzone.sock")
+}
+
 fn main() {
-    // The `launch` function is the main entry point for a dioxus app. It takes a component and renders it with the platform feature
-    // you have enabled
-    dioxus::launch(App);
+    // Window close option
+    // Should be either WindowHides or WindowCloses
+    // WindowHides will hide the window to the background
+    // WindowCloses will close the window
+    // https://docs.rs/dioxus-desktop/latest/dioxus_desktop/enum.WindowCloseBehaviour.html
+    // In the future plumb this to the setting in the settings page
+    let window_close_option: WindowCloseBehaviour = WindowCloseBehaviour::WindowHides;
+
+    let sock = socket_path();
+
+    // Try to connect to an existing instance
+    if let Ok(mut stream) = UnixStream::connect(&sock) {
+        // Another instance is running -- tell it to show, then exit
+        let _ = stream.write_all(b"show");
+        std::process::exit(0);
+    }
+
+    // No existing instance -- clean up stale socket and start
+    let _ = std::fs::remove_file(&sock);
+
+    // App should close to the background when the window is closed
+    dioxus::LaunchBuilder::desktop()
+        .with_cfg(
+            Config::new()
+                .with_close_behaviour(window_close_option)
+        )
+        .launch(App);
 }
 
 /// App is the main component of our app. Components are the building blocks of dioxus apps. Each component is a function
@@ -37,6 +78,34 @@ fn main() {
 /// Components should be annotated with `#[component]` to support props, better error messages, and autocomplete
 #[component]
 fn App() -> Element {
+    // Check if an instance is already running
+    // If yes, show the already running instance
+    // Runs ONCE on first render -- creates the listener thread
+    let mut show_requested = use_signal_sync(|| false);
+
+    use_hook(move || {
+        std::thread::spawn(move || {
+            let listener = UnixListener::bind(socket_path()).expect("Failed to bind socket");
+            // Blocking .incoming() -- waits for connections, no sleep needed
+            for stream in listener.incoming() {
+                if stream.is_ok() {
+                    show_requested.set(true);
+                }
+            }
+        });
+    });
+
+    // Reacts to the signal change
+    use_effect(move || {
+        if show_requested() {
+            let window = dioxus_desktop::window();
+            window.set_visible(true);
+            window.set_focus();
+            show_requested.set(false);
+        }
+    });
+
+
     // Initialise the state
     // Create the state at the root
     use_context_provider(|| AppState {
