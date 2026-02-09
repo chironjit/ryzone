@@ -2,85 +2,108 @@ use dioxus::prelude::*;
 
 #[component]
 pub fn Info() -> Element {
+    let mut notice_expanded = use_signal(|| true);
+
     rsx! {
         div { class: "p-8 max-w-[1600px] mx-auto",
 
             // Note Section
-            div { class: "bg-[var(--color-warning)]/10 border-2 border-[var(--color-warning)] rounded-xl p-8 mb-6",
-                div { class: "text-2xl font-bold text-[var(--color-warning)] mb-6",
+            div { class: "bg-[var(--color-warning)]/10 border-2 border-[var(--color-warning)] rounded-xl mb-6 overflow-hidden",
+            // Header - clickable
+            button {
+                class: "w-full flex items-center justify-between p-8 hover:bg-[var(--color-warning)]/20 transition-colors",
+                onclick: move |_| notice_expanded.set(!notice_expanded()),
+
+                div { class: "text-2xl font-bold text-[var(--color-warning)]",
                     "Important Notice"
                 }
 
-                div { class: "space-y-4",
-                    div { class: "flex gap-3",
-                        div { class: "flex-shrink-0 mt-1",
-                            svg {
-                                class: "w-5 h-5 stroke-[var(--color-warning)]",
-                                view_box: "0 0 24 24",
-                                fill: "none",
-                                stroke_width: "2",
-                                path { d: "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" }
-                                line { x1: "12", y1: "9", x2: "12", y2: "13" }
-                                line { x1: "12", y1: "17", x2: "12.01", y2: "17" }
-                            }
-                        }
-                        div { class: "text-sm text-[var(--color-base-content)]/80",
-                            "Please note that your use of this software is at your own risk. Neither the owner of this app nor the providers of the underlying software can guarantee that this will work or that it will not harm your system."
-                        }
-                    }
+                // Chevron icon
+                svg {
+                    class: if notice_expanded() { "w-6 h-6 stroke-[var(--color-warning)] transform rotate-180 transition-transform" } else { "w-6 h-6 stroke-[var(--color-warning)] transition-transform" },
+                    view_box: "0 0 24 24",
+                    fill: "none",
+                    stroke_width: "2",
+                    polyline { points: "6 9 12 15 18 9" }
+                }
+            }
 
-                    div { class: "flex gap-3",
-                        div { class: "flex-shrink-0 mt-1",
-                            svg {
-                                class: "w-5 h-5 stroke-[var(--color-warning)]",
-                                view_box: "0 0 24 24",
-                                fill: "none",
-                                stroke_width: "2",
-                                path { d: "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" }
-                                line { x1: "12", y1: "9", x2: "12", y2: "13" }
-                                line { x1: "12", y1: "17", x2: "12.01", y2: "17" }
+            // Content - collapsible
+            if notice_expanded() {
+                div { class: "px-8 pb-8",
+                    div { class: "space-y-4",
+                        div { class: "flex gap-3",
+                            div { class: "flex-shrink-0 mt-1",
+                                svg {
+                                    class: "w-5 h-5 stroke-[var(--color-warning)]",
+                                    view_box: "0 0 24 24",
+                                    fill: "none",
+                                    stroke_width: "2",
+                                    path { d: "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" }
+                                    line { x1: "12", y1: "9", x2: "12", y2: "13" }
+                                    line { x1: "12", y1: "17", x2: "12.01", y2: "17" }
+                                }
+                            }
+                            div { class: "text-sm text-[var(--color-base-content)]/80",
+                                "Please note that your use of this software is at your own risk. Neither the owner of this app nor the providers of the underlying software can guarantee that this will work or that it will not harm your system."
                             }
                         }
-                        div { class: "text-sm text-[var(--color-base-content)]/80",
-                            "While this has been tested on some AMD systems, it may not work on every system as there may be locks in place from your own hardware vendor."
-                        }
-                    }
 
-                    div { class: "flex gap-3",
-                        div { class: "flex-shrink-0 mt-1",
-                            svg {
-                                class: "w-5 h-5 stroke-[var(--color-warning)]",
-                                view_box: "0 0 24 24",
-                                fill: "none",
-                                stroke_width: "2",
-                                path { d: "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" }
-                                line { x1: "12", y1: "9", x2: "12", y2: "13" }
-                                line { x1: "12", y1: "17", x2: "12.01", y2: "17" }
+                        div { class: "flex gap-3",
+                            div { class: "flex-shrink-0 mt-1",
+                                svg {
+                                    class: "w-5 h-5 stroke-[var(--color-warning)]",
+                                    view_box: "0 0 24 24",
+                                    fill: "none",
+                                    stroke_width: "2",
+                                    path { d: "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" }
+                                    line { x1: "12", y1: "9", x2: "12", y2: "13" }
+                                    line { x1: "12", y1: "17", x2: "12.01", y2: "17" }
+                                }
+                            }
+                            div { class: "text-sm text-[var(--color-base-content)]/80",
+                                "While this has been tested on some AMD systems, it may not work on every system as there may be locks in place from your own hardware vendor."
                             }
                         }
-                        div { class: "text-sm text-[var(--color-base-content)]/80",
-                            "Most systems in general have limits to prevent damage, but these limits may not be available on your system or may fail to prevent damage."
-                        }
-                    }
 
-                    div { class: "flex gap-3",
-                        div { class: "flex-shrink-0 mt-1",
-                            svg {
-                                class: "w-5 h-5 stroke-[var(--color-warning)]",
-                                view_box: "0 0 24 24",
-                                fill: "none",
-                                stroke_width: "2",
-                                path { d: "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" }
-                                line { x1: "12", y1: "9", x2: "12", y2: "13" }
-                                line { x1: "12", y1: "17", x2: "12.01", y2: "17" }
+                        div { class: "flex gap-3",
+                            div { class: "flex-shrink-0 mt-1",
+                                svg {
+                                    class: "w-5 h-5 stroke-[var(--color-warning)]",
+                                    view_box: "0 0 24 24",
+                                    fill: "none",
+                                    stroke_width: "2",
+                                    path { d: "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" }
+                                    line { x1: "12", y1: "9", x2: "12", y2: "13" }
+                                    line { x1: "12", y1: "17", x2: "12.01", y2: "17" }
+                                }
+                            }
+                            div { class: "text-sm text-[var(--color-base-content)]/80",
+                                "Most systems in general have limits to prevent damage, but these limits may not be available on your system or may fail to prevent damage."
                             }
                         }
-                        div { class: "text-sm text-[var(--color-base-content)]/80",
-                            "AMD is the copyright owner of AMD, Ryzen and associated brands. AMD was not involved in any form in the production of this software, and no part of this software implies any form of support or approval of use of this software on their systems."
+
+                        div { class: "flex gap-3",
+                            div { class: "flex-shrink-0 mt-1",
+                                svg {
+                                    class: "w-5 h-5 stroke-[var(--color-warning)]",
+                                    view_box: "0 0 24 24",
+                                    fill: "none",
+                                    stroke_width: "2",
+                                    path { d: "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" }
+                                    line { x1: "12", y1: "9", x2: "12", y2: "13" }
+                                    line { x1: "12", y1: "17", x2: "12.01", y2: "17" }
+                                }
+                            }
+                            div { class: "text-sm text-[var(--color-base-content)]/80",
+                                "AMD is the copyright owner of AMD, Ryzen and associated brands. AMD was not involved in any form in the production of this software, and no part of this software implies any form of support or approval of use of this software on their systems."
+                            }
                         }
                     }
                 }
             }
+        }
+           
 
             // Guide Section
             div { class: "bg-[var(--color-base-200)] rounded-xl p-8 border border-[var(--color-base-300)] mb-6",
