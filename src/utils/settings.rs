@@ -1,84 +1,13 @@
 use std::fs;
 use std::path::Path;
-use serde::{Deserialize, Serialize};
-
-#[derive(Deserialize, Serialize)]
-pub struct AppSettings {
-    pub units: Units,
-    pub style: Style,
-    pub app: App,
-}
-
-#[derive(Deserialize, Serialize)]
-pub struct Units {
-    pub power: String,
-    pub temp: String,
-}
-
-#[derive(Deserialize, Serialize)]
-pub struct Style {
-    pub theme_mode: String,
-    pub theme_light_palette: String,
-    pub theme_dark_palette: String,
-}
-
-#[derive(Deserialize, Serialize)]
-pub struct App {
-    pub start_on_login: bool,
-    pub minimize_to_tray: bool,
-    pub enable_logging: bool,
-    pub update_frequency: i32,
-    pub logging_frequency: i32,
-}
-
-#[derive(Deserialize, Serialize)]
-pub struct ProfileSettings {
-    pub profile: String,
-    pub low_batt_threshold: i32,
-    pub system: SystemProfiles,
-    pub custom: CustomProfiles,
-    pub turbo: TurboProfile,
-    pub fixed: FixedProfile,
-}
-
-#[derive(Deserialize, Serialize)]
-pub struct SystemProfiles {
-    pub performance: PowerLimits,
-    pub balanced: PowerLimits,
-    pub power_saver: PowerLimits,
-}
-
-#[derive(Deserialize, Serialize)]
-pub struct CustomProfiles {
-    pub ac: PowerLimits,
-    pub batt: PowerLimits,
-    pub low_batt: PowerLimits,
-}
-
-#[derive(Deserialize, Serialize)]
-pub struct TurboProfile {
-    pub turbo: PowerLimits,
-}
-
-#[derive(Deserialize, Serialize)]
-pub struct FixedProfile {
-    pub fixed: PowerLimits,
-}
-
-#[derive(Deserialize, Serialize)]
-pub struct PowerLimits {
-    pub fast: i32,
-    pub slow: i32,
-    pub stapm: i32,
-    pub temp: i32,
-}
 
 
+use crate::utils::types::{AppSettings, ProfileSettings};
 
 pub static APP_SETTINGS_TEMPLATE: &str = 
 r#"[units]
-power = "watt"                      # watt | mwatt
-temp = "celcius"                    # celcius | fahrenheit
+power = "watt"                      # watt | milliwatt
+temp = "celsius"                    # celsius | fahrenheit
 
 [style]
 theme_mode = "dark"                 # dark | light
@@ -94,7 +23,7 @@ logging_frequency = 1               # 60 | 30 | 10 | 5 | 1
 "#;
 
 pub static PROFILE_SETTINGS_TEMPLATE: &str = 
-r#"profile = "system"                  # system | custom | turbo | fixed
+r#"active_profile = "system"                  # system | custom | turbo | fixed
 low_batt_threshold = 20
 
 [system.performance]

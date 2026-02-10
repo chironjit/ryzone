@@ -8,10 +8,11 @@ mod profiles;
 mod settings;
 mod battery;
 mod info;
+mod navbar;
 
 pub use dashboard::Dashboard;
 pub use profiles::Profiles;
 pub use settings::Settings;
 pub use battery::Battery;
 pub use info::Info;
-
+pub use navbar::Navbar;

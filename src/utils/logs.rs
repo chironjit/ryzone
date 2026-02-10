@@ -1,0 +1,1 @@
+// Capture stats at the preset update interval and then write to the log file at the preset logging interval

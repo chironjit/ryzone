@@ -242,9 +242,6 @@
   .mx-auto {
     margin-inline: auto;
   }
-  .my-10 {
-    margin-block: calc(var(--spacing) * 10);
-  }
   .mt-1 {
     margin-top: calc(var(--spacing) * 1);
   }
@@ -313,9 +310,6 @@
   }
   .h-screen {
     height: 100vh;
-  }
-  .min-h-screen {
-    min-height: 100vh;
   }
   .w-4 {
     width: calc(var(--spacing) * 4);
