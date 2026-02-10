@@ -5,11 +5,18 @@ use crate::utils::settings::{write_app_settings, write_profile_settings};
 
 #[component]
 pub fn Navbar(mut active_tab: Signal<String>) -> Element {
+
+    // Import context
     let mut settings = use_context::<Signal<AppSettings>>();
     let mut profile = use_context::<Signal<ProfileSettings>>();
+
+    // State for showing profile dropdown
     let mut show_profile_dropdown = use_signal(|| false);
+
+    // Theme mode
     let theme_mode = settings().style.theme_mode.clone();
 
+    // Active profile
     let active_profile = profile().active_profile.clone();
 
     rsx! {

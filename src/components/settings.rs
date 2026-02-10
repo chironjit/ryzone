@@ -1,24 +1,30 @@
 use dioxus::prelude::*;
-use crate::utils::types::AppSettings;
+use crate::utils::types::{AppSettings, ProfileSettings};
 use crate::utils::settings::write_app_settings;
 
 
 #[component]
 pub fn Settings() -> Element {
-    // App state context
+    // Import context
     let mut settings = use_context::<Signal<AppSettings>>();
+
+    // Theme mode
     let theme_mode = settings().style.theme_mode.clone();
     let theme_light_palette = settings().style.theme_light_palette.clone();
     let theme_dark_palette = settings().style.theme_dark_palette.clone();
+
+    // Units
     let power_unit = settings().units.power.clone();
     let temp_unit = settings().units.temp.clone();
+
+    // Application settings
     let start_on_login = settings().app.start_on_login.clone();
     let minimize_to_tray = settings().app.minimize_to_tray.clone();
-    let enable_logging = settings().app.enable_logging.clone();
+    let enable_logging = settings().app.enable_logging.clone();    
     let update_frequency = settings().app.update_frequency.clone();
     let logging_frequency = settings().app.logging_frequency.clone();
 
-    // Signals that only are used in this component
+    // State for showing dropdowns
     let mut show_theme_mode_dropdown = use_signal(|| false);
     let mut show_light_palette_dropdown = use_signal(|| false);
     let mut show_dark_palette_dropdown = use_signal(|| false);

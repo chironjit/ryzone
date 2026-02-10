@@ -1,57 +1,62 @@
 use dioxus::prelude::*;
+use crate::utils::types::{AppSettings, ProfileSettings};
+
+use crate::utils::context::use_profile_settings;
 
 #[component]
 pub fn Profiles() -> Element {
+    // Import context
+    let mut profile = use_context::<Signal<ProfileSettings>>();
+
     // State for tracking which profile section is expanded (only one at a time)
     let mut expanded_section = use_signal(|| "".to_string());
 
-    // State for active profile (this would normally come from app state)
-    let mut active_profile = use_signal(|| "system".to_string());
+    // Active profile
+    let active_profile = 
+    let low_batt_threshold = profile().low_batt_threshold.clone();
 
-    // State for profile parameters - System profiles
-    let mut sys_perf_fast = use_signal(|| 25);
-    let mut sys_perf_slow = use_signal(|| 20);
-    let mut sys_perf_stapm = use_signal(|| 22);
-    let mut sys_perf_tctl = use_signal(|| 95);
+    // System profile
+    let system_perf_fast = profile().system.performance.fast.clone();
+    let system_perf_slow = profile().system.performance.slow.clone();
+    let system_perf_stapm = profile().system.performance.stapm.clone();
+    let system_perf_tctl = profile().system.performance.temp.clone();
+    let system_bal_fast = profile().system.balanced.fast.clone();
+    let system_bal_slow = profile().system.balanced.slow.clone();
+    let system_bal_stapm = profile().system.balanced.stapm.clone();
+    let system_bal_tctl = profile().system.balanced.temp.clone();
+    let system_power_saver_fast = profile().system.power_saver.fast.clone();
+    let system_power_saver_slow = profile().system.power_saver.slow.clone();
+    let system_power_saver_stapm = profile().system.power_saver.stapm.clone();
+    let system_power_saver_tctl = profile().system.power_saver.temp.clone();
 
-    let mut sys_bal_fast = use_signal(|| 18);
-    let mut sys_bal_slow = use_signal(|| 15);
-    let mut sys_bal_stapm = use_signal(|| 16);
-    let mut sys_bal_tctl = use_signal(|| 85);
+    // Custom profile
+    let custom_ac_fast = profile().custom.ac.fast.clone();
+    let custom_ac_slow = profile().custom.ac.slow.clone();
+    let custom_ac_stapm = profile().custom.ac.stapm.clone();
+    let custom_ac_tctl = profile().custom.ac.temp.clone();
+    let custom_batt_fast = profile().custom.batt.fast.clone();
+    let custom_batt_slow = profile().custom.batt.slow.clone();
+    let custom_batt_stapm = profile().custom.batt.stapm.clone();
+    let custom_batt_tctl = profile().custom.batt.temp.clone();
+    let custom_low_batt_fast = profile().custom.low_batt.fast.clone();
+    let custom_low_batt_slow = profile().custom.low_batt.slow.clone();
+    let custom_low_batt_stapm = profile().custom.low_batt.stapm.clone();
+    let custom_low_batt_tctl = profile().custom.low_batt.temp.clone();
 
-    let mut sys_power_fast = use_signal(|| 12);
-    let mut sys_power_slow = use_signal(|| 10);
-    let mut sys_power_stapm = use_signal(|| 11);
-    let mut sys_power_tctl = use_signal(|| 75);
+    // Turbo profile
+    let turbo_fast = profile().turbo.turbo.fast.clone();
+    let turbo_slow = profile().turbo.turbo.slow.clone();
+    let turbo_stapm = profile().turbo.turbo.stapm.clone();
+    let turbo_tctl = profile().turbo.turbo.temp.clone();
 
-    // State for profile parameters - Custom profiles
-    let mut custom_bat_fast = use_signal(|| 15);
-    let mut custom_bat_slow = use_signal(|| 12);
-    let mut custom_bat_stapm = use_signal(|| 13);
-    let mut custom_bat_tctl = use_signal(|| 80);
+    // Fixed profile
+    let fixed_fast = profile().fixed.fixed.fast.clone();
+    let fixed_slow = profile().fixed.fixed.slow.clone();
+    let fixed_stapm = profile().fixed.fixed.stapm.clone();
+    let fixed_tctl = profile().fixed.fixed.temp.clone();
 
-    let mut custom_ac_fast = use_signal(|| 28);
-    let mut custom_ac_slow = use_signal(|| 25);
-    let mut custom_ac_stapm = use_signal(|| 26);
-    let mut custom_ac_tctl = use_signal(|| 90);
 
-    let mut custom_lowbat_fast = use_signal(|| 10);
-    let mut custom_lowbat_slow = use_signal(|| 8);
-    let mut custom_lowbat_stapm = use_signal(|| 9);
-    let mut custom_lowbat_tctl = use_signal(|| 70);
-    let mut custom_lowbat_level = use_signal(|| 20);
 
-    // State for profile parameters - Turbo
-    let mut turbo_fast = use_signal(|| 35);
-    let mut turbo_slow = use_signal(|| 30);
-    let mut turbo_stapm = use_signal(|| 32);
-    let mut turbo_tctl = use_signal(|| 100);
-
-    // State for profile parameters - Fixed
-    let mut fixed_fast = use_signal(|| 20);
-    let mut fixed_slow = use_signal(|| 20);
-    let mut fixed_stapm = use_signal(|| 20);
-    let mut fixed_tctl = use_signal(|| 85);
 
     rsx! {
         div { class: "p-8 max-w-[1600px] mx-auto",
