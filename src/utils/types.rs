@@ -26,15 +26,15 @@ pub struct App {
     pub start_on_login: bool,
     pub minimize_to_tray: bool,
     pub enable_logging: bool,
-    pub update_frequency: i32,
-    pub logging_frequency: i32,
+    pub update_frequency_ms: i32, // milliseconds
+    pub logging_frequency_ms: i32, // milliseconds
 }
 
 // Profile Settings
 #[derive(Deserialize, Serialize, Clone)]
 pub struct ProfileSettings {
     pub active_profile: String,
-    pub low_batt_threshold: i32,
+    pub low_batt_threshold_percent: i32,
     pub system: SystemProfiles,
     pub custom: CustomProfiles,
     pub turbo: TurboProfile,
@@ -67,60 +67,61 @@ pub struct FixedProfile {
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct PowerLimits {
-    pub fast: i32,
-    pub slow: i32,
-    pub stapm: i32,
-    pub temp: i32,
+    pub fast_mw: i32, // milliwatts
+    pub slow_mw: i32, // milliwatts
+    pub stapm_mw: i32, // milliwatts
+    pub temp_c: i32, // celsius
 }
 
 // Current stats type
 #[derive(Default)]
 pub struct CurrentStats {
     // CPU
-    pub cpu_frequency: i32,
-    pub cpu_temperature: i32,
-    pub cpu_load: i32,
+    pub cpu_frequency_mhz: i32, // megahertz
+    pub cpu_temperature_c: i32, // celsius
+    pub cpu_load_percent: i32, // percentage
+    
     // GPU
-    pub gpu_frequency: i32,
-    pub gpu_temperature: i32,
-    pub gpu_load: i32,
+    pub gpu_frequency_mhz: i32, // megahertz
+    pub gpu_temperature_c: i32, // celsius
+    pub gpu_load_percent: i32, // percentage
 
     // Power
-    pub power_draw: i32,
-    pub profile: String,
-    pub sub_profile: String,
+    pub power_draw_mw: i32, // milliwatts
+    pub profile: String, // profile name
+    pub sub_profile: String, // sub-profile name
 
     // Battery
-    pub batt_charge_status: String,
-    pub batt_charge_percentage: i32,
-    pub batt_design_capacity: i32,
-    pub batt_full_charge_capacity: i32,
-    pub batt_current_capacity: i32,
-    pub batt_health: i32,
-    pub batt_voltage: i32,
-    pub batt_cycle_count: i32,
-    pub batt_temperature: i32,
+    pub batt_charge_status: String, // charging | discharging | full | empty | na
+    pub batt_charge_percent: i32, // percentage
+    pub batt_design_capacity_mwh: i32, // milliwatt-hours
+    pub batt_full_charge_capacity_mwh: i32, // milliwatt-hours
+    pub batt_current_capacity_mwh: i32, // milliwatt-hours
+    pub batt_health_percent: i32, // percentage
+    pub batt_voltage_volt: i32, // volts
+    pub batt_cycle_count_cycles: i32, // cycles
+    pub batt_temperature_c: i32, // celsius
 
     // Runtime estimates
-    pub current_load: i32,
-    pub light_usage: i32,
-    pub heavy_usage: i32,
-    pub avg_discharge_rate: i32,
+    pub current_load_min: i32, // minutes
+    pub light_usage_min: i32, // minutes
+    pub heavy_usage_min: i32, // minutes
+    pub avg_discharge_rate_mw: i32, // milliwatts
     
     // Power Limits
     // Current Limits
-    pub curr_fast_limit: i32,
-    pub curr_slow_limit: i32,
-    pub curr_stapm_limit: i32,
-    pub curr_tctl_limit: i32,
+    pub curr_fast_limit_mw: i32, // milliwatts
+    pub curr_slow_limit_mw: i32, // milliwatts
+    pub curr_stapm_limit_mw: i32, // milliwatts
+    pub curr_tctl_limit_c: i32, // celsius
     // Current Values
-    pub curr_fast_value: i32,
-    pub curr_slow_value: i32,
-    pub curr_stapm_value: i32,
-    pub curr_tctl_value: i32,
+    pub curr_fast_value_mw: i32, // milliwatts
+    pub curr_slow_value_mw: i32, // milliwatts
+    pub curr_stapm_value_mw: i32, // milliwatts
+    pub curr_tctl_value_c: i32, // celsius
     // Current percentages (of limits)
-    pub curr_fast_percentage: i32,
-    pub curr_slow_percentage: i32,
-    pub curr_stapm_percentage: i32,
-    pub curr_tctl_percentage: i32,
+    pub curr_fast_percent: i32, // percentage
+    pub curr_slow_percent: i32, // percentage
+    pub curr_stapm_percent: i32, // percentage
+    pub curr_tctl_percent: i32, // percentage
 }

@@ -21,8 +21,8 @@ pub fn Settings() -> Element {
     let start_on_login = settings().app.start_on_login.clone();
     let minimize_to_tray = settings().app.minimize_to_tray.clone();
     let enable_logging = settings().app.enable_logging.clone();    
-    let update_frequency = settings().app.update_frequency.clone();
-    let logging_frequency = settings().app.logging_frequency.clone();
+    let update_frequency_ms = settings().app.update_frequency_ms.clone();
+    let logging_frequency_ms = settings().app.logging_frequency_ms.clone();
 
     // State for showing dropdowns
     let mut show_theme_mode_dropdown = use_signal(|| false);
@@ -364,7 +364,7 @@ pub fn Settings() -> Element {
                         title: "Select Update Frequency",
                         onclick: move |_| show_update_freq_dropdown.set(!show_update_freq_dropdown()),
                         span { class: "text-sm font-medium",
-                            {match update_frequency {
+                            {match update_frequency_ms {
                                 1000 => "1 second",
                                 5000 => "5 seconds",
                                 10000 => "10 seconds",
@@ -391,9 +391,9 @@ pub fn Settings() -> Element {
                         div { class: "absolute left-0 right-0 mt-2 bg-[var(--color-base-200)] border border-[var(--color-base-300)] rounded-lg shadow-xl z-50 overflow-hidden",
                             div { class: "border-t border-[var(--color-base-300)]" }
                             button {
-                                class: if update_frequency == 1000 { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
+                                class: if update_frequency_ms == 1000 { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
                                 onclick: move |_| {
-                                    settings.write().app.update_frequency = 1000;
+                                    settings.write().app.update_frequency_ms = 1000;
                                     let _ = write_app_settings(&settings());
                                     show_update_freq_dropdown.set(false);
                                 },
@@ -401,9 +401,9 @@ pub fn Settings() -> Element {
                             }
                             div { class: "border-t border-[var(--color-base-300)]" }
                             button {
-                                class: if update_frequency == 5000 { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
+                                class: if update_frequency_ms == 5000 { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
                                 onclick: move |_| {
-                                    settings.write().app.update_frequency = 5000;
+                                    settings.write().app.update_frequency_ms = 5000;
                                     let _ = write_app_settings(&settings());
                                     show_update_freq_dropdown.set(false);
                                 },
@@ -411,9 +411,9 @@ pub fn Settings() -> Element {
                             }
                             div { class: "border-t border-[var(--color-base-300)]" }
                             button {
-                                class: if update_frequency == 10000 { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
+                                class: if update_frequency_ms == 10000 { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
                                 onclick: move |_| {
-                                    settings.write().app.update_frequency = 10000;
+                                    settings.write().app.update_frequency_ms = 10000;
                                     let _ = write_app_settings(&settings());
                                     show_update_freq_dropdown.set(false);
                                 },
@@ -433,7 +433,7 @@ pub fn Settings() -> Element {
                         title: "Select Logging Frequency",
                         onclick: move |_| show_logging_freq_dropdown.set(!show_logging_freq_dropdown()),
                         span { class: "text-sm font-medium",
-                            {match logging_frequency {
+                            {match logging_frequency_ms {
                                 1000 => "1 seconds",
                                 5000 => "5 seconds",
                                 10000 => "10 seconds",
@@ -462,9 +462,9 @@ pub fn Settings() -> Element {
                         div { class: "absolute left-0 right-0 mt-2 bg-[var(--color-base-200)] border border-[var(--color-base-300)] rounded-lg shadow-xl z-50 overflow-hidden",
                             div { class: "border-t border-[var(--color-base-300)]" }
                             button {
-                                class: if logging_frequency == 1000 { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
+                                class: if logging_frequency_ms == 1000 { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
                                 onclick: move |_| {
-                                    settings.write().app.logging_frequency = 1000;
+                                    settings.write().app.logging_frequency_ms = 1000;
                                     let _ = write_app_settings(&settings());
                                     show_logging_freq_dropdown.set(false);
                                 },
@@ -472,9 +472,9 @@ pub fn Settings() -> Element {
                             }
                             div { class: "border-t border-[var(--color-base-300)]" }
                             button {
-                                class: if logging_frequency == 5000 { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
+                                class: if logging_frequency_ms == 5000 { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
                                 onclick: move |_| {
-                                    settings.write().app.logging_frequency = 5000;
+                                    settings.write().app.logging_frequency_ms = 5000;
                                     let _ = write_app_settings(&settings());
                                     show_logging_freq_dropdown.set(false);
                                 },
@@ -482,9 +482,9 @@ pub fn Settings() -> Element {
                             }
                             div { class: "border-t border-[var(--color-base-300)]" }
                             button {
-                                class: if logging_frequency == 10000 { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
+                                class: if logging_frequency_ms == 10000 { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
                                 onclick: move |_| {
-                                    settings.write().app.logging_frequency = 10000;
+                                    settings.write().app.logging_frequency_ms = 10000;
                                     let _ = write_app_settings(&settings());
                                     show_logging_freq_dropdown.set(false);
                                 },
@@ -492,9 +492,9 @@ pub fn Settings() -> Element {
                             }
                             div { class: "border-t border-[var(--color-base-300)]" }
                             button {
-                                class: if logging_frequency == 30000 { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
+                                class: if logging_frequency_ms == 30000 { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
                                 onclick: move |_| {
-                                    settings.write().app.logging_frequency = 30000;
+                                    settings.write().app.logging_frequency_ms = 30000;
                                     let _ = write_app_settings(&settings());
                                     show_logging_freq_dropdown.set(false);
                                 },
@@ -502,9 +502,9 @@ pub fn Settings() -> Element {
                             }
                             div { class: "border-t border-[var(--color-base-300)]" }
                             button {
-                                class: if logging_frequency == 60000 { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
+                                class: if logging_frequency_ms == 60000 { "w-full text-left px-4 py-3 bg-[var(--color-primary)] text-[var(--color-neutral)] font-medium transition-all duration-150" } else { "w-full text-left px-4 py-3 hover:bg-[var(--color-base-300)] text-[var(--color-base-content)] transition-all duration-150" },
                                 onclick: move |_| {
-                                    settings.write().app.logging_frequency = 60000;
+                                    settings.write().app.logging_frequency_ms = 60000;
                                     let _ = write_app_settings(&settings());
                                     show_logging_freq_dropdown.set(false);
                                 },
