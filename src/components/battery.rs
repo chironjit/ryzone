@@ -1,5 +1,10 @@
 use dioxus::prelude::*;
 
+use crate::utils::conversions::{
+    battery_health_label, battery_status_text, format_mwh, format_power_mw, minutes_to_hm_text,
+};
+use crate::utils::types::CurrentStats;
+
 #[component]
 pub fn Battery() -> Element {
     // Sample data for the chart (in a real app, this would come from your daemon)
@@ -19,6 +24,45 @@ pub fn Battery() -> Element {
         (12, 52),
     ];
 
+    let stats = use_context::<SyncSignal<CurrentStats>>();
+    let stats_now = stats.read();
+
+    let charge_percent = stats_now.batt_charge_percent.clamp(0, 100);
+    let health_label = battery_health_label(stats_now.batt_health_percent);
+    let status_text = battery_status_text(&stats_now.batt_charge_status);
+    let time_label = if stats_now.batt_charge_status == "charging" {
+        "Time to Full"
+    } else {
+        "Time Remaining"
+    };
+    let power_draw_text = format_power_mw(stats_now.power_draw_mw);
+    let design_capacity_text = if stats_now.batt_design_capacity_mwh > 0 {
+        format_mwh(stats_now.batt_design_capacity_mwh)
+    } else {
+        "N/A".to_string()
+    };
+    let full_capacity_text = if stats_now.batt_full_charge_capacity_mwh > 0 {
+        format_mwh(stats_now.batt_full_charge_capacity_mwh)
+    } else {
+        "N/A".to_string()
+    };
+    let current_capacity_text = format_mwh(stats_now.batt_current_capacity_mwh);
+    let current_runtime = minutes_to_hm_text(stats_now.current_load_min);
+    let light_runtime = minutes_to_hm_text(stats_now.light_usage_min);
+    let heavy_runtime = minutes_to_hm_text(stats_now.heavy_usage_min);
+    let avg_discharge_text = format_power_mw(stats_now.avg_discharge_rate_mw);
+    let voltage_text = format!("{:.1}", stats_now.batt_voltage_millivolt as f32 / 1000.0);
+    let health_percent_text = if stats_now.batt_health_percent >= 0 {
+        format!("{}%", stats_now.batt_health_percent)
+    } else {
+        "N/A".to_string()
+    };
+    let battery_temperature_text = if stats_now.batt_temperature_c >= 0 {
+        format!("{} °C", stats_now.batt_temperature_c)
+    } else {
+        "N/A".to_string()
+    };
+
     rsx! {
         div { class: "p-8 max-w-[1600px] mx-auto",
 
@@ -30,12 +74,12 @@ pub fn Battery() -> Element {
                             "Battery Status"
                         }
                         div { class: "text-sm text-[var(--color-base-content)]/70",
-                            "Health: Good"
+                            "Health: {health_label}"
                         }
                     }
                     div { class: "text-right",
                         div { class: "text-5xl font-bold text-[var(--color-primary)]",
-                            "85%"
+                            "{charge_percent}%"
                         }
                     }
                 }
@@ -43,7 +87,7 @@ pub fn Battery() -> Element {
                 // Battery charge progress bar
                 div { class: "mb-4",
                     div { class: "w-full h-4 bg-[var(--color-base-300)] rounded-full overflow-hidden",
-                        div { class: "h-full bg-[var(--color-success)] rounded-full transition-all", style: "width: 85%" }
+                        div { class: "h-full bg-[var(--color-success)] rounded-full transition-all", style: "width: {charge_percent}%" }
                     }
                 }
 
@@ -51,15 +95,15 @@ pub fn Battery() -> Element {
                 div { class: "grid grid-cols-3 gap-4 text-sm",
                     div {
                         div { class: "text-[var(--color-base-content)]/70 mb-1", "Status" }
-                        div { class: "font-semibold", "Charging" }
+                        div { class: "font-semibold", "{status_text}" }
                     }
                     div {
-                        div { class: "text-[var(--color-base-content)]/70 mb-1", "Time to Full" }
-                        div { class: "font-semibold", "1h 23m" }
+                        div { class: "text-[var(--color-base-content)]/70 mb-1", "{time_label}" }
+                        div { class: "font-semibold", "{current_runtime}" }
                     }
                     div {
                         div { class: "text-[var(--color-base-content)]/70 mb-1", "Power Draw" }
-                        div { class: "font-semibold", "24.5 W" }
+                        div { class: "font-semibold", "{power_draw_text}" }
                     }
                 }
             }
@@ -74,20 +118,20 @@ pub fn Battery() -> Element {
                     div { class: "space-y-3",
                         div { class: "flex justify-between items-center",
                             span { class: "text-sm text-[var(--color-base-content)]/70", "Design Capacity" }
-                            span { class: "text-sm font-semibold", "54,000 mWh" }
+                            span { class: "text-sm font-semibold", "{design_capacity_text}" }
                         }
                         div { class: "flex justify-between items-center",
                             span { class: "text-sm text-[var(--color-base-content)]/70", "Full Charge Capacity" }
-                            span { class: "text-sm font-semibold", "51,300 mWh" }
+                            span { class: "text-sm font-semibold", "{full_capacity_text}" }
                         }
                         div { class: "flex justify-between items-center",
                             span { class: "text-sm text-[var(--color-base-content)]/70", "Current Capacity" }
-                            span { class: "text-sm font-semibold", "43,605 mWh" }
+                            span { class: "text-sm font-semibold", "{current_capacity_text}" }
                         }
                         div { class: "pt-3 mt-3 border-t border-[var(--color-base-300)]",
                             div { class: "flex justify-between items-center",
                                 span { class: "text-sm text-[var(--color-base-content)]/70", "Battery Health" }
-                                span { class: "text-sm font-semibold text-[var(--color-success)]", "95%" }
+                                span { class: "text-sm font-semibold text-[var(--color-success)]", "{health_percent_text}" }
                             }
                         }
                     }
@@ -101,20 +145,20 @@ pub fn Battery() -> Element {
                     div { class: "space-y-3",
                         div { class: "flex justify-between items-center",
                             span { class: "text-sm text-[var(--color-base-content)]/70", "Current Load" }
-                            span { class: "text-sm font-semibold", "3h 45m" }
+                            span { class: "text-sm font-semibold", "{current_runtime}" }
                         }
                         div { class: "flex justify-between items-center",
                             span { class: "text-sm text-[var(--color-base-content)]/70", "Light Usage" }
-                            span { class: "text-sm font-semibold", "6h 20m" }
+                            span { class: "text-sm font-semibold", "{light_runtime}" }
                         }
                         div { class: "flex justify-between items-center",
                             span { class: "text-sm text-[var(--color-base-content)]/70", "Heavy Usage" }
-                            span { class: "text-sm font-semibold", "2h 10m" }
+                            span { class: "text-sm font-semibold", "{heavy_runtime}" }
                         }
                         div { class: "pt-3 mt-3 border-t border-[var(--color-base-300)]",
                             div { class: "flex justify-between items-center",
                                 span { class: "text-sm text-[var(--color-base-content)]/70", "Avg. Discharge Rate" }
-                                span { class: "text-sm font-semibold", "11.6 W" }
+                                span { class: "text-sm font-semibold", "{avg_discharge_text}" }
                             }
                         }
                     }
@@ -154,10 +198,7 @@ pub fn Battery() -> Element {
                         "VOLTAGE"
                     }
                     div { class: "text-3xl font-bold text-[var(--color-primary)] mb-2",
-                        "12.6 V"
-                    }
-                    div { class: "text-xs text-[var(--color-base-content)]/70",
-                        "Nominal: 11.4 V"
+                        "{voltage_text} V"
                     }
                 }
 
@@ -167,10 +208,7 @@ pub fn Battery() -> Element {
                         "CYCLE COUNT"
                     }
                     div { class: "text-3xl font-bold text-[var(--color-primary)] mb-2",
-                        "127"
-                    }
-                    div { class: "text-xs text-[var(--color-base-content)]/70",
-                        "Target: < 500"
+                        "{stats_now.batt_cycle_count_cycles}"
                     }
                 }
 
@@ -180,10 +218,7 @@ pub fn Battery() -> Element {
                         "TEMPERATURE"
                     }
                     div { class: "text-3xl font-bold text-[var(--color-primary)] mb-2",
-                        "32 °C"
-                    }
-                    div { class: "text-xs text-[var(--color-base-content)]/70",
-                        "Status: Normal"
+                        "{battery_temperature_text}"
                     }
                 }
             }

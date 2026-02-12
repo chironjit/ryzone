@@ -98,7 +98,7 @@ pub struct CurrentStats {
     pub batt_full_charge_capacity_mwh: i32, // milliwatt-hours
     pub batt_current_capacity_mwh: i32, // milliwatt-hours
     pub batt_health_percent: i32, // percentage
-    pub batt_voltage_volt: i32, // volts
+    pub batt_voltage_millivolt: i32, // millivolts
     pub batt_cycle_count_cycles: i32, // cycles
     pub batt_temperature_c: i32, // celsius
 

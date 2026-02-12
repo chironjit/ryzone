@@ -17,7 +17,8 @@ mod components;
 mod utils;
 
 use utils::settings::{read_app_settings, read_profile_settings};
-use utils::types::{AppSettings, ProfileSettings, CurrentStats};
+use utils::stats::use_current_stats_signal;
+use utils::types::{AppSettings, ProfileSettings};
 
 // We can import assets in dioxus with the `asset!` macro. This macro takes a path to an asset relative to the crate root.
 // The macro returns an `Asset` type that will display as the path to the asset in the browser or a local path in desktop bundles.
@@ -101,8 +102,12 @@ fn App() -> Element {
     let app_settings = use_context::<AppSettings>();
     let profile_settings = use_context::<ProfileSettings>();
 
-    use_context_provider(|| Signal::new(app_settings));
+    use_context_provider(|| Signal::new(app_settings.clone()));
     use_context_provider(|| Signal::new(profile_settings));
+
+    let update_frequency_ms = app_settings.app.update_frequency_ms;
+    let current_stats = use_current_stats_signal(update_frequency_ms);
+    use_context_provider(|| current_stats);
 
     // Runtime-only UI state (not persisted) stays as individual signals
     let mut active_tab = use_signal(|| "dashboard".to_string());
