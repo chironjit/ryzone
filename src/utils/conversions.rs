@@ -76,7 +76,8 @@ pub fn battery_health_label(health_percent: i32) -> &'static str {
         90..=100 => "Excellent",
         80..=89 => "Good",
         70..=79 => "Fair",
-        1..=69 => "Poor",
+        50..=69 => "Poor",
+        1..=49 => "Degraded",
         _ => "N/A",
     }
 }

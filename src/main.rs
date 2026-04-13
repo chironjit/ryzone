@@ -103,10 +103,13 @@ fn App() -> Element {
     let profile_settings = use_context::<ProfileSettings>();
 
     use_context_provider(|| Signal::new(app_settings.clone()));
-    use_context_provider(|| Signal::new(profile_settings));
+
+    // SyncSignal so the background stats thread can read profile settings
+    let profile_signal: SyncSignal<ProfileSettings> = use_signal_sync(|| profile_settings);
+    use_context_provider(|| profile_signal);
 
     let update_frequency_ms = app_settings.app.update_frequency_ms;
-    let current_stats = use_current_stats_signal(update_frequency_ms);
+    let current_stats = use_current_stats_signal(update_frequency_ms, profile_signal);
     use_context_provider(|| current_stats);
 
     // Runtime-only UI state (not persisted) stays as individual signals

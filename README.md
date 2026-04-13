@@ -49,3 +49,6 @@ To build the appimage, you will need to set up the appimagetool AppImage first o
 2. Once done, the app will be in the `target/appimage` folder
 3. Convert it to an executable `chmod +x ./ryzone.AppImage`
 4. Run with *sudo -E* for example `sudo -E ./ryzone.AppImage`
+
+### Installation steps
+1. Install ryzen_smu

@@ -75,7 +75,7 @@ fn TempInput(label: String, value_c: Signal<i32>, temp_unit: String) -> Element 
 pub fn Profiles() -> Element {
     // Import context
     let mut settings = use_context::<Signal<AppSettings>>();
-    let mut profile = use_context::<Signal<ProfileSettings>>();
+    let mut profile = use_context::<SyncSignal<ProfileSettings>>();
 
     // State for tracking which profile section is expanded (only one at a time)
     let mut expanded_section = use_signal(|| "".to_string());

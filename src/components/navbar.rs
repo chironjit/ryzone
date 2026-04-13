@@ -8,7 +8,7 @@ pub fn Navbar(mut active_tab: Signal<String>) -> Element {
 
     // Import context
     let mut settings = use_context::<Signal<AppSettings>>();
-    let mut profile = use_context::<Signal<ProfileSettings>>();
+    let mut profile = use_context::<SyncSignal<ProfileSettings>>();
 
     // State for showing profile dropdown
     let mut show_profile_dropdown = use_signal(|| false);
